@@ -12,21 +12,34 @@ nnm.config( function ($routeProvider) {
 });
 
 nnm.controller('HotCtrl', ['$scope', function ($scope) {
-  $scope.model = {
-    message: "dhsklhlkh"
-  };
+  $scope.message = "dhsklhlkh";
 }]);
 
-nnm.controller('NavCtrl', ['$scope', '$http', function ($scope, $http) {
+nnm.controller('NavCtrl', ['$rootScope','$scope', '$http', '$location', function ($rootScope, $scope, $http, $location) {
   $http.get('/config/db_connection').
   success(function (data) {
-    data == "EALREADYCONNECTED" ? $scope.dbConnected = true : $scope.dbConnected = false
+    data == "EALREADYCONNECTED" ? $rootScope.dbConnected = true : $rootScope.dbConnected = false;
   }).
   error(function () {
-    $scope.dbStatus = "Ошибка"
+    $rootScope.dbStatus = "Ошибка"
   });
   $http.get('/config/servicennm').
   success(function (data) {
-    $scope.ServiceNNM = data;
+    $rootScope.ServiceNNM = data;
   });
+  // активна ли вкладка
+  $scope.isActive = function (route) {
+    return route === $location.path();
+  };
 }]);
+
+// nnm.directive('LineChart', [function () {
+//   return {
+//     restrict: 'E',
+//     template: '<div></div>',
+//     replace: true,
+//     link: function ($scope, element, attrs) {
+//       var data: 
+//     }
+//   };
+// }])

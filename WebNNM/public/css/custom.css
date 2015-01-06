@@ -6,10 +6,37 @@
   background-color: MediumSeaGreen;
 }
 
-.notexist {
-  background-color: Plum;
-}
-
 body, a {
   color: black;
+}
+
+.active, .pure-menu li a:hover, .pure-menu li a:focus {
+  background: yellow;
+}
+
+.worked {
+  background: none repeat scroll 0 0 green;
+}
+.stopped {
+  background: none repeat scroll 0 0 red;
+}
+.notexist {
+  background:  none repeat scroll 0 0 plum;
+}
+.stopped, .worked, .notexist {
+    border-radius: 2px;
+    display: inline-block;
+    height: 10px;
+    margin-right: 0.5em;
+    width: 10px;
+}
+
+#panel-bg {
+  background: HoneyDew;
+  padding: 10px 0px 10px 0px;
+  font-size: 20px;
+}
+
+#panel-title {
+  margin-left: 10px;
 }

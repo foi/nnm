@@ -16,11 +16,15 @@
   </header>
     <div class="pure-menu pure-menu-open pure-menu-horizontal" ng-controller="NavCtrl" ng-init="checkConnection()">
       <ul>
-        <li><a href="/#/">HOT</a></li>
-        <li><a href="/#/dictionaries">Словари</a></li>
-        <li><a href="/#/statistics">Детальная статистика</a></li>
-        <li><a href="/#/config" ng-class="{success: dbConnected === true, error: dbConnected === false}">База данных</a></li>
-        <li><a href="/#/config" ng-class="{success: ServiceNNM === 'RUNNING', error: ServiceNNM === 'STOPPED', notexist: ServiceNNM === 'NOTEXIST'}">Служба NNM</a></li>
+        <li ng-class="{active:isActive('/')}"><a href="/#/">HOT</a></li>
+        <li ng-class="{active:isActive('/dictionaries')}"><a href="/#/dictionaries">Словари</a></li>
+        <li ng-class="{active:isActive('/statistics')}"><a href="/#/statistics">Детальная статистика</a></li>
+        <li>
+          <a href="/#/config" >
+            <span ng-class="{worked: dbConnected === true, stopped: dbConnected === false}"></span>База данных
+            <span ng-class="{worked: ServiceNNM === 'RUNNING', stopped: ServiceNNM === 'STOPPED', notexist: ServiceNNM === 'NOTEXIST'}"></span>Служба NNM
+          </a>
+        </li>
       </ul>
     </div>
   <div>
