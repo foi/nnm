@@ -25,3 +25,12 @@ G:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe
 G:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\AgentNNM.pdb
 G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNNM.exe
 G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNNM.pdb
+G:\projects\nnm\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe.config
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNNM.exe
+G:\projects\nnm\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe
+G:\projects\nnm\AgentNNM\AgentNNM\bin\Debug\AgentNNM.pdb
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csprojResolveAssemblyReference.cache
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.AgentForm.resources
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.Properties.Resources.resources
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csproj.GenerateResource.Cache
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNNM.pdb

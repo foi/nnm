@@ -9,9 +9,7 @@
   },
   "dependencies": {
     "body-parser": "*",
-    "ejs": "*",
     "express": "*",
-    "express-ejs-layouts": "*",
     "js-methods": "*",
     "mssql": "*",
     "strftime": "^0.8.2",

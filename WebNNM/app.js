@@ -6,6 +6,7 @@ var moment = require('moment');
 var express = require('express');
 var strftime = require('strftime');
 var bodyParser = require("body-parser");
+var fs = require("fs");
 var _ = require("underscore");
 // для layout.ejs без этого не работает
 var expressLayouts = require('express-ejs-layouts');
@@ -60,12 +61,9 @@ var queries = {
 
 }
 // подлючение к базе данных
-var connection = new sql.Connection(config, function(err) {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log('connection to database established');
-  }
+var connection = new sql.Connection(config);
+connection.connect(function(err){
+  err ? console.log(err) : console.log("db connection established");
 });
 
 // хелперы
@@ -97,37 +95,12 @@ function setPeriodForPeriodId(array, format, periods_array){
 // конец хелперов
 
 // Установка движка для вьюшек и поддержка layout.ejs
-app.set('view engine', 'ejs');
-app.use(expressLayouts);
-// Директория для вьюшек
-app.set('views', __dirname + '/views');
 // папка по умолчанию для public с маршрутом /public потому что IIS ><
 app.use('/public', express.static(__dirname + '/public'));
-// Отрендерить словарики
-app.get('/dictionaries', function(req, res) {
-  var q = new sql.Request(connection);
-  q.query(queries.groups, function(err, entries) {
-    q.query(queries.hosts_with_group_name, function(err, _entries) {
-      q.query(queries.select_types_of_host_and_port, function(err, __entries) {
-        q.query(queries.hosts_and_ports, function(err, ___entries) {
-          q.query(queries.get_subscribers, function (err, ____entries) {
-            res.render("index", {
-              layout: false,
-              groups: entries,
-              hosts: _entries,
-              types: __entries,
-              hosts_and_ports: ___entries,
-              subscribers: ____entries
-            });
-          });
-        });
-      });
-    });
-  });
-});
 // рутовая страница
 app.get('/', function(req, res) {
-  res.render('null.ejs')
+  var fileContents = fs.readFileSync("index.html");
+  res.send(fileContents.toString());
 });
 
 // получить последнюю информацию о пинге для всех хостов
