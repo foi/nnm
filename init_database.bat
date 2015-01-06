@@ -1,0 +1,1 @@
+sqlcmd -S LOCALHOST\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql

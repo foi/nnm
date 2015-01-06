@@ -1,0 +1,20 @@
+{
+  "name": "web_net_mon",
+  "description": "...",
+  "version": "0.1.0",
+  "author": "foi.first@gmail.com",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "*",
+    "ejs": "*",
+    "express": "*",
+    "express-ejs-layouts": "*",
+    "js-methods": "*",
+    "mssql": "*",
+    "strftime": "^0.8.2",
+    "underscore": "^1.7.0"
+  }
+}

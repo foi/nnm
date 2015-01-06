@@ -1,0 +1,13 @@
+{
+    "user": "sa",
+    "password": "qwerty123",
+    "server": "NETBIOSNAME",
+    "driver": "tedious",
+    "database": "noname_network_monitor",
+    "options": {
+        "instanceName": "SQLEXPRESS"
+    },
+    "chart" : {
+      "minutes": 60
+    }
+}

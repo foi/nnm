@@ -1,0 +1,48 @@
+<form action="/hosts_and_ports" role="form" name="add_host_and_port_form" id="add_host_and_port" method="POST">
+
+  <div class="form-host_and_port form-group">
+    <label>Название</label>
+    <input type="text" class="form-control" name="host_and_port_name" placeholder="Введите название">
+    <label>Хост</label>
+    <select class="form-control" name="host_and_port_id" id="host_and_port_id"></select>
+    <label>Порт</label>
+    <input type="text" class="form-control" name="host_and_port_port">
+    <label>Тип</label>
+    <select class="form-control" name="host_and_port_type" id="host_and_port_type"></select>
+    <label>Дополнительный маршрут</label>
+    <input type="text" class="form-control" name="host_and_port_route" placeholder="Необязательное поле">
+  </div>
+	<button type="submit" class="btn btn-default">Добавить</button>
+</form>
+<table class="table table-striped host_and_port_table">
+  <thead>
+  	<tr>
+  		<th>Название</th>
+      <th>Хост</th>
+      <th>Порт</th>
+  		<th>Тип</th>
+      <th>X?</th>
+  	</tr>
+  </thead>
+  <tbody>
+	<% hosts_and_ports.forEach(function(h){ %>
+		<tr id="<%= h.id %>">
+      <td>
+        <div id="name" class="edit-name-of-host-and-port" data-type="text" data-pk="<%= h.id %>" data-url="/edit/hosts_and_ports" data-title="Введите имя для хоста и порта"><%= h.name %></div>
+      </td>
+      <td>
+        <div id="host_id" class="edit-host-id" data-type="select2" data-pk="<%= h.id %>" data-url="/edit/hosts_and_ports" data-value="<%= h.host_id %>" data-title="Выберите необходимый хост"><%= h.hostname %></div>
+      </td>
+      <td>
+        <div id="port" class="edit-port-of-host-and-port" data-type="text" data-pk="<%= h.id %>" data-url="/edit/hosts_and_ports" data-title="Введите порт"><%= h.port %></div>
+      </td>
+      <td>
+        <div id="type_of_host_and_port_id" class="edit-type_of_host_and_port_id" data-type="select2" data-pk="<%= h.id %>" data-url="/edit/hosts_and_ports" data-value="<%= h.type_of_host_and_port_id %>" data-title="Выберите тип"><%= h.typename %></div>
+      </td>
+      <td>
+        <span class="delete delete-host-and-port" id="<%= h.id %>">X</span>
+      </td>
+    </tr>
+	<% }) %>
+	</tbody>
+</table>

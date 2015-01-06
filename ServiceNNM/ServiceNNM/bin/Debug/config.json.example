@@ -1,0 +1,31 @@
+{
+  "connection_string": "Data Source=LOCALHOST\\SQLEXPRESS;Initial Catalog=noname_network_monitor;User ID=sa;Password=Qwerty123;Connection Lifetime=0",
+  "Smtp" : {
+    "server": "mail.mx.ru",
+    "port": 25,
+    "ssl": false,
+    "from": "down@fut.ru",
+    "password": "yu1wwwe12",
+    "notification": true,
+    "sleep_after_send_one_mail_message": 100
+  },
+  "Timeouts" : {
+    "for_web_page_check": 3000,
+    "for_smtp_mail_send": 1000,
+    "for_ping": 2000,
+    "for_check_port": 1000,
+    "for_get_from_agent": 5000,
+  },
+  "Sleep" : {
+    "when_operate": true,
+    "min_mseconds_sleep_when_operate": 1,
+    "max_mseconds_sleep_when_operate": 100,
+  },
+  "number_of_periods_after_to_send_notify": 5,
+  "count_after_host_is_considered_as_alive": 5,
+  "ThoughtfulMode" : {
+    "Ping": true,
+    "Port": true,
+    "Web": true
+  }
+}

@@ -1,0 +1,20 @@
+<form action="/new/type_of_host_and_port" role="form" name="add_type_form" id="add_type" method="POST" class="navbar-form navbar-left">
+  <div class="form-type form-group">
+    <input type="text" class="form-control single-text" name="type_name" placeholder="Например: проверка веб-страницы">
+  </div>
+  <button type="submit" class="btn btn-default">Добавить</button>
+</form>
+<table class="table type_table table-striped">
+  <thead>
+  	<tr>
+  		<th>Название</th>
+  		<th>Изменить</th>
+  		<th>Удалить</th>
+  	</tr>
+  </thead>
+  <tbody>
+	<% types.forEach(function (t) { %>
+		<tr><td><%= t.name %></td><td></td><td></td></tr>
+	<% }); %>
+	</tbody>
+</table>

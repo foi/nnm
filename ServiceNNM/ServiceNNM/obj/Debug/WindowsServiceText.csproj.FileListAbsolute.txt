@@ -1,0 +1,10 @@
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\bin\Debug\WindowsServiceText.exe.config
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\bin\Debug\WindowsServiceText.exe
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\bin\Debug\WindowsServiceText.pdb
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\bin\Debug\log4net.dll
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\bin\Debug\Newtonsoft.Json.dll
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\bin\Debug\log4net.xml
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\bin\Debug\Newtonsoft.Json.xml
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\obj\Debug\WindowsServiceText.csprojResolveAssemblyReference.cache
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\obj\Debug\WindowsServiceText.exe
+C:\projects\miac_netmon\WindowsServiceText\WindowsServiceText\obj\Debug\WindowsServiceText.pdb
