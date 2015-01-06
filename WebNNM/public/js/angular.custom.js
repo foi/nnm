@@ -25,4 +25,8 @@ nnm.controller('NavCtrl', ['$scope', '$http', function ($scope, $http) {
   error(function () {
     $scope.dbStatus = "Ошибка"
   });
+  $http.get('/config/servicennm').
+  success(function (data) {
+    $scope.ServiceNNM = data;
+  });
 }]);

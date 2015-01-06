@@ -1,7 +1,15 @@
 .error {
-	background-color: LightCoral;
+  background-color: LightCoral;
 }
 
 .success {
-	background-color: MediumSeaGreen;
+  background-color: MediumSeaGreen;
+}
+
+.notexist {
+  background-color: Plum;
+}
+
+body, a {
+  color: black;
 }

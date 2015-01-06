@@ -19,7 +19,8 @@
         <li><a href="/#/">HOT</a></li>
         <li><a href="/#/dictionaries">Словари</a></li>
         <li><a href="/#/statistics">Детальная статистика</a></li>
-        <li><a href="/#/config" ng-class="{success: dbConnected === true, error: dbConnected === false}">База данных</div></a></li>
+        <li><a href="/#/config" ng-class="{success: dbConnected === true, error: dbConnected === false}">База данных</a></li>
+        <li><a href="/#/config" ng-class="{success: ServiceNNM === 'RUNNING', error: ServiceNNM === 'STOPPED', notexist: ServiceNNM === 'NOTEXIST'}">Служба NNM</a></li>
       </ul>
     </div>
   <div>
