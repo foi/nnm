@@ -8,6 +8,8 @@ var strftime = require('strftime');
 var bodyParser = require("body-parser");
 var fs = require("fs");
 var _ = require("underscore");
+var sys = require('sys')
+var exec = require('child_process').exec;
 // для layout.ejs без этого не работает
 var expressLayouts = require('express-ejs-layouts');
 var app = express();
@@ -60,6 +62,8 @@ var queries = {
   select_periods_from_between_ids: "SELECT * FROM periods WHERE id BETWEEN %0 AND %1"
 
 }
+
+var html_folder = __dirname + '/public/html/';
 // подлючение к базе данных
 var connection = new sql.Connection(config);
 connection.connect(function(err){
@@ -99,8 +103,28 @@ function setPeriodForPeriodId(array, format, periods_array){
 app.use('/public', express.static(__dirname + '/public'));
 // рутовая страница
 app.get('/', function(req, res) {
-  var fileContents = fs.readFileSync("index.html");
+  var fileContents = fs.readFileSync(html_folder + "index.html");
   res.send(fileContents.toString());
+});
+// Проверка - есть ли коннект к базе данных
+app.get('/config/db_connection', function(req, res){
+  connection.connect(function(err){
+    res.send(err.code);
+  });
+});
+// Проверка, работает ли служба ServiceNNM
+function puts(error, stdout, stderr) { sys.puts(stdout) };
+
+app.get('/config/servicennm', function (req, res) {
+  exec('sc query "ALG1"', function (error, stdout, stderr) {
+    var w = stdout.indexOf("RUNNING");
+    if (w == -1) {
+      stdout.indexOf("STOPPED") == -1 ? res.send("STOPPED") : res.send("NOTEXIST");
+    } else {
+      res.send("RUNNING");
+    }
+  });
+  
 });
 
 // получить последнюю информацию о пинге для всех хостов

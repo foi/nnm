@@ -1,12 +1,32 @@
 <!DOCTYPE html>
 <html ng-app="nnm">
 <head>
-  <link rel="stylesheet" type="text/css" href="">
-  <script type="text/javascript" src="angular.js"></script>
-  <script type="text/javascript" src="angular.custom.js"></script>
+  <!-- css -->
+  <link rel="stylesheet" type="text/css" href="public/css/pure.min.css">
+  <link rel="stylesheet" type="text/css" href="public/css/custom.css">
+  <!-- js libraries -->
+  <script type="text/javascript" src="public/js/angular.js"></script>
+  <script type="text/javascript" src="public/js/angular-route.js"></script>
+  <!-- custom js -->
+  <script type="text/javascript" src="public/js/angular.custom.js"></script>
   <title>Noname Network Monitor</title>
 </head>
 <body>
-hfklhfklhkl
+  <header>
+  </header>
+    <div class="pure-menu pure-menu-open pure-menu-horizontal" ng-controller="NavCtrl" ng-init="checkConnection()">
+      <ul>
+        <li><a href="/#/">HOT</a></li>
+        <li><a href="/#/dictionaries">Словари</a></li>
+        <li><a href="/#/statistics">Детальная статистика</a></li>
+        <li><a href="/#/config" ng-class="{success: dbConnected === true, error: dbConnected === false}">База данных</div></a></li>
+      </ul>
+    </div>
+  <div>
+    <div ng-view>
+      
+    </div>
+  </div>
+  <footer></footer>
 </body>
 </html>
