@@ -1,0 +1,48 @@
+<div ng-controller="DictCtrl" ng-show="dbConnected">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <!-- Таблица с хостами -->
+      <h3>Таблица с хостами</h3>
+      <table class="table table-bordered table-hover table-condensed">
+        <tr style="font-weight: bold">
+          <td style="width:30%">название</td>
+          <td style="width:25%">ip-адрес/доменное имя</td>
+          <td style="width:20%">группа</td>
+          <td style="width:25%">изменить/удалить</td>
+        </tr>
+        <tr ng-repeat="host in hosts">
+          <td>
+            <a href="#" editable-text="host.name" onbeforesave="updateHost(host)">
+              {{ host.name || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-text="host.ip_or_name" onbeforesave="updateHost(host)">
+              {{ host.name || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-select="host.group_id" e-ng-options="g.id as g.name for g in groups" onbeforesave="updateHost(host)">
+              {{ showGroup(host) }}
+            </a>
+          </td>
+        </tr>
+      </table>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <form class="form-inline" editable-form name="addNewHostFrom" onaftersave="addHost()" shown="editableForm.$show()">
+          <div class="form-group">
+            <span class="title">User name: </span>
+            <span editable-text="host.name" e-name="name"  e-required>{{ host.name || 'empty' }}</span>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" id="enterIp" placeholder="ip-адрес или доменное имя">
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="addHost()">Добавить</button>
+        </form>
+        </div>
+      </div>
+      <!-- Конец таблицы с хостами -->
+    </div>
+  </div>
+</div>

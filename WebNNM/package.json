@@ -12,6 +12,7 @@
     "express": "*",
     "js-methods": "*",
     "mssql": "*",
+    "q": "^1.1.2",
     "strftime": "^0.8.2",
     "underscore": "^1.7.0"
   }

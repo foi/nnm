@@ -8,7 +8,8 @@ var strftime = require('strftime');
 var bodyParser = require("body-parser");
 var fs = require("fs");
 var _ = require("underscore");
-var sys = require('sys')
+var sys = require('sys');
+var Q = require('q');
 var exec = require('child_process').exec;
 // для layout.ejs без этого не работает
 var expressLayouts = require('express-ejs-layouts');
@@ -59,8 +60,12 @@ var queries = {
   select_hdd_partitions_stat_till_period_from_period_for_agent: "SELECT hdd_partition_id, size, period_id FROM hdd_stat_journal WHERE (period_id BETWEEN %0 AND %1) AND agent_id = %2",
   select_latest_ping_stat_till_period_from_period: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1",
   select_latest_ping_stat_till_period_from_period_for_host: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1 AND host_id = %2",
-  select_periods_from_between_ids: "SELECT * FROM periods WHERE id BETWEEN %0 AND %1"
-
+  select_periods_from_between_ids: "SELECT * FROM periods WHERE id BETWEEN %0 AND %1",
+  select_all_from: "SELECT * FROM %0",
+  select_by_id: "SELECT * FROM %0 WHERE id=%1",
+  insert_record: "INSERT INTO %0 VALUES (%1)",
+  delete_record: "DELETE FROM %0 WHERE id=%1",
+  edit_record: ""
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -96,6 +101,52 @@ function setPeriodForPeriodId(array, format, periods_array){
   });
 }; 
 
+// получить все данные из таблицы
+function queryAll (query) {
+  var deferred = Q.defer();
+  var q = new sql.Request(connection);
+  q.query(query, function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+}
+//получить запись с ид
+function queryById (query, table, id) {
+  var deferred = Q.defer();
+  var q = new sql.Request(connection);
+  q.query(query.format([table, id]), function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+}
+// внести запись
+function createRecord (query, table, values) {
+  var deferred = Q.defer();
+  var _v = _.values(values);
+  var s = "";
+  _.each(_v, function (e, i) { 
+    i == (_.size(_v) - 1) ? s = s + e + "'": s = "'" + s + e + "'" + ',' + "'";
+  });
+  var q = new sql.Request(connection);
+  console.log(query.format([table, s]));
+  q.query(query.format([table, s]), function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+}
+// удалить запись
+function deleteRecord (query, table, id) {
+  var deferred = Q.defer();
+  var q = new sql.Request(connection);
+  q.query(query.format([table, id]), function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+}
 // конец хелперов
 
 // Установка движка для вьюшек и поддержка layout.ejs
@@ -109,12 +160,16 @@ app.get('/', function(req, res) {
 // Проверка - есть ли коннект к базе данных
 app.get('/config/db_connection', function(req, res){
   connection.connect(function(err){
-    res.send(err.code);
+    try {
+      res.send(err.code);
+    }
+    catch (c) {
+      console.log("EIDONTKNOW");
+    }
   });
 });
-// Проверка, работает ли служба ServiceNNM
-function puts(error, stdout, stderr) { sys.puts(stdout) };
 
+// Проверка, работает ли служба ServiceNNM
 app.get('/config/servicennm', function (req, res) {
   exec('sc query "ALG1"', function (error, stdout, stderr) {
     var w = stdout.indexOf("RUNNING");
@@ -124,7 +179,47 @@ app.get('/config/servicennm', function (req, res) {
       res.send("RUNNING");
     }
   });
-  
+});
+
+// api для получения данных
+// получить все записи из таблицы
+app.get('/api/:table', function (req, res) {
+  queryAll(queries.select_all_from.format([req.params.table])).then(function (data) {
+    res.send(data);
+  }, function (err) {
+    res.send(err);
+  });
+});
+// получить запись по ид
+app.get('/api/:table/:id', function (req, res) {
+  var table = req.params.table;
+  var id = req.params.id;
+  queryById(queries.select_by_id, table, id).then(function (data) {
+    res.send(data);
+  }, function (err) {
+    res.send(err);
+  });
+})
+// добавить запись
+app.post('/api/:table', function (req, res) {
+  var table = req.params.table;
+  var values = req.body;
+  console.log(values);
+  createRecord(queries.insert_record, table, values).then(function (data) {
+    res.sendStatus(200);
+  }, function (err) {
+    res.send(err);
+  });
+});
+// удалить запись
+app.delete('/api/:table', function (req, res) {
+  var table = req.params.table;
+  var id = req.body.id;
+  queryAll(queries.delete_record.format([table, id])).then(function (data) {
+    res.sendStatus(200);
+  }, function (err) {
+    res.send(err);
+  });
 });
 
 // получить последнюю информацию о пинге для всех хостов
