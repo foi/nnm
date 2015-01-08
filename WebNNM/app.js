@@ -65,7 +65,8 @@ var queries = {
   select_by_id: "SELECT * FROM %0 WHERE id=%1",
   insert_record: "INSERT INTO %0 VALUES (%1)",
   delete_record: "DELETE FROM %0 WHERE id=%1",
-  edit_record: "UPDATE %0 SET %1 WHERE id=%2"
+  edit_record: "UPDATE %0 SET %1 WHERE id=%2",
+  get_last_record: "SELECT TOP 1 * FROM %0 ORDER BY ID DESC"
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -170,6 +171,16 @@ function updateRecord (table, keys, values, id) {
   });
   return deferred.promise;
 };
+// получить последнюю запись из таблицы
+function getLast (query, table) {
+  var deferred = Q.defer();
+  var q = new sql.Request(connection);
+  q.query(query.format([table]), function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+};
 // конец хелперов
 
 // Установка движка для вьюшек и поддержка layout.ejs
@@ -249,6 +260,14 @@ app.post('/api/:table/:id', function (req, res) {
     res.send(err);
   });
 })
+// получить последнюю запись
+app.get('/extra/api/last/:table', function (req, res) {
+  getLast(queries.get_last_record, req.params.table).then(function (data) {
+    res.send(data);
+  }, function (err) {
+    res.send(err);
+  })
+});
 
 // получить последнюю информацию о пинге для всех хостов
 // app.get('/latest/ping/all', function(req, res){

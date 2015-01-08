@@ -19,6 +19,27 @@ nnm.config( function ($routeProvider) {
   })
 });
 
+// Factories 
+nnm.factory('Hp', ['$resource', function ($resource) {
+  return $resource('/api/hosts_and_ports/:id', {id: '@id'}, {}); 
+}]);
+
+nnm.factory('Host', ['$resource', function ($resource) {
+  return $resource('/api/hosts/:id', {id: '@id'}, {}); 
+}]);
+
+nnm.factory('Group', ['$resource', function ($resource) {
+  return $resource('/api/groups/:id', {id: '@id'}, {}); 
+}]);
+
+nnm.factory('Service', ['$resource', function ($resource) {
+  return $resource('/api/services/:id', {id: '@id'}, {}); 
+}]);
+
+nnm.factory('TPHP', ['$resource', function ($resource) {
+  return $resource('/api/types_of_host_and_port/:id', {id: '@id'}, {}); 
+}]);
+
 // Свежие новости
 nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
   // на сколько минут график
@@ -32,9 +53,12 @@ nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
 }]);
 
 // Справочники
-nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', function ($scope, $filter, Host, Group) {
+nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service', 'TPHP', function ($scope, $filter, Host, Group, Hp, Service, TPHP) {
   $scope.hosts = Host.query();
   $scope.groups = Group.query();
+  $scope.services = Service.query();
+  $scope.hosts_and_ports = Hp.query();
+  $scope.types = TPHP.query();
   // для хостов
   $scope.showGroup = function (host) {
     var selected = $filter('filter')($scope.groups, {id: host.group_id});
@@ -44,12 +68,67 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', function ($sco
     Host.save(host);
   };
   $scope.addHost = function (host) {
-    var h = new Host(host);
-    h.$save();
+    Host.save(host, function () {
+      $scope.hosts = Host.query();
+    }, function (err) {
+      console.log(err);
+    });
   };
   $scope.deleteHost = function (id) {
-    Host.delete({id: id});
+    Host.delete({id: id}, function () {
+      $scope.hosts = Host.query();
+    }, function (err) {
+      console.log(err);
+    });
   };
+  // для групп
+  $scope.addGroup = function (group) {
+    Group.save(group, function () {
+      $scope.groups = Group.query();
+    }, function (err) {
+      console.log(err);
+    });
+  };
+  $scope.updateGroup = function (group) {
+    Group.save(group);
+  };
+  $scope.deleteGroup = function (id) {
+    Group.delete({id: id}, function () {
+      $scope.groups = Group.query();
+    }, function (err) {
+      console.log(err);
+    });
+  };
+  // для сервисов
+  $scope.updateService = function (service) {
+    Service.save(service);
+  };
+  $scope.deleteService = function (id) {
+    Service.delete({id: id}, function () {
+      $scope.hosts = Service.query();
+    }, function (err) {
+      console.log(err);
+    });
+  };
+  // для хостов с портами
+  $scope.showHost = function (host_id) {
+    var selected = $filter('filter')($scope.hosts, {id: host_id});
+    return selected.length ? selected[0].name : 'Не выбрано';
+  };
+  $scope.showType = function (type_id) {
+    var selected = $filter('filter')($scope.types, {id: type_id});
+    return selected.length ? selected[0].name : 'Не выбрано';
+  };
+  $scope.updateHp = function (hp) {
+    Hp.save(hp);
+  };
+  $scope.addHp = function (hp) {
+    Hp.save(hp, function () {
+      $scope.hosts_and_ports = Hp.query();
+    }, function (err) {
+      console.log(err);
+    });
+  }
 }]);
 
 // Навигация
@@ -69,13 +148,4 @@ nnm.controller('NavCtrl', ['$rootScope','$scope', '$http', '$location', function
   $scope.isActive = function (route) {
     return route === $location.path();
   };
-}]);
-
-// Factories 
-nnm.factory('Host', ['$resource', function ($resource) {
-  return $resource('/api/hosts/:id', {id: '@id'}, {}); 
-}]);
-
-nnm.factory('Group', ['$resource', function ($resource) {
-  return $resource('/api/groups/:id', {id: '@id'}, {}); 
 }]);

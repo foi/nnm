@@ -22,3 +22,7 @@
 input.ng-invalid {
   border: 1px solid red;
 }
+
+.form-inline {
+  padding: 10px;
+}
