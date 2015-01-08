@@ -40,6 +40,10 @@ nnm.factory('TPHP', ['$resource', function ($resource) {
   return $resource('/api/types_of_host_and_port/:id', {id: '@id'}, {}); 
 }]);
 
+nnm.factory('Subscriber', ['$resource', function ($resource) {
+  return $resource('/api/subscribers/:id', {id: '@id'}, {}); 
+}]);
+
 // Свежие новости
 nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
   // на сколько минут график
@@ -53,12 +57,13 @@ nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
 }]);
 
 // Справочники
-nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service', 'TPHP', function ($scope, $filter, Host, Group, Hp, Service, TPHP) {
+nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service', 'TPHP', 'Subscriber', function ($scope, $filter, Host, Group, Hp, Service, TPHP, Subscriber) {
   $scope.hosts = Host.query();
   $scope.groups = Group.query();
   $scope.services = Service.query();
   $scope.hosts_and_ports = Hp.query();
   $scope.types = TPHP.query();
+  $scope.subscribers = Subscriber.query();
   // для хостов
   $scope.showGroup = function (host) {
     var selected = $filter('filter')($scope.groups, {id: host.group_id});
@@ -132,6 +137,24 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
   $scope.deleteHp = function (id) {
     Hp.delete({id: id}, function () {
       $scope.hosts_and_ports = Hp.query();
+    }, function (err) {
+      console.log(err);
+    });
+  };
+  //для подписунов
+  $scope.updateSubscriber = function (s) {
+    Subscriber.save(s);
+  };
+  $scope.addSubscriber = function (subscriber) {
+    Subscriber.save(subscriber, function () {
+      $scope.subscribers = Subscriber.query();
+    }, function (err) {
+      console.log(err);
+    });
+  };
+  $scope.deleteSubscriber = function (id) {
+    Subscriber.delete({id: id}, function () {
+      $scope.subscribers = Subscriber.query();
     }, function (err) {
       console.log(err);
     });

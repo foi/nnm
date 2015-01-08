@@ -5,9 +5,9 @@
       <h3>Хосты</h3>
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
-          <td style="width:40%">название</td>
+          <td style="width:40%">Название</td>
           <td style="width:35%">ip-адрес/доменное имя</td>
-          <td style="width:20%">группа</td>
+          <td style="width:20%">Группа</td>
           <td style="width:5%">X</td>
         </tr>
         <tr ng-repeat="host in hosts">
@@ -53,7 +53,7 @@
       <h3>Группы</h3>
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
-          <td style="width:95%">название</td>
+          <td style="width:95%">Название</td>
           <td style="width:5%">X</td>
         </tr>
         <tr ng-repeat="group in groups">
@@ -83,10 +83,11 @@
       <h3>Хосты и порты</h3>
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
-          <td style="width:40%">Наименование</td>
+          <td style="width:30%">Наименование</td>
           <td style="width:25%">Тип</td>
-          <td style="width:25%">Хост</td>
           <td style="width:5%">Порт</td>
+          <td style="width:20%">Хост</td>
+          <td style="width:15%">Дополнительный маршрут</td>
           <td style="width:5%">X</td>
         </tr>
         <tr ng-repeat="hp in hosts_and_ports">
@@ -111,6 +112,11 @@
             </a>
           </td>
           <td>
+            <a href="#" editable-text="hp.route" onbeforesave="updateHp(hp)">
+              {{ hp.route || 'Пусто' }}
+            </a>
+          </td>
+          <td>
             <button ng-click="deleteHp(hp.id)" href="#" class="btn btn-primary">
               Удалить
             </button>
@@ -124,24 +130,27 @@
             <input type="text" class="form-control" ng-model='hp.name' name="hpname" id="hpnameinput" placeholder="наименование хоста и порта" required>
           </div>
           <div class="form-group">
-            <input type="text" class="form-control" ng-model='hp.port' name="hpport" id="hpnameinput" placeholder="порт" required>
+            <input type="text" class="form-control" ng-model='hp.port' name="hpport" id="hpportinput" placeholder="порт" required>
           </div>
           <div class="form-group">
-            <select ng-model="hp.type_of_host_and_port_id" ng-options="t.id as t.name for t in types" name="type_of_host_and_port_id" class="form-control" required></select>
+            <select ng-model="hp.type_of_host_and_port_id" ng-options="t.id as t.name for t in types" name="hptype_of_host_and_port_id" class="form-control" required></select>
           </div>
           <div class="form-group">
             <select ng-model="hp.host_id" ng-options="h.id as h.name for h in hosts" name="hphost_id" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model='hp.route' name="hproute" id="hprouteinput" placeholder="дополнительный маршрут/">
           </div>
           <button type="submit" class="btn btn-default" ng-click="addHp(hp)">Добавить</button>
         </form>
       </div>
       <!-- Конец таблицы с хостами и портами -->
       <!-- Начало таблицы с сервисами -->
-      <h3>Таблица с сервисами</h3>
+      <h3>Сервисы</h3>
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
-          <td style="width:40%">название</td>
-          <td style="width:55%">гуманное название</td>
+          <td style="width:40%">Название сервиса</td>
+          <td style="width:55%">Гуманное название</td>
           <td style="width:5%">X</td>
         </tr>
         <tr ng-repeat="service in services">
@@ -164,6 +173,34 @@
       </table>
       <!-- Конец таблицы с сервисами -->
       <!-- Таблица с подписчиками -->
+      <h3>Подписчики</h3>
+      <table class="table table-bordered table-hover table-condensed">
+        <tr style="font-weight: bold">
+          <td style="width:95%">Email</td>
+          <td style="width:5%">X</td>
+        </tr>
+        <tr ng-repeat="s in subscribers">
+          <td>
+            <a href="#" editable-text="s.email" onbeforesave="updateSubscriber(s)">
+              {{ s.email || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <button ng-click="deleteSubscriber(s.id)" href="#" class="btn btn-primary">
+              Удалить
+            </button>
+          </td>
+        </tr>
+      </table>
+      <div class="panel panel-info">
+        <div class="panel-heading">Добавить подписчика</div>
+        <form class="form-inline" name="addSubscriberForm">
+          <div class="form-group">
+            <input type="email" class="form-control" ng-model='s.email' name="subscriberemail" id="subscriberemailinput" placeholder="адрес электронной почты" required>
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="addSubscriber(s)">Добавить</button>
+        </form>
+      </div>
       <!-- конец таблицы с подписчиками -->
     </div>
   </div>
