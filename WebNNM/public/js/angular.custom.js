@@ -32,21 +32,24 @@ nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
 }]);
 
 // Справочники
-nnm.controller('DictCtrl', ['$scope', '$filter', 'Hosts', 'Groups', function ($scope, $filter, Hosts, Groups) {
-  $scope.hosts = Hosts.query();
-  $scope.groups = Groups.query();
+nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', function ($scope, $filter, Host, Group) {
+  $scope.hosts = Host.query();
+  $scope.groups = Group.query();
   // для хостов
   $scope.showGroup = function (host) {
     var selected = $filter('filter')($scope.groups, {id: host.group_id});
     return selected.length ? selected[0].name : 'Не выбрано';
   };
   $scope.updateHost = function (host) {
-    Hosts.save(host);
+    Host.save(host);
   };
   $scope.addHost = function (host) {
-    var h = new Hosts(host);
+    var h = new Host(host);
     h.$save();
-  }
+  };
+  $scope.deleteHost = function (id) {
+    Host.delete({id: id});
+  };
 }]);
 
 // Навигация
@@ -69,10 +72,10 @@ nnm.controller('NavCtrl', ['$rootScope','$scope', '$http', '$location', function
 }]);
 
 // Factories 
-nnm.factory('Hosts', ['$resource', function ($resource) {
+nnm.factory('Host', ['$resource', function ($resource) {
   return $resource('/api/hosts/:id', {id: '@id'}, {}); 
 }]);
 
-nnm.factory('Groups', ['$resource', function ($resource) {
+nnm.factory('Group', ['$resource', function ($resource) {
   return $resource('/api/groups/:id', {id: '@id'}, {}); 
 }]);

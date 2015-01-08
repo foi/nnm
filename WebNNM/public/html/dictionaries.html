@@ -18,13 +18,18 @@
           </td>
           <td>
             <a href="#" editable-text="host.ip_or_name" onbeforesave="updateHost(host)">
-              {{ host.name || 'Пусто' }}
+              {{ host.ip_or_name || 'Пусто' }}
             </a>
           </td>
           <td>
             <a href="#" editable-select="host.group_id" e-ng-options="g.id as g.name for g in groups" onbeforesave="updateHost(host)">
               {{ showGroup(host) }}
             </a>
+          </td>
+          <td>
+            <button ng-click="deleteHost(host.id)" href="#" class="btn btn-primary">
+              Удалить
+            </button>
           </td>
         </tr>
       </table>
@@ -41,7 +46,7 @@
           </div>
           <button type="submit" class="btn btn-default" ng-click="addHost(host)">Добавить</button>
         </form>
-        {{ host | json }}
+        {{ hosts | json }}
       </div>
       <!-- Конец таблицы с хостами -->
     </div>

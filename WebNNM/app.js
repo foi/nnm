@@ -145,6 +145,7 @@ function createRecord (query, table, values) {
 function deleteRecord (query, table, id) {
   var deferred = Q.defer();
   var q = new sql.Request(connection);
+  console.log(query.format([table, id]));
   q.query(query.format([table, id]), function (err, data) {
     if (err) deferred.reject(err)
     else deferred.resolve(data);
@@ -159,7 +160,7 @@ function updateRecord (table, keys, values, id) {
   _.each(keys, function (k, i) {
     if (k != "id") {
       string_update = string_update + k + "=" + (_.isString(values[i]) ? "'" + values[i] + "'" : values[i]);
-      (_.size(keys) - 1 == i) ? string_update : string_update = string_update + ","
+      (_.size(keys) - 1 == i) ? string_update : string_update = string_update + ",";
     };
   });
   console.log(queries.edit_record.format([table, string_update, id]));
@@ -229,10 +230,10 @@ app.post('/api/:table', function (req, res) {
   });
 });
 // удалить запись
-app.delete('/api/:table', function (req, res) {
+app.delete('/api/:table/:id', function (req, res) {
   var table = req.params.table;
-  var id = req.body.id;
-  queryAll(queries.delete_record.format([table, id])).then(function (data) {
+  var id = req.params.id;
+  deleteRecord(queries.delete_record, table, id).then(function (data) {
     res.sendStatus(200);
   }, function (err) {
     res.send(err);
