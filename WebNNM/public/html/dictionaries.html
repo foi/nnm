@@ -2,7 +2,7 @@
   <div class="panel panel-default">
     <div class="panel-body">
       <!-- Таблица с хостами -->
-      <h3>Таблица с хостами</h3>
+      <h3>Хосты</h3>
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:40%">название</td>
@@ -50,7 +50,7 @@
       </div>
       <!-- Конец таблицы с хостами -->
       <!-- таблица с группами -->
-      <h3>Таблица с группами</h3>
+      <h3>Группы</h3>
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:95%">название</td>
@@ -80,7 +80,7 @@
       </div>
       <!-- Конец таблицы с группами -->
       <!-- Начало таблицы с хостами и портами -->
-      <h3>Таблица с хостами и портами</h3>
+      <h3>Хосты и порты</h3>
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:40%">Наименование</td>
@@ -111,7 +111,7 @@
             </a>
           </td>
           <td>
-            <button ng-click="deleteHp(Hp.id)" href="#" class="btn btn-primary">
+            <button ng-click="deleteHp(hp.id)" href="#" class="btn btn-primary">
               Удалить
             </button>
           </td>
@@ -124,13 +124,13 @@
             <input type="text" class="form-control" ng-model='hp.name' name="hpname" id="hpnameinput" placeholder="наименование хоста и порта" required>
           </div>
           <div class="form-group">
+            <input type="text" class="form-control" ng-model='hp.port' name="hpport" id="hpnameinput" placeholder="порт" required>
+          </div>
+          <div class="form-group">
             <select ng-model="hp.type_of_host_and_port_id" ng-options="t.id as t.name for t in types" name="type_of_host_and_port_id" class="form-control" required></select>
           </div>
           <div class="form-group">
             <select ng-model="hp.host_id" ng-options="h.id as h.name for h in hosts" name="hphost_id" class="form-control" required></select>
-          </div>
-          <div class="form-group">
-            <input type="text" class="form-control" ng-model='hp.port' name="hpport" id="hpnameinput" placeholder="порт" required>
           </div>
           <button type="submit" class="btn btn-default" ng-click="addHp(hp)">Добавить</button>
         </form>
@@ -163,6 +163,8 @@
         </tr>
       </table>
       <!-- Конец таблицы с сервисами -->
+      <!-- Таблица с подписчиками -->
+      <!-- конец таблицы с подписчиками -->
     </div>
   </div>
 </div>

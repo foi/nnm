@@ -63,7 +63,7 @@ var queries = {
   select_periods_from_between_ids: "SELECT * FROM periods WHERE id BETWEEN %0 AND %1",
   select_all_from: "SELECT * FROM %0",
   select_by_id: "SELECT * FROM %0 WHERE id=%1",
-  insert_record: "INSERT INTO %0 VALUES (%1)",
+  insert_record: "INSERT INTO %0 (%1) VALUES (%2)",
   delete_record: "DELETE FROM %0 WHERE id=%1",
   edit_record: "UPDATE %0 SET %1 WHERE id=%2",
   get_last_record: "SELECT TOP 1 * FROM %0 ORDER BY ID DESC"
@@ -128,15 +128,15 @@ function createRecord (query, table, values) {
   var _v = _.values(values);
   var s = "";
   _.each(_v, function (e, i) {
-    if (_.isString(e)) 
+    if (!_.isFinite(e)) 
       s = s + "'" + e + "'";
     else 
-      s = s + e;
+      s = s + parseInt(e);
     (_.size(_v) - 1 == i) ? s : s = s + ","
   });
   var q = new sql.Request(connection);
-  console.log(query.format([table, s]));
-  q.query(query.format([table, s]), function (err, data) {
+  console.log(query.format([table, _.keys(values).join(), s]));
+  q.query(query.format([table, _.keys(values).join(), s]), function (err, data) {
     if (err) deferred.reject(err)
     else deferred.resolve(data);
   });
@@ -181,6 +181,7 @@ function getLast (query, table) {
   });
   return deferred.promise;
 };
+
 // конец хелперов
 
 // Установка движка для вьюшек и поддержка layout.ejs

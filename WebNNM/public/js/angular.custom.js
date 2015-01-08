@@ -128,7 +128,14 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
     }, function (err) {
       console.log(err);
     });
-  }
+  };
+  $scope.deleteHp = function (id) {
+    Hp.delete({id: id}, function () {
+      $scope.hosts_and_ports = Hp.query();
+    }, function (err) {
+      console.log(err);
+    });
+  };
 }]);
 
 // Навигация
