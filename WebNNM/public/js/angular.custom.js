@@ -58,6 +58,14 @@ nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
 
 // Справочники
 nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service', 'TPHP', 'Subscriber', function ($scope, $filter, Host, Group, Hp, Service, TPHP, Subscriber) {
+  $scope.show = {
+    hosts: true,
+    groups: false,
+    hp: false, 
+    services: false,
+    subscribers: false
+  };
+
   $scope.hosts = Host.query();
   $scope.groups = Group.query();
   $scope.services = Service.query();
@@ -159,6 +167,10 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
       console.log(err);
     });
   };
+}]);
+
+nnm.controller('ConfigCtrl', ['$scope', function($scope){
+  
 }]);
 
 // Навигация

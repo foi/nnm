@@ -211,6 +211,16 @@ app.get('/config/servicennm', function (req, res) {
   });
 });
 
+app.get('/config/web', function (req, res) {
+  config.webnnm = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
+  console.log(config.webnnm.path_to_servicennm_config);
+  console.log(JSON.parse(fs.readFileSync(config.webnnm.path_to_servicennm_config, 'utf8')));
+});
+
+app.get('/config/service', function (req, res) {
+  config.servicennm = JSON.parse(fs.readFileSync(config.webnnm.path_to_servicennm_config, 'utf8'));
+  console.log(config);
+})
 // api для получения данных
 // получить все записи из таблицы
 app.get('/api/:table', function (req, res) {

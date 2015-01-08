@@ -2,8 +2,10 @@
   <div class="panel panel-default">
     <div class="panel-body">
       <!-- Таблица с хостами -->
-      <h3>Хосты</h3>
-      <table class="table table-bordered table-hover table-condensed">
+      <div class="panel panel-default">
+      <div class="panel-heading"><a  ng-click="show.hosts = !show.hosts">Хосты</a></div>
+      <div class="panel-body" ng-show="show.hosts">
+        <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:40%">Название</td>
           <td style="width:35%">ip-адрес/доменное имя</td>
@@ -47,10 +49,14 @@
           </div>
           <button type="submit" class="btn btn-default" ng-click="addHost(host)">Добавить</button>
         </form>
+      </div>  
+      </div>
       </div>
       <!-- Конец таблицы с хостами -->
       <!-- таблица с группами -->
-      <h3>Группы</h3>
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.groups = !show.groups">Группы</a></div>
+      <div class="panel-body" ng-show="show.groups">
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:95%">Название</td>
@@ -78,9 +84,13 @@
           <button type="submit" class="btn btn-default" ng-click="addGroup(group)">Добавить</button>
         </form>
       </div>
+      </div>
+      </div>
       <!-- Конец таблицы с группами -->
       <!-- Начало таблицы с хостами и портами -->
-      <h3>Хосты и порты</h3>
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.hp = !show.hp">Хосты и порты</a></div>
+      <div class="panel-body" ng-show="show.hp">
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:30%">Наименование</td>
@@ -144,9 +154,13 @@
           <button type="submit" class="btn btn-default" ng-click="addHp(hp)">Добавить</button>
         </form>
       </div>
+      </div>
+      </div>
       <!-- Конец таблицы с хостами и портами -->
       <!-- Начало таблицы с сервисами -->
-      <h3>Сервисы</h3>
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.services = !show.services">Сервисы</a></div>
+      <div class="panel-body" ng-show="show.services">
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:40%">Название сервиса</td>
@@ -171,9 +185,13 @@
           </td>
         </tr>
       </table>
+      </div>
+      </div>
       <!-- Конец таблицы с сервисами -->
       <!-- Таблица с подписчиками -->
-      <h3>Подписчики</h3>
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.subscribers = !show.subscribers">Подписчики</a></div>
+      <div class="panel-body" ng-show="show.subscribers">
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
           <td style="width:95%">Email</td>
@@ -200,6 +218,8 @@
           </div>
           <button type="submit" class="btn btn-default" ng-click="addSubscriber(s)">Добавить</button>
         </form>
+      </div>
+      </div>
       </div>
       <!-- конец таблицы с подписчиками -->
     </div>
