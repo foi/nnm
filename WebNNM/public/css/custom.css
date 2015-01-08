@@ -18,3 +18,7 @@
 .panel {
   margin: 10px;
 }
+
+input.ng-invalid {
+  border: 1px solid red;
+}

@@ -65,7 +65,7 @@ var queries = {
   select_by_id: "SELECT * FROM %0 WHERE id=%1",
   insert_record: "INSERT INTO %0 VALUES (%1)",
   delete_record: "DELETE FROM %0 WHERE id=%1",
-  edit_record: ""
+  edit_record: "UPDATE %0 SET %1 WHERE id=%2"
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -110,7 +110,7 @@ function queryAll (query) {
     else deferred.resolve(data);
   });
   return deferred.promise;
-}
+};
 //получить запись с ид
 function queryById (query, table, id) {
   var deferred = Q.defer();
@@ -120,14 +120,18 @@ function queryById (query, table, id) {
     else deferred.resolve(data);
   });
   return deferred.promise;
-}
+};
 // внести запись
 function createRecord (query, table, values) {
   var deferred = Q.defer();
   var _v = _.values(values);
   var s = "";
-  _.each(_v, function (e, i) { 
-    i == (_.size(_v) - 1) ? s = s + e + "'": s = "'" + s + e + "'" + ',' + "'";
+  _.each(_v, function (e, i) {
+    if (_.isString(e)) 
+      s = s + "'" + e + "'";
+    else 
+      s = s + e;
+    (_.size(_v) - 1 == i) ? s : s = s + ","
   });
   var q = new sql.Request(connection);
   console.log(query.format([table, s]));
@@ -136,7 +140,7 @@ function createRecord (query, table, values) {
     else deferred.resolve(data);
   });
   return deferred.promise;
-}
+};
 // удалить запись
 function deleteRecord (query, table, id) {
   var deferred = Q.defer();
@@ -146,7 +150,25 @@ function deleteRecord (query, table, id) {
     else deferred.resolve(data);
   });
   return deferred.promise;
-}
+};
+// обновить
+function updateRecord (table, keys, values, id) {
+  var deferred = Q.defer();
+  var q = new sql.Request(connection);
+  var string_update = "";
+  _.each(keys, function (k, i) {
+    if (k != "id") {
+      string_update = string_update + k + "=" + (_.isString(values[i]) ? "'" + values[i] + "'" : values[i]);
+      (_.size(keys) - 1 == i) ? string_update : string_update = string_update + ","
+    };
+  });
+  console.log(queries.edit_record.format([table, string_update, id]));
+  q.query(queries.edit_record.format([table, string_update, id]), function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+};
 // конец хелперов
 
 // Установка движка для вьюшек и поддержка layout.ejs
@@ -160,12 +182,7 @@ app.get('/', function(req, res) {
 // Проверка - есть ли коннект к базе данных
 app.get('/config/db_connection', function(req, res){
   connection.connect(function(err){
-    try {
-      res.send(err.code);
-    }
-    catch (c) {
-      console.log("EIDONTKNOW");
-    }
+    res.send(err.code);
   });
 });
 
@@ -221,6 +238,16 @@ app.delete('/api/:table', function (req, res) {
     res.send(err);
   });
 });
+// обновить запись
+app.post('/api/:table/:id', function (req, res) {
+  var table = req.params.table;
+  var id = req.params.id;
+  updateRecord(table, _.keys(req.body), _.values(req.body), id).then(function (data) {
+    res.sendStatus(200);
+  }, function (err) {
+    res.send(err);
+  });
+})
 
 // получить последнюю информацию о пинге для всех хостов
 // app.get('/latest/ping/all', function(req, res){

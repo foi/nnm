@@ -43,8 +43,9 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Hosts', 'Groups', function ($s
   $scope.updateHost = function (host) {
     Hosts.save(host);
   };
-  $scope.addHost = function () {
-    $scope.hosts.push({id:3, name:'dd', ip_or_name:'dsdsd', group_id:1});
+  $scope.addHost = function (host) {
+    var h = new Hosts(host);
+    h.$save();
   }
 }]);
 
