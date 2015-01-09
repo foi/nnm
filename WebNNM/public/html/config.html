@@ -1,8 +1,199 @@
-
-    <div class="panel panel-default">
-    <div class="panel-heading">Конфигурация Web-сервиса</div>
-    <div class="panel-body">
-      {{ config }}
+<!-- Конфигурация веб-сервиса -->
+<div class="panel panel-default">
+<div class="panel-heading">Конфигурация Web-сервиса</div>
+<form name="webserviceconfigform" ng-init="getConfig()">
+<div class="panel-body">
+  <ul class="list-group">
+    <li class="list-group-item">
+    <div class="input-group">
+      <div class="input-group-addon">Имя пользователя:</div>
+      <input type="text" class="form-control" name="dbusername" id="dbusername" ng-model="webconfig.user" required>
     </div>
-  </div>
-
+    </li>
+    <li class="list-group-item">
+    <div class="input-group">
+      <div class="input-group-addon">Пароль:</div>
+      <input type="text" class="form-control" name="dbpassword" id="dbpassword" ng-model="webconfig.password" required>
+    </div>
+    </li>
+    <li class="list-group-item">
+    <div class="input-group">
+      <div class="input-group-addon">Драйвер:</div>
+      <input type="text" class="form-control" name="dbdriver" id="dbdriver" ng-model="webconfig.driver" required>
+    </div>
+    </li>
+    <li class="list-group-item">
+    <div class="input-group">
+      <div class="input-group-addon">Имя базы данных:</div>
+      <input type="text" class="form-control" name="dbname" id="dbname" ng-model="webconfig.database" required>
+    </div>
+    </li>
+    <li class="list-group-item">
+    <div class="input-group">
+      <div class="input-group-addon">Имя экземпляра базы:</div>
+      <input type="text" class="form-control" name="dbinstancename" id="dbinstancename" ng-model="webconfig.options.instanceName" required>
+    </div>
+    </li>
+    <li class="list-group-item">
+    <div class="input-group">
+      <div class="input-group-addon">Путь к конфигу ServiceNNM:</div>
+      <input type="text" class="form-control" name="servicennmpath" id="servicennmpath" ng-model="webconfig.path_to_servicennm_config" required>
+    </div>
+    </li>
+  </ul>
+  <button type="submit" class="btn btn-default" ng-click="saveWebConfig()" ng-disabled="webserviceconfigform.$invalid">Сохранить</button>
+</div>
+</form>
+</div>
+<!-- Конец конфигурации веб-сервиса -->
+<!-- конфигурация сервиса -->
+<div class="panel panel-default" ng-show="serviceconfig">
+  <div class="panel-heading">Конфигурация службы</div>
+  <form name="servicennmform">
+    <div class="panel-body">
+    <ul class="list-group">
+      <h4>База данных</h4>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Строка подключения к базе данных:</div>
+          <input type="text" class="form-control" name="serviceconnectionstring" id="serviceconnectionstring" ng-model="serviceconfig.connection_string" required>
+        </div>
+      </li>
+    </ul>
+    <ul class="list-group">
+      <h4>
+      SMTP (отправка уведомлений)
+        <label>
+          <input type="checkbox" ng-model="serviceconfig.smtp.notification"> Уведомлять?
+        </label>
+      </h4> 
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Сервер:</div>
+          <input type="text" class="form-control" name="smtpserver" id="smtpserver" ng-model="serviceconfig.smtp.server" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Порт:</div>
+          <input type="number" class="form-control" name="smtpport" id="smtpport" ng-model="serviceconfig.smtp.port" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="serviceconfig.Smtp.ssl"> SSL?
+          </label>
+          </div>
+        </div>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Email для отправки уведомлений:</div>
+          <input type="email" class="form-control" name="from" id="smtpfrom" ng-model="serviceconfig.smtp.from" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Пароль:</div>
+          <input type="text" class="form-control" name="password" id="smtppassword" ng-model="serviceconfig.smtp.password" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">После отправки сообщения отдыхать (мс):</div>
+          <input type="number" class="form-control" name="sleep_after_send_one_mail_message" id="sleep_after_send_one_mail_message" ng-model="serviceconfig.smtp.sleep_after_send_one_mail_message" required>
+        </div>
+      </li>
+    </ul>
+    <ul class="list-group">
+      <h4>
+        Таймауты (мс)
+      </h4> 
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Для проверки размера веб-страницы (мс):</div>
+          <input type="number" class="form-control" name="for_web_page_check" id="for_web_page_check" ng-model="serviceconfig.timeouts.for_web_page_check" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Для отправки сообщения (мс):</div>
+          <input type="number" class="form-control" name="for_smtp_mail_send" id="for_smtp_mail_send" ng-model="serviceconfig.timeouts.for_smtp_mail_send" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Для пинга (мс):</div>
+          <input type="number" class="form-control" name="for_ping" id="for_ping" ng-model="serviceconfig.timeouts.for_ping" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Для проверки доступности порта (мс):</div>
+          <input type="number" class="form-control" name="for_check_port" id="for_check_port" ng-model="serviceconfig.timeouts.for_check_port" required>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">Для получения информации с агента (мс):</div>
+          <input type="number" class="form-control" name="for_get_from_agent" id="for_get_from_agent" ng-model="serviceconfig.timeouts.for_get_from_agent" required>
+        </div>
+      </li>
+    </ul>
+    <ul class="list-group">
+      <h4>
+        Задержки при выполнении проверок (мс)
+        <label>
+          <input type="checkbox" ng-model="serviceconfig.sleep.when_operate"> ?
+        </label>
+      </h4>
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">От (мс):</div>
+          <input type="number" class="form-control" name="min_mseconds_sleep_when_operate" id="min_mseconds_sleep_when_operate" ng-model="serviceconfig.sleep.min_mseconds_sleep_when_operate" required>
+        </div>
+      </li> 
+      <li class="list-group-item">
+        <div class="input-group">
+          <div class="input-group-addon">До (мс):</div>
+          <input type="number" class="form-control" name="max_mseconds_sleep_when_operate" id="max_mseconds_sleep_when_operate" ng-model="serviceconfig.sleep.max_mseconds_sleep_when_operate" required>
+        </div>
+      </li> 
+    </ul>
+    <ul class="list-group">
+      <div class="input-group">
+        <div class="input-group-addon">После Х проверок (1 проверка в 60 секунд) высылать уведомление о недоступности:</div>
+        <input type="number" class="form-control" name="number_of_periods_after_to_send_notify" id="number_of_periods_after_to_send_notify" ng-model="serviceconfig.number_of_periods_after_to_send_notify" required>
+      </div>
+    </ul>
+    <ul class="list-group">
+      <div class="input-group">
+        <div class="input-group-addon">После Х проверок (1 проверка в 60 секунд) высылать уведомление о доступности:</div>
+        <input type="number" class="form-control" name="count_after_host_is_considered_as_alive" id="count_after_host_is_considered_as_alive" ng-model="serviceconfig.count_after_host_is_considered_as_alive" required>
+      </div>
+    </ul>
+    <ul class="list-group">
+      <h4>
+        Тщательная проверка (т.е. пинг и т.д. выполняется дважды)
+      </h4>
+      <div class="input-group">
+        <label>
+          <input type="checkbox" ng-model="serviceconfig.thoughtfulMode.ping"> Пинг?
+        </label>
+        <label>
+          <input type="checkbox" ng-model="serviceconfig.thoughtfulMode.port"> Проверка порта?
+        </label>
+        <label>
+          <input type="checkbox" ng-model="serviceconfig.thoughtfulMode.web"> Проверка веб-страницы?
+        </label>
+        <label>
+          <input type="checkbox" ng-model="serviceconfig.thoughtfulMode.agent"> Получение информации с агента?
+        </label>
+      </div>
+    </ul>
+    <button type="submit" class="btn btn-default" ng-click="saveServiceConfig()" ng-disabled="servicennmform.$invalid">Сохранить</button> <button type="submit" class="btn btn-default" ng-click="startStopService()" ng-disabled="servicennmform.$invalid">Остановить/Запустить службу</button>
+    </div>
+  </form>
+</div>
+<!-- конец концигурации сервиса -->

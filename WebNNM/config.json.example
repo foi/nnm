@@ -7,7 +7,5 @@
     "options": {
         "instanceName": "SQLEXPRESS"
     },
-    "chart" : {
-      "minutes": 60
-    }
+    "path_to_servicennm_config": "../ServiceNNM/config.json"
 }
