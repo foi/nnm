@@ -3,20 +3,20 @@
     class ExternalConfiguration
     {
         public string connection_string { get; set; }
-        public SmtpConfig Smtp { get; set; }
-        public Timeouts Timeouts { get; set; }
-        public Sleep Sleep { get; set; }
+        public SmtpConfig smtp { get; set; }
+        public Timeouts timeouts { get; set; }
+        public Sleep sleep { get; set; }
         public int number_of_periods_after_to_send_notify { get; set; }
         public int count_after_host_is_considered_as_alive { get; set; }
-        public Thoughtful ThoughtfulMode { get; set; }
+        public Thoughtful thoughtfulMode { get; set; }
     }
 
     class Thoughtful
     {
-        public bool Ping { get; set; }
-        public bool Port { get; set; }
-        public bool Web { get; set; }
-        public bool Agent { get; set; }
+        public bool ping { get; set; }
+        public bool port { get; set; }
+        public bool web { get; set; }
+        public bool agent { get; set; }
     }
 
     class SmtpConfig

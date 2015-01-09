@@ -38,3 +38,11 @@ G:\projects\miac_netmon\ServiceNNM\ServiceNNM\bin\Debug\Newtonsoft.Json.dll
 G:\projects\miac_netmon\ServiceNNM\ServiceNNM\bin\Debug\Newtonsoft.Json.xml
 G:\projects\miac_netmon\ServiceNNM\ServiceNNM\obj\Debug\net_mon_service.csprojResolveAssemblyReference.cache
 G:\projects\miac_netmon\ServiceNNM\ServiceNNM\obj\Debug\ServiceNNM.pdb
+G:\projects\nnm\ServiceNNM\ServiceNNM\bin\Debug\ServiceNNM.exe.config
+G:\projects\nnm\ServiceNNM\ServiceNNM\obj\Debug\ServiceNNM.exe
+G:\projects\nnm\ServiceNNM\ServiceNNM\bin\Debug\ServiceNNM.exe
+G:\projects\nnm\ServiceNNM\ServiceNNM\bin\Debug\ServiceNNM.pdb
+G:\projects\nnm\ServiceNNM\ServiceNNM\bin\Debug\Newtonsoft.Json.dll
+G:\projects\nnm\ServiceNNM\ServiceNNM\bin\Debug\Newtonsoft.Json.xml
+G:\projects\nnm\ServiceNNM\ServiceNNM\obj\Debug\net_mon_service.csprojResolveAssemblyReference.cache
+G:\projects\nnm\ServiceNNM\ServiceNNM\obj\Debug\ServiceNNM.pdb

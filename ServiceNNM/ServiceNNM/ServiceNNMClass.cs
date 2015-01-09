@@ -117,7 +117,7 @@ namespace NonameNetworkMonitor
                 }
                 _thread.Start();
                 Thread.Sleep(Interval * 1000 - 10000);
-                if (externalConfiguration.Smtp.notification)
+                if (externalConfiguration.smtp.notification)
                 {
                     // Стартуем поток со сбором об ошибках и запись их в лог несколько позже, потому что currentPeriodID может быть пуст
                     _notifyThread.Start();
@@ -146,7 +146,7 @@ namespace NonameNetworkMonitor
             }
             foreach (var sqlConnection in sqlConnections){ sqlConnection.Close(); }
             _thread.Abort();
-            if (externalConfiguration.Smtp.notification)
+            if (externalConfiguration.smtp.notification)
             {
                 _notifyThread.Abort();
                 _sendMailThread.Abort();
@@ -510,7 +510,7 @@ namespace NonameNetworkMonitor
                 {
                     Console.WriteLine(result);
                     SendMail(result);
-                    Thread.Sleep(externalConfiguration.Smtp.sleep_after_send_one_mail_message);
+                    Thread.Sleep(externalConfiguration.smtp.sleep_after_send_one_mail_message);
                 }
                 Thread.Sleep(5000);
             } while (true);
@@ -920,7 +920,7 @@ namespace NonameNetworkMonitor
         private static int CheckAvailibilityOfPort(string server, int port)
         {
             var _ = 1;
-            if (externalConfiguration.ThoughtfulMode.Port)
+            if (externalConfiguration.thoughtfulMode.port)
             {
                 var first = _checkPort(server, port);
                 if (first == 0) _ = _checkPort(server, port);
@@ -939,7 +939,7 @@ namespace NonameNetworkMonitor
                 var wh = ar.AsyncWaitHandle;
                 try
                 {
-                    if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(externalConfiguration.Timeouts.for_check_port), false))
+                    if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(externalConfiguration.timeouts.for_check_port), false))
                     {
                         tcp.Close();
                         return 0;
@@ -961,7 +961,7 @@ namespace NonameNetworkMonitor
         {
             long _ = 0;
             // внимательный пинг - т.е. два раза пингуется, а не один
-            if (externalConfiguration.ThoughtfulMode.Ping)
+            if (externalConfiguration.thoughtfulMode.ping)
             {
                 long first = _ping(host);
                 if (first != 0) _ = first;
@@ -984,7 +984,7 @@ namespace NonameNetworkMonitor
             try
             {
                 var p = new Ping();
-                PingReply pr = p.Send(host, externalConfiguration.Timeouts.for_ping);
+                PingReply pr = p.Send(host, externalConfiguration.timeouts.for_ping);
                 // если хост пинганулся, но время отклика меньше 1 мс
                 if (pr.Status == IPStatus.Success && pr.RoundtripTime < 1) return 1;
                 if (pr.Status == IPStatus.DestinationHostUnreachable || pr.Status == IPStatus.TimedOut) return 0;
@@ -1025,8 +1025,8 @@ namespace NonameNetworkMonitor
         {
             var finalResult = 0;
             var firstTry = requestAsync(route, true).Result;
-            Thread.Sleep(externalConfiguration.Timeouts.for_web_page_check);
-            if (externalConfiguration.ThoughtfulMode.Web)
+            Thread.Sleep(externalConfiguration.timeouts.for_web_page_check);
+            if (externalConfiguration.thoughtfulMode.web)
             {
                 finalResult = firstTry == 0 ? requestAsync(route, true).Result : firstTry;
             }
@@ -1041,8 +1041,8 @@ namespace NonameNetworkMonitor
             {
                 Timeout =
                     isSize
-                        ? TimeSpan.FromMilliseconds(externalConfiguration.Timeouts.for_web_page_check)
-                        : TimeSpan.FromMilliseconds(externalConfiguration.Timeouts.for_get_from_agent)
+                        ? TimeSpan.FromMilliseconds(externalConfiguration.timeouts.for_web_page_check)
+                        : TimeSpan.FromMilliseconds(externalConfiguration.timeouts.for_get_from_agent)
             };
             var getStringTask = client.GetStringAsync(url);
             var content = await getStringTask;
@@ -1081,7 +1081,7 @@ namespace NonameNetworkMonitor
                 {
                     var request = String.Format("http://{0}:{1}", agent.domainNameIp, agent.port);
                     var webReq = WebRequest.Create(request);
-                    webReq.Timeout = externalConfiguration.Timeouts.for_get_from_agent;
+                    webReq.Timeout = externalConfiguration.timeouts.for_get_from_agent;
                     var webResp = webReq.GetResponse();
                     var stream = webResp.GetResponseStream();
                     var reader = new StreamReader(stream, Encoding.UTF8);
@@ -1105,19 +1105,19 @@ namespace NonameNetworkMonitor
             var mail = new MailMessage();
             var client = new SmtpClient
             {
-                Host = externalConfiguration.Smtp.server,
-                Port = externalConfiguration.Smtp.port,
-                EnableSsl = externalConfiguration.Smtp.ssl,
-                Credentials = new NetworkCredential(externalConfiguration.Smtp.from.Split('@')[0], externalConfiguration.Smtp.password),
+                Host = externalConfiguration.smtp.server,
+                Port = externalConfiguration.smtp.port,
+                EnableSsl = externalConfiguration.smtp.ssl,
+                Credentials = new NetworkCredential(externalConfiguration.smtp.from.Split('@')[0], externalConfiguration.smtp.password),
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                Timeout = externalConfiguration.Timeouts.for_smtp_mail_send
+                Timeout = externalConfiguration.timeouts.for_smtp_mail_send
             };
             sweet_sleep();
             client.ServicePoint.MaxIdleTime = 1;
             client.ServicePoint.ConnectionLimit = 100;
             try
             {
-                mail.From = new MailAddress(externalConfiguration.Smtp.from);
+                mail.From = new MailAddress(externalConfiguration.smtp.from);
                 // Добавляем в список адресатов всех подписчиков
                 subscribers.ForEach(subscriber => mail.To.Add(new MailAddress(subscriber)));
                 mail.Subject = caption;
@@ -1134,9 +1134,9 @@ namespace NonameNetworkMonitor
         // сон во время операций - без этого иногда пинга нет от того, у кого 100% он должен быть, наверное что все единомоментно запускаются и не вывозит сет. соединение
         private static void sweet_sleep()
         {
-            if (externalConfiguration.Sleep.when_operate)
+            if (externalConfiguration.sleep.when_operate)
             {
-                var how_long_to_sleep = new Random().Next(externalConfiguration.Sleep.min_mseconds_sleep_when_operate, externalConfiguration.Sleep.max_mseconds_sleep_when_operate);
+                var how_long_to_sleep = new Random().Next(externalConfiguration.sleep.min_mseconds_sleep_when_operate, externalConfiguration.sleep.max_mseconds_sleep_when_operate);
                 Thread.Sleep(how_long_to_sleep);
             }
         } 

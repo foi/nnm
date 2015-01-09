@@ -10,6 +10,7 @@ namespace NonameNetworkMonitor
         static void Main(string[] args)
         {
             service.Start();
+            Console.ReadLine();
         }
     }
 }
