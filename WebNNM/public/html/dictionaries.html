@@ -1,8 +1,7 @@
-<div ng-controller="DictCtrl" ng-show="dbConnected">
+<div ng-show="dbConnected">
   <div class="panel panel-default">
     <div class="panel-body">
       <!-- Таблица с хостами -->
-      {{ hosts }}
       <div class="panel panel-default">
       <div class="panel-heading"><a  ng-click="show.hosts = !show.hosts">Хосты</a></div>
       <div class="panel-body" ng-show="show.hosts">
@@ -217,7 +216,7 @@
           <div class="form-group">
             <input type="email" class="form-control" ng-model='s.email' name="subscriberemail" id="subscriberemailinput" placeholder="адрес электронной почты" required>
           </div>
-          <button type="submit" class="btn btn-default" ng-click="addSubscriber(s)">Добавить</button>
+          <button type="submit" class="btn btn-default" ng-click="addSubscriber(s)" ng-disabled="addSubscriberForm.$invalid">Добавить</button>
         </form>
       </div>
       </div>

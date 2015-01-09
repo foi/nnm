@@ -76,6 +76,8 @@ connection.connect(function(err){
   err ? console.log(err) : console.log("db connection established");
 });
 
+var conf = {};
+
 // хелперы
 
 // Ни одно из значений не пусто
@@ -211,16 +213,12 @@ app.get('/config/servicennm', function (req, res) {
   });
 });
 
-app.get('/config/web', function (req, res) {
-  config.webnnm = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
-  console.log(config.webnnm.path_to_servicennm_config);
-  console.log(JSON.parse(fs.readFileSync(config.webnnm.path_to_servicennm_config, 'utf8')));
+app.get('/config/', function (req, res) {
+  conf.webnnm = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
+  if (fs.existsSync(conf.webnnm.path_to_servicennm_config)) conf.servicennm = JSON.parse(fs.readFileSync(conf.webnnm.path_to_servicennm_config, 'utf8'));
+  res.send(conf);
 });
 
-app.get('/config/service', function (req, res) {
-  config.servicennm = JSON.parse(fs.readFileSync(config.webnnm.path_to_servicennm_config, 'utf8'));
-  console.log(config);
-})
 // api для получения данных
 // получить все записи из таблицы
 app.get('/api/:table', function (req, res) {

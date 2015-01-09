@@ -44,6 +44,17 @@ nnm.factory('Subscriber', ['$resource', function ($resource) {
   return $resource('/api/subscribers/:id', {id: '@id'}, {}); 
 }]);
 
+nnm.service('ConfigService', ['$http' ,function ($http) {
+  this.get = function () {
+    $http.get('/config/').then(function (data) {
+      return data;
+    },
+    function (err) {
+      console.log(data);
+    })
+  } 
+}]);
+
 // Свежие новости
 nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
   // на сколько минут график
@@ -178,8 +189,14 @@ nnm.controller('DictCtrl', ['$scope', '$filter', '$http', 'Host', 'Group', 'Hp',
   };
 }]);
 
-nnm.controller('ConfigCtrl', ['$scope', function($scope){
-  
+nnm.controller('ConfigCtrl', ['$scope', '$http', function($scope, $http){
+  $http.get('/config/').then(function (data) {
+      $scope.config = data['data'];
+    },
+    function (err) {
+      console.log(err);
+    });
+  console.log($scope.config);
 }]);
 
 // Навигация
