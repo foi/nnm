@@ -25,7 +25,7 @@ nnm.factory('Hp', ['$resource', function ($resource) {
 }]);
 
 nnm.factory('Host', ['$resource', function ($resource) {
-  return $resource('/api/hosts/:id', {id: '@id'}, {}); 
+  return $resource('/api/hosts/:id', {id: '@id'}, { last: { url: '/extra/api/last/hosts', method: 'GET', isArray: false }}); 
 }]);
 
 nnm.factory('Group', ['$resource', function ($resource) {
@@ -57,13 +57,22 @@ nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
 }]);
 
 // Справочники
-nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service', 'TPHP', 'Subscriber', function ($scope, $filter, Host, Group, Hp, Service, TPHP, Subscriber) {
+nnm.controller('DictCtrl', ['$scope', '$filter', '$http', 'Host', 'Group', 'Hp', 'Service', 'TPHP', 'Subscriber', function ($scope, $filter, $http, Host, Group, Hp, Service, TPHP, Subscriber) {
   $scope.show = {
     hosts: true,
     groups: false,
     hp: false, 
     services: false,
     subscribers: false
+  };
+
+  var appendLast = function (table, scope) {
+    return $http.get('/extra/api/last/' + table).then(function (data) {
+        scope.push(data.data[0]);
+      }, function (err) {
+        console.log(err);
+      }
+    );
   };
 
   $scope.hosts = Host.query();
@@ -82,22 +91,22 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
   };
   $scope.addHost = function (host) {
     Host.save(host, function () {
-      $scope.hosts = Host.query();
+      appendLast('hosts', $scope.hosts);
     }, function (err) {
       console.log(err);
     });
   };
-  $scope.deleteHost = function (id) {
+  $scope.deleteHost = function (id, idx) {
     Host.delete({id: id}, function () {
-      $scope.hosts = Host.query();
+      $scope.hosts.splice(idx, 1);
     }, function (err) {
       console.log(err);
     });
   };
   // для групп
   $scope.addGroup = function (group) {
-    Group.save(group, function () {
-      $scope.groups = Group.query();
+    Group.save(group, function (data) {
+      appendLast('groups', $scope.groups);
     }, function (err) {
       console.log(err);
     });
@@ -105,9 +114,9 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
   $scope.updateGroup = function (group) {
     Group.save(group);
   };
-  $scope.deleteGroup = function (id) {
+  $scope.deleteGroup = function (id, idx) {
     Group.delete({id: id}, function () {
-      $scope.groups = Group.query();
+      $scope.groups.splice(idx, 1);
     }, function (err) {
       console.log(err);
     });
@@ -116,9 +125,9 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
   $scope.updateService = function (service) {
     Service.save(service);
   };
-  $scope.deleteService = function (id) {
+  $scope.deleteService = function (id, idx) {
     Service.delete({id: id}, function () {
-      $scope.hosts = Service.query();
+      $scope.services.splice(idx, 1);
     }, function (err) {
       console.log(err);
     });
@@ -137,14 +146,14 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
   };
   $scope.addHp = function (hp) {
     Hp.save(hp, function () {
-      $scope.hosts_and_ports = Hp.query();
+      appendLast('hosts_and_ports', $scope.hosts_and_ports);
     }, function (err) {
       console.log(err);
     });
   };
-  $scope.deleteHp = function (id) {
+  $scope.deleteHp = function (id, idx) {
     Hp.delete({id: id}, function () {
-      $scope.hosts_and_ports = Hp.query();
+      $scope.hosts_and_ports.splice(idx, 1);
     }, function (err) {
       console.log(err);
     });
@@ -160,9 +169,9 @@ nnm.controller('DictCtrl', ['$scope', '$filter', 'Host', 'Group', 'Hp', 'Service
       console.log(err);
     });
   };
-  $scope.deleteSubscriber = function (id) {
+  $scope.deleteSubscriber = function (id, idx) {
     Subscriber.delete({id: id}, function () {
-      $scope.subscribers = Subscriber.query();
+      $scope.subscribers.splice(idx, 1);
     }, function (err) {
       console.log(err);
     });

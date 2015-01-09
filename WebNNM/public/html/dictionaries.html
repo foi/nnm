@@ -2,6 +2,7 @@
   <div class="panel panel-default">
     <div class="panel-body">
       <!-- Таблица с хостами -->
+      {{ hosts }}
       <div class="panel panel-default">
       <div class="panel-heading"><a  ng-click="show.hosts = !show.hosts">Хосты</a></div>
       <div class="panel-body" ng-show="show.hosts">
@@ -29,7 +30,7 @@
             </a>
           </td>
           <td>
-            <button ng-click="deleteHost(host.id)" href="#" class="btn btn-primary">
+            <button ng-click="deleteHost(host.id, $index)" href="#" class="btn btn-primary">
               Удалить
             </button>
           </td>
@@ -69,7 +70,7 @@
             </a>
           </td>
           <td>
-            <button ng-click="deleteGroup(group.id)" href="#" class="btn btn-primary">
+            <button ng-click="deleteGroup(group.id, $index)" href="#" class="btn btn-primary">
               Удалить
             </button>
           </td>
@@ -127,7 +128,7 @@
             </a>
           </td>
           <td>
-            <button ng-click="deleteHp(hp.id)" href="#" class="btn btn-primary">
+            <button ng-click="deleteHp(hp.id, $index)" href="#" class="btn btn-primary">
               Удалить
             </button>
           </td>
@@ -179,7 +180,7 @@
             </a>
           </td>
           <td>
-            <button ng-click="deleteService(service.id)" href="#" class="btn btn-primary">
+            <button ng-click="deleteService(service.id, $index)" href="#" class="btn btn-primary">
               Удалить
             </button>
           </td>
@@ -204,7 +205,7 @@
             </a>
           </td>
           <td>
-            <button ng-click="deleteSubscriber(s.id)" href="#" class="btn btn-primary">
+            <button ng-click="deleteSubscriber(s.id, $index)" href="#" class="btn btn-primary">
               Удалить
             </button>
           </td>
