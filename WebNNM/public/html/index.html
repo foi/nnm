@@ -22,7 +22,7 @@
         <li ng-class="{active:isActive('/')}"><a href="/#/">HOT</a></li>
         <li ng-class="{active:isActive('/dictionaries')}"><a href="/#/dictionaries">Словари</a></li>
         <li ng-class="{active:isActive('/statistics')}"><a href="/#/statistics">Детальная статистика</a></li>
-        <li>
+        <li ng-class="{active:isActive('/config')}">
           <a href="/#/config" >
             <span ng-class="{worked: dbConnected === true, stopped: dbConnected === false}"></span>База данных
             <span ng-class="{worked: ServiceNNM === 'RUNNING', stopped: ServiceNNM === 'STOPPED', notexist: ServiceNNM === 'NOTEXIST'}"></span>Служба NNM
