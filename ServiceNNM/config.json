@@ -18,12 +18,12 @@
   },
   "sleep": {
     "when_operate": true,
-    "min_mseconds_sleep_when_operate": 1,
+    "min_mseconds_sleep_when_operate": 12,
     "max_mseconds_sleep_when_operate": 100
   },
   "number_of_periods_after_to_send_notify": 1,
   "count_after_host_is_considered_as_alive": 1,
-  "thoughtfulMode" : {
+  "thoughtfulMode": {
     "ping": true,
     "port": true,
     "web": true,

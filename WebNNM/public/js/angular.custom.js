@@ -203,10 +203,6 @@ nnm.controller('DictCtrl', ['$scope', '$filter', '$http', 'Host', 'Group', 'Hp',
 nnm.controller('ConfigCtrl', ['$scope', '$http', '$rootScope', '$route', '$timeout', function($scope, $http, $rootScope, $route, $timeout){
   var isRunning = $rootScope.ServiceNNM == "RUNNING" ? true : false;
 
-  function reload () {
-    $route.reload();
-  }
-
   $scope.getConfig = function () {
     $http.get('/config/').then(function (data) {
     $scope.webconfig = data['data']['webnnm'];
@@ -216,19 +212,30 @@ nnm.controller('ConfigCtrl', ['$scope', '$http', '$rootScope', '$route', '$timeo
       console.log(err);
     });
   };
+
   $scope.startStopService = function () {
     if (isRunning) {
       $http.get('/config/servicennm/stop').success(function () {
         $rootScope.ServiceNNM = "STOPPED";
-        $timeout(reload, 3000);
+        $timeout($route.reload(), 3000);
       });
     }
     else {
       $http.get('/config/servicennm/start').success(function (data) {
         $rootScope.ServiceNNM = "RUNNING";
-        $timeout(reload, 3000);
+        $timeout($route.reload(), 3000);
       });
     };
+  };
+
+  $scope.saveConfig = function (configname) {
+    $http.post('/config/save/' + configname, (configname == 'webnnm' ? $scope.webconfig : $scope.serviceconfig)).then(
+      function (data) {
+        console.log(data);
+      },
+      function (err) {
+        console.log(err);
+    });
   };
 }]);
 

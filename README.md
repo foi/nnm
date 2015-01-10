@@ -105,6 +105,8 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 
 ![Статистика](http://i.imgur.com/hZWXABA.jpg)
 
+*Для того, чтобы WebNNM могла останавливать/запускать службу, ее необходимо запускать от имени администратора*
+
 ## Файлы конфигурации
 ### ServiceNNM
 

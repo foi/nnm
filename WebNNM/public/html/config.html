@@ -41,7 +41,7 @@
     </div>
     </li>
   </ul>
-  <button type="submit" class="btn btn-success" ng-click="saveWebConfig()" ng-disabled="webserviceconfigform.$invalid">Сохранить</button>
+  <button type="submit" class="btn btn-success" ng-click="saveConfig('webnnm')" ng-disabled="webserviceconfigform.$invalid">Сохранить</button>
 </div>
 </form>
 </div>
@@ -83,7 +83,7 @@
         <div class="input-group">
           <div class="checkbox">
           <label>
-            <input type="checkbox" ng-model="serviceconfig.Smtp.ssl"> SSL?
+            <input type="checkbox" ng-model="serviceconfig.smtp.ssl"> SSL?
           </label>
           </div>
         </div>
@@ -192,7 +192,7 @@
         </label>
       </div>
     </ul>
-    <button type="submit" class="btn btn-success" ng-click="saveServiceConfig()" ng-disabled="servicennmform.$invalid">Сохранить</button> <button type="submit" class="btn btn-warning" ng-click="startStopService()" ng-disabled="servicennmform.$invalid">Остановить/Запустить службу</button>
+    <button type="submit" class="btn btn-success" ng-click="saveConfig('servicennm')" ng-disabled="servicennmform.$invalid">Сохранить</button> <button type="submit" class="btn btn-warning" ng-click="startStopService()" ng-disabled="servicennmform.$invalid">Остановить/Запустить службу</button>
     </div>
   </form>
 </div>

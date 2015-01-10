@@ -215,6 +215,29 @@ app.get('/config/servicennm', function (req, res) {
       res.send("NOTEXIST");
   });
 });
+
+//Сохранить изменения в конфигурации
+app.post('/config/save/:configname', function (req, res) {
+  var configname = req.params.configname;
+  var json_config = JSON.stringify(req.body, null, 2);
+  if (configname == 'webnnm') {
+    fs.writeFile('./config.json', json_config, function (err) {
+      if (err)
+        res.send(err);
+      else
+        res.send('OK');
+    });
+  }
+  else {
+    fs.writeFile(conf.webnnm['path_to_servicennm_config'], json_config, function (err) {
+      if (err)
+        res.send(err);
+      else
+        res.send('OK');
+    });
+  }
+});
+
 // остановить/запустить службу
 app.get('/config/servicennm/:whattodo', function (req, res) {
   var whattodo = req.params.whattodo; 
@@ -230,7 +253,7 @@ app.get('/config/servicennm/:whattodo', function (req, res) {
 
 app.get('/config/', function (req, res) {
   conf.webnnm = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
-  if (fs.existsSync(conf.webnnm.path_to_servicennm_config)) conf.servicennm = JSON.parse(fs.readFileSync(conf.webnnm.path_to_servicennm_config, 'utf8'));
+  if (fs.existsSync(conf.webnnm['path_to_servicennm_config'])) conf.servicennm = JSON.parse(fs.readFileSync(conf.webnnm['path_to_servicennm_config'], 'utf8'));
   res.send(conf);
 });
 
