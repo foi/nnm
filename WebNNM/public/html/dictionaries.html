@@ -37,7 +37,7 @@
       </table>
       <div class="panel panel-info">
         <div class="panel-heading">Добавить новый хост</div>
-        <form class="form-inline" name="addHostForm">
+        <form class="form-inline" name="addHostForm" novalidate>
           <div class="form-group">
             <input type="text" class="form-control" ng-model='host.name' name="hostname" id="hostnameinput" placeholder="название хоста" required>
           </div>
@@ -77,7 +77,7 @@
       </table>
       <div class="panel panel-info">
         <div class="panel-heading">Добавить новую группу</div>
-        <form class="form-inline" name="addGroupForm">
+        <form class="form-inline" name="addGroupForm" novalidate>
           <div class="form-group">
             <input type="text" class="form-control" ng-model='group.name' name="groupname" id="groupnameinput" placeholder="наименование группы" required>
           </div>
@@ -135,7 +135,7 @@
       </table>
       <div class="panel panel-info">
         <div class="panel-heading">Добавить новый хост и порт</div>
-        <form class="form-inline" name="addHpFrom">
+        <form class="form-inline" name="addHpFrom" novalidate>
           <div class="form-group">
             <input type="text" class="form-control" ng-model='hp.name' name="hpname" id="hpnameinput" placeholder="наименование хоста и порта" required>
           </div>
@@ -212,7 +212,7 @@
       </table>
       <div class="panel panel-info">
         <div class="panel-heading">Добавить подписчика</div>
-        <form class="form-inline" name="addSubscriberForm">
+        <form class="form-inline" name="addSubscriberForm" novalidate>
           <div class="form-group">
             <input type="email" class="form-control" ng-model='s.email' name="subscriberemail" id="subscriberemailinput" placeholder="адрес электронной почты" required>
           </div>

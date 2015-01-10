@@ -1,7 +1,7 @@
 <!-- Конфигурация веб-сервиса -->
 <div class="panel panel-default">
 <div class="panel-heading">Конфигурация Web-сервиса</div>
-<form name="webserviceconfigform" ng-init="getConfig()">
+<form name="webserviceconfigform" ng-init="getConfig()" novalidate>
 <div class="panel-body">
   <ul class="list-group">
     <li class="list-group-item">
@@ -41,7 +41,7 @@
     </div>
     </li>
   </ul>
-  <button type="submit" class="btn btn-default" ng-click="saveWebConfig()" ng-disabled="webserviceconfigform.$invalid">Сохранить</button>
+  <button type="submit" class="btn btn-success" ng-click="saveWebConfig()" ng-disabled="webserviceconfigform.$invalid">Сохранить</button>
 </div>
 </form>
 </div>
@@ -49,10 +49,10 @@
 <!-- конфигурация сервиса -->
 <div class="panel panel-default" ng-show="serviceconfig">
   <div class="panel-heading">Конфигурация службы</div>
-  <form name="servicennmform">
+  <form name="servicennmform" novalidate>
     <div class="panel-body">
     <ul class="list-group">
-      <h4>База данных</h4>
+      <h5>База данных</h5>
       <li class="list-group-item">
         <div class="input-group">
           <div class="input-group-addon">Строка подключения к базе данных:</div>
@@ -61,12 +61,12 @@
       </li>
     </ul>
     <ul class="list-group">
-      <h4>
+      <h5>
       SMTP (отправка уведомлений)
         <label>
           <input type="checkbox" ng-model="serviceconfig.smtp.notification"> Уведомлять?
         </label>
-      </h4> 
+      </h5> 
       <li class="list-group-item">
         <div class="input-group">
           <div class="input-group-addon">Сервер:</div>
@@ -107,9 +107,9 @@
       </li>
     </ul>
     <ul class="list-group">
-      <h4>
+      <h5>
         Таймауты (мс)
-      </h4> 
+      </h5> 
       <li class="list-group-item">
         <div class="input-group">
           <div class="input-group-addon">Для проверки размера веб-страницы (мс):</div>
@@ -142,12 +142,12 @@
       </li>
     </ul>
     <ul class="list-group">
-      <h4>
+      <h5>
         Задержки при выполнении проверок (мс)
         <label>
           <input type="checkbox" ng-model="serviceconfig.sleep.when_operate"> ?
         </label>
-      </h4>
+      </h5>
       <li class="list-group-item">
         <div class="input-group">
           <div class="input-group-addon">От (мс):</div>
@@ -174,9 +174,9 @@
       </div>
     </ul>
     <ul class="list-group">
-      <h4>
+      <h5>
         Тщательная проверка (т.е. пинг и т.д. выполняется дважды)
-      </h4>
+      </h5>
       <div class="input-group">
         <label>
           <input type="checkbox" ng-model="serviceconfig.thoughtfulMode.ping"> Пинг?
@@ -192,7 +192,7 @@
         </label>
       </div>
     </ul>
-    <button type="submit" class="btn btn-default" ng-click="saveServiceConfig()" ng-disabled="servicennmform.$invalid">Сохранить</button> <button type="submit" class="btn btn-default" ng-click="startStopService()" ng-disabled="servicennmform.$invalid">Остановить/Запустить службу</button>
+    <button type="submit" class="btn btn-success" ng-click="saveServiceConfig()" ng-disabled="servicennmform.$invalid">Сохранить</button> <button type="submit" class="btn btn-warning" ng-click="startStopService()" ng-disabled="servicennmform.$invalid">Остановить/Запустить службу</button>
     </div>
   </form>
 </div>

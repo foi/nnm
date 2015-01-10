@@ -6,6 +6,17 @@ nnm.run(function(editableOptions, editableThemes) {
   editableOptions.theme = 'bs3';
 });
 
+// фикс для ie
+// http://stackoverflow.com/questions/16098430/angular-ie-caching-issue-for-http
+nnm.config(['$httpProvider', function($httpProvider) {
+    //initialize get if not there
+    if (!$httpProvider.defaults.headers.get) {
+        $httpProvider.defaults.headers.get = {};    
+    }
+    //disable IE ajax request caching
+    $httpProvider.defaults.headers.get['If-Modified-Since'] = '0';
+}]);
+
 nnm.config( function ($routeProvider) {
   $routeProvider.when('/', {
     templateUrl: 'public/html/hot.html',
@@ -188,8 +199,14 @@ nnm.controller('DictCtrl', ['$scope', '$filter', '$http', 'Host', 'Group', 'Hp',
     });
   };
 }]);
+// контроллер отвечающий за конфигурацию
+nnm.controller('ConfigCtrl', ['$scope', '$http', '$rootScope', '$route', '$timeout', function($scope, $http, $rootScope, $route, $timeout){
+  var isRunning = $rootScope.ServiceNNM == "RUNNING" ? true : false;
 
-nnm.controller('ConfigCtrl', ['$scope', '$http', function($scope, $http){
+  function reload () {
+    $route.reload();
+  }
+
   $scope.getConfig = function () {
     $http.get('/config/').then(function (data) {
     $scope.webconfig = data['data']['webnnm'];
@@ -199,19 +216,30 @@ nnm.controller('ConfigCtrl', ['$scope', '$http', function($scope, $http){
       console.log(err);
     });
   };
-
-  
-  console.log($scope.config);
+  $scope.startStopService = function () {
+    if (isRunning) {
+      $http.get('/config/servicennm/stop').success(function () {
+        $rootScope.ServiceNNM = "STOPPED";
+        $timeout(reload, 3000);
+      });
+    }
+    else {
+      $http.get('/config/servicennm/start').success(function (data) {
+        $rootScope.ServiceNNM = "RUNNING";
+        $timeout(reload, 3000);
+      });
+    };
+  };
 }]);
 
 // Навигация
 nnm.controller('NavCtrl', ['$rootScope','$scope', '$http', '$location', function ($rootScope, $scope, $http, $location) {
   $http.get('/config/db_connection').
   success(function (data) {
-    data == "EALREADYCONNECTED" ? $rootScope.dbConnected = true : $rootScope.dbConnected = false;
+    data == "OK" ? $rootScope.dbConnected = true : $rootScope.dbConnected = false;
   }).
-  error(function () {
-    $rootScope.dbStatus = "Ошибка"
+  error(function (err) {
+    console.log(err);
   });
   $http.get('/config/servicennm').
   success(function (data) {

@@ -66,7 +66,8 @@ var queries = {
   insert_record: "INSERT INTO %0 (%1) VALUES (%2)",
   delete_record: "DELETE FROM %0 WHERE id=%1",
   edit_record: "UPDATE %0 SET %1 WHERE id=%2",
-  get_last_record: "SELECT TOP 1 * FROM %0 ORDER BY ID DESC"
+  get_last_record: "SELECT TOP 1 * FROM %0 ORDER BY ID DESC",
+  check_db_connection: "SELECT TOP 1 * FROM groups"
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -77,6 +78,7 @@ connection.connect(function(err){
 });
 
 var conf = {};
+var size_of_errors = { start: 0, stop: 0, already: 0 };
 
 // хелперы
 
@@ -196,21 +198,34 @@ app.get('/', function(req, res) {
 });
 // Проверка - есть ли коннект к базе данных
 app.get('/config/db_connection', function(req, res){
-  connection.connect(function(err){
-    res.send(err.code);
+  var q = new sql.Request(connection);
+  q.query(queries.check_db_connection, function (err, data) {
+    _.isUndefined(err) ? res.send("OK") : res.send("DIED");
   });
 });
 
 // Проверка, работает ли служба ServiceNNM
 app.get('/config/servicennm', function (req, res) {
-  exec('sc query "ALG1"', function (error, stdout, stderr) {
-    var w = stdout.indexOf("RUNNING");
-    if (w == -1) {
-      stdout.indexOf("STOPPED") == -1 ? res.send("STOPPED") : res.send("NOTEXIST");
-    } else {
+  exec('sc query "pinger"', function (error, stdout, stderr) {
+    if (stdout.indexOf("RUNNING") != -1)
       res.send("RUNNING");
-    }
+    else if (stdout.indexOf("STOPPED") != -1)
+      res.send("STOPPED");
+    else
+      res.send("NOTEXIST");
   });
+});
+// остановить/запустить службу
+app.get('/config/servicennm/:whattodo', function (req, res) {
+  var whattodo = req.params.whattodo; 
+  if (whattodo == "stop" || whattodo == "start") {
+    exec('net ' + whattodo + ' "pinger"', function (error, stdout, stderr) {
+      _.size(stdout) > 0 ? res.send("OK") : res.send("ERROR");
+    });
+  } 
+  else {
+    res.send("ERROR");
+  }
 });
 
 app.get('/config/', function (req, res) {
