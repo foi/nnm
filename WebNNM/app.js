@@ -339,14 +339,13 @@ app.get('/extra/api/last/:table', function (req, res) {
   })
 });
 // получить статистику пинга, список id хостов передается как 1&2&3
-app.get('/extra/api/ping/:hosts', function (req, res) {
+app.post('/extra/api/ping/:hosts', function (req, res) {
   var hosts = [];
   _.each(req.params.hosts.split('&'), function (e) {
     hosts.push(parseInt(e));
   });
   var hosts_int = hosts;
   hosts = hosts.join();
-
   var start_date = req.body.from;
   var end_date = req.body.till;
   var response = {};
@@ -375,9 +374,36 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
         });
         // отсортируем по period_id
         ping_data = _.sortBy(ping_data, "period_id");
+        // заменить 0 на null, чтобы были разрывы в графике
+        _.each(ping_data, function(p){
+          if (p.latency == 0) { p.latency = null };
+        });
+        var by_host_id = _.groupBy(ping_data, 'host_id');
+        var fin = {};
+        _.each(by_host_id, function (v, k) {
+          //console.log(k);
+          //console.log(v);
+            fin[k] = [];
+          _.each(v, function (val) {
+            console.log(val);
+            fin[k].push(val['latency']);
+          });
+          
+        });
+        var f = [];
+        _.each(fin, function (val, key) {
+
+          _.each(val, function (elm) {
+            
+          })
+          
+        });
+        
         // заменим period_id часами и минутами
-        setPeriodForPeriodId(ping_data, "%H:%M", periods);
-        res.send(ping_data);
+        //setPeriodForPeriodId(ping_data, "%H:%M", periods);
+
+        res.send(fin);
+        //res.send(ping_data);
       })
     }, 
     function (err) {
@@ -551,14 +577,6 @@ app.post("/ping/:host_id", function(req, res){
     console.log(start_date);
   };
 });
-// получить хтмл для индивидуальной статистики
-app.get("/individual", function(req, res){
-  res.render("individual/index.ejs", { layout: false });
-});
-// получить html для последней статистики
-app.get("/statistics", function(req, res){
-  res.render("statistics/index.ejs", { layout: false });
-});
 // получаем последнюю статистику за последние 30 минут для определенного агента 
 app.get("/agents/stat/latest/:id", function(req, res){
   var agent_id = req.params.id;
@@ -618,103 +636,6 @@ app.get("/agents/stat/latest/:id", function(req, res){
       });
     }); 
   });
-});
-// Единый маршрут для добавления в разные таблицы
-app.post('/new/:record_in_table', function(req, res) {
-  var table = req.params.record_in_table;
-  // Если добавляется группа
-  if (table == 'group') {
-    if (req.body.group_name != '') {
-      var transaction = connection.transaction();
-      transaction.begin(function() {
-        var insertGroupInTable = transaction.request();
-        insertGroupInTable.query(queries.add_new_group.format([req.body.group_name]), function() {
-          transaction.commit();
-        });
-      });
-      res.sendStatus(200);
-    }
-  }
-  // Если хост
-  else if (table == 'host') {
-    var r = req.body;
-    if (allFilled([r.host_name, r.host_ip, r.host_group])) {
-      var transaction = connection.transaction();
-      transaction.begin(function(error) {
-        var insertHost = transaction.request();
-        insertHost.query(queries.add_host.format([r.host_name, r.host_ip, r.host_group]), function() {
-          transaction.commit();
-        });
-      });
-      res.sendStatus(200);
-    }
-  }
-  // Если хост с портом
-  else if (table == 'host_and_port') {
-    r = req.body;
-    if (allFilled([r.host_and_port_name, r.host_and_port_id, r.host_and_port_port, r.host_and_port_type])) {
-      var transaction = connection.transaction();
-      transaction.begin(function() {
-        var insertHostAndPort = transaction.request();
-        insertHostAndPort.query(
-          queries.add_new_host_with_port.format([r.host_and_port_id, r.host_and_port_port, r.host_and_port_name, r.host_and_port_type, r.host_and_port_route]),
-          function(err) {
-            transaction.commit();
-          })
-      })
-      res.sendStatus(200);
-    }
-  }
-  // Если тип хоста с портом
-  else if (table == 'type_of_host_and_port') {
-    var type = req.body.type_name;
-    var transaction = connection.transaction();
-    transaction.begin(function() {
-      var insertType = transaction.request();
-      insertType.query(queries.add_new_type_of_host_and_port.format([type]), function(err) {
-        console.log(err);
-        transaction.commit();
-      });
-    })
-    res.sendStatus(200);
-  }
-  // Если подписчик
-  else if (table == 'subscriber') {
-    var email = req.body.subscriber_email;
-    var transaction = connection.transaction();
-    transaction.begin(function(){
-      var insertSubscriber = transaction.request();
-      insertSubscriber.query(queries.add_subscriber.format([email]), function(){
-        transaction.commit();
-      });
-    });
-    res.sendStatus(200);
-  };
-  //
-});
-// Единый маршрут для редактирования 
-app.post('/edit/:table_name', function(req, res){
-  var table = req.params.table_name;
-  var field = req.body.name;
-  var q = new sql.Request(connection);
-  var value = req.body.value;
-  var id = req.body.pk;
-  if (_.contains(["name", "ip_or_name"], field)) {
-    q.query(queries.update_table_field_string_value_with_id.format([table, field, value, id]), function(err){
-      res.sendStatus(200);
-    });
-  }
-  else {
-    q.query(queries.update_table_field_int_value_with_id.format([table, field, value, id]), function(err){
-      res.sendStatus(200);
-    });
-  };
-});
-
-// для удаления
-app.post('/delete/:table_name', function(req, res) {
-  var q = new sql.Request(connection);
-  q.query(queries.delete_from_table_with_this_id.format([req.params.table_name, req.body.id]), function(err){ res.sendStatus(200); })
 });
 
 app.listen(process.env.PORT || 80);

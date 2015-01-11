@@ -65,23 +65,9 @@ nnm.factory('Subscriber', ['$resource', function ($resource) {
 //     })
 //   } 
 // }]);
-// Директива для создания линейного графика
-nnm.directive('LineChart', [function () {
-  return {
-    restrict: 'A',
-    template: '<div id="linechart"></div>',
-    scope: {
-      data: '=',
-      ykey: '=',
-      xkey: '='
-    }
-    link: function (scope, iElement, iAttrs) {
-      
-    }
-  };
-}]) 
+ 
 // Свежие новости
-nnm.controller('HotCtrl', ['$scope', '$http', 'Host', function ($scope, $http, Host) {
+nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($scope, $http, $rootScope, Host) {
   // на какое время график
   $http.get('/public/public_config.json').
   success(function (data) {
@@ -90,14 +76,47 @@ nnm.controller('HotCtrl', ['$scope', '$http', 'Host', function ($scope, $http, H
   error(function () {
     $scope.minutes = "ERROR";
   });
+
+  // заполнить глобальный конфиг
+  $rootScope.morris = { 
+    line_chart: {
+      parseTime: false,
+      continuousLine: false,
+      hideHover: 'always',
+      pointSize: "0px",
+      ymax: 'auto',
+      xkey: "range",
+      gridIntegers: true,
+      data: [],
+      labels: ['fgfgfg'],
+      ykeys: []
+    }
+  };
   // получим имена хостов для labels на графике
-  $scope.hot = { hostnames: []};
-  Host.query(function (data) {
-    angular.forEach(data, function (e) {
-      $scope.hot.hostnames.push(e.name);
+  $scope.hot = { hostnames: [], ids: [] };
+  $scope.ping_data =  $rootScope.morris.line_chart;
+
+  $scope.lineChartLatestPing = function () {
+    $http.get('/api/hosts').success(function (data) {
+      angular.forEach(data, function (e) {
+        $scope.hot.ids.push(e.id);
+        //$scope.ping_data.labels.push(e.name);
+      });
+      //$http.post('/extra/api/ping/' + $scope.hot.ids.join('&')).success(function (data) {
+        //$scope.ping_data.data = data;
+        $scope.ping_data.data = [
+    { range: 'January', total_tasks: 20, total_overdue: 5 },
+    { range: 'January', total_tasks: 35, total_overdue: 8 },
+    { range: 'January', total_tasks: 20, total_overdue: 1 },
+    { range: 'January', total_tasks: 20, total_overdue: 6 }
+  ];
+        //$scope.ping_data.ykeys = ['latency'];
+      //});
+    }).error(function (err) {
+      console.log(err);
     });
-  });
-  
+  };
+
 }]);
 
 // Справочники
@@ -277,5 +296,27 @@ nnm.controller('NavCtrl', ['$rootScope','$scope', '$http', '$location', function
   // активна ли вкладка
   $scope.isActive = function (route) {
     return route === $location.path();
+  };
+}]);
+
+// Директива для создания линейного графика
+nnm.directive('linechart', [function () {
+  return {
+    restrict: 'E',
+    template: '<div></div>',
+    replace: true,
+    link: function ($scope, element, attrs) {
+       var data = $scope[attrs.data],
+                xkey = $scope[attrs.xkey],
+                ykeys= $scope[attrs.ykeys],
+                labels= $scope[attrs.labels];
+                Morris.Line({
+                    element: element,
+                    data: data,
+                    xkey: xkey,
+                    ykeys: ykeys,
+                    labels: labels
+                });
+    }
   };
 }]);
