@@ -67,7 +67,8 @@ var queries = {
   delete_record: "DELETE FROM %0 WHERE id=%1",
   edit_record: "UPDATE %0 SET %1 WHERE id=%2",
   get_last_record: "SELECT TOP 1 * FROM %0 ORDER BY ID DESC",
-  check_db_connection: "SELECT TOP 1 * FROM groups"
+  check_db_connection: "SELECT TOP 1 * FROM groups",
+  get_ping_stats_from_till_period_for_hosts: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1 AND host_id IN (%2)",
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -180,6 +181,28 @@ function getLast (query, table) {
   var deferred = Q.defer();
   var q = new sql.Request(connection);
   q.query(query.format([table]), function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+};
+
+// получить список периодов за последние Х минут
+function getPeriodsForN (minutes) {
+  var deferred = Q.defer();
+  var q = new sql.Request(connection);
+  q.query((queries.select_latest_n_periods.format([minutes])), function (err, data) {
+    if (err) deferred.reject(err)
+    else deferred.resolve(data);
+  });
+  return deferred.promise;
+};
+// получить информацию о пинге с периода по период для хостов
+function getPingData (from, to, hosts) {
+  var deferred = Q.defer();
+  var q = new sql.Request(connection);
+  console.log((queries.get_ping_stats_from_till_period_for_hosts.format([from, to, hosts])));
+  q.query((queries.get_ping_stats_from_till_period_for_hosts.format([from, to, hosts])), function (err, data) {
     if (err) deferred.reject(err)
     else deferred.resolve(data);
   });
@@ -315,6 +338,57 @@ app.get('/extra/api/last/:table', function (req, res) {
     res.send(err);
   })
 });
+// получить статистику пинга, список id хостов передается как 1&2&3
+app.get('/extra/api/ping/:hosts', function (req, res) {
+  var hosts = [];
+  _.each(req.params.hosts.split('&'), function (e) {
+    hosts.push(parseInt(e));
+  });
+  var hosts_int = hosts;
+  hosts = hosts.join();
+
+  var start_date = req.body.from;
+  var end_date = req.body.till;
+  var response = {};
+  var periods_ids = [];
+  // Если стартовая и последующие даты не указаны
+  if (_.isUndefined(start_date) && _.isUndefined(end_date)) {
+    getPeriodsForN(public_config.chart.minutes - 1).
+    then(function (_p) {
+      var periods = _p; 
+      periods_ids = _.pluck(_p, "id");
+      getPingData(_.first(periods_ids), _.last(periods_ids), hosts).
+      then(function (_p_d) {
+        var ping_data = _p_d;
+        var missed_periods = {};
+        // найдем недостающие периоды
+        _.each(hosts_int, function (host) {
+          var m = _.where(ping_data, {host_id: host});
+          if (_.size(m) != 0)
+            missed_periods[host] = _.difference(periods_ids, _.pluck(m, "period_id"));
+        });
+        // теперь необходимо заполнить добавить недостающие периоды  и null
+        _.each(missed_periods, function (missed, host_id) {
+          _.each(missed, function (m) {
+            ping_data.push({host_id: host_id, latency: null, period_id: m});
+          });
+        });
+        // отсортируем по period_id
+        ping_data = _.sortBy(ping_data, "period_id");
+        // заменим period_id часами и минутами
+        setPeriodForPeriodId(ping_data, "%H:%M", periods);
+        res.send(ping_data);
+      })
+    }, 
+    function (err) {
+      console.log(err);
+    });
+  }
+  else {
+
+  }
+});
+
 
 // получить последнюю информацию о пинге для всех хостов
 // app.get('/latest/ping/all', function(req, res){

@@ -65,10 +65,24 @@ nnm.factory('Subscriber', ['$resource', function ($resource) {
 //     })
 //   } 
 // }]);
-
+// Директива для создания линейного графика
+nnm.directive('LineChart', [function () {
+  return {
+    restrict: 'A',
+    template: '<div id="linechart"></div>',
+    scope: {
+      data: '=',
+      ykey: '=',
+      xkey: '='
+    }
+    link: function (scope, iElement, iAttrs) {
+      
+    }
+  };
+}]) 
 // Свежие новости
-nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
-  // на сколько минут график
+nnm.controller('HotCtrl', ['$scope', '$http', 'Host', function ($scope, $http, Host) {
+  // на какое время график
   $http.get('/public/public_config.json').
   success(function (data) {
     $scope.minutes = data.chart.minutes;
@@ -76,6 +90,14 @@ nnm.controller('HotCtrl', ['$scope', '$http', function ($scope, $http) {
   error(function () {
     $scope.minutes = "ERROR";
   });
+  // получим имена хостов для labels на графике
+  $scope.hot = { hostnames: []};
+  Host.query(function (data) {
+    angular.forEach(data, function (e) {
+      $scope.hot.hostnames.push(e.name);
+    });
+  });
+  
 }]);
 
 // Справочники

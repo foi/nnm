@@ -54,4 +54,12 @@ namespace NonameNetworkMonitor
         public string name { get; set; }
         public string readable_name { get; set; }
     }
+    // класс для размера веб-страниц
+    class WebPageSizeJournalT
+    {
+        public int id { get; set; }
+        public int host_and_port_id { get; set; }
+        public int size { get; set; }
+        public int period_id { get; set; }
+    }
 }

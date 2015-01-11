@@ -8,7 +8,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
@@ -33,6 +32,10 @@ namespace NonameNetworkMonitor
         private static List<int> resurrectPorts = new List<int>(); 
         // Подписчики
         private static List<string> subscribers = new List<string>();
+        // для веб-страниц эталон, куда в случае изменения будут записываться изменения, а так же и в базу данных.
+        private static List<WebPageSizeJournalT> journalWebPages = new List<WebPageSizeJournalT>();  
+        // добавился/добавились ли новые объекты проверки для веб-страниц
+        private static bool hasNewWebPages = true;
         // строка подключения к БД
         private static string connectionString; 
         private readonly Thread _thread = new Thread(Gather) { IsBackground = true };
@@ -221,8 +224,10 @@ namespace NonameNetworkMonitor
             insertCheckOfPortIntoJournal.CommandText = removeLastComma(qCheckPortsString);
             // запись данных в журнал о проверке веб-страниц
             //!! Добавить - если с прошлого раза размер не изменился то записи и вовсе не создается. - хуй забил
+            //WebPageSizeAudit(qWebPageCheckString);
             hostsForWebCheck.ForEach(hostAndPort => qWebPageCheckString += String.Format("({0},{1},{2}),", hostAndPort.id, hostAndPort.size, currentPeriodId));
             insertWebPageSizeIntoJournal.CommandText = removeLastComma(qWebPageCheckString);
+            
             // формат строки для агентов
             agentDatas.ForEach(agentData => qInsertCpuMemLoadString += String.Format("({0},{1},{2},{3}),", agentData.CpuLoad, agentData.Ram.UsedRam, agentData.host_and_port_agent_id, currentPeriodId));
             insertAgentCpuMemData.CommandText = removeLastComma(qInsertCpuMemLoadString);
@@ -239,6 +244,49 @@ namespace NonameNetworkMonitor
             }
             // Запись в журнал статистику с интерфейсов
             BatchExecuteNonQuery(collectionInsertQueries);
+        }
+        // читаем информацию о размере веб-страниц, в случае если добавились новые проверки, тогда вставляем значения в базу, а если размер остался без изменений - ничего не делаем
+        private static void WebPageSizeAudit(string queryString)
+        {
+            // инициализация эталонного листа
+            if (hasNewWebPages)
+            {
+                // сначала найдем последний период, который есть в журнале
+                var findLastPeriodId = new SqlCommand { Connection = mainConnnection, CommandText = "SELECT MAX(period_id) FROM journal_of_web_page_check)" };
+                var pr = findLastPeriodId.ExecuteReader();
+                while (pr.Read())
+                {
+                    // потом доделаю
+                }
+
+                var qReadLastWebPagesSizes = String.Format("SELECT * FROM journal_of_web_page_check WHERE period_id={0}",
+                currentPeriodId - 1);
+                var readWebPagesSizes = new SqlCommand {Connection = mainConnnection, CommandText = qReadLastWebPagesSizes};
+                var r = readWebPagesSizes.ExecuteReader();
+                while (r.Read())
+                {
+                    if (r.HasRows) 
+                        journalWebPages.Add(new WebPageSizeJournalT{id = r.GetInt32(0), host_and_port_id = r.GetInt32(1), size = r.GetInt32(2), period_id = r.GetInt32(3)});
+                }
+                r.Close();
+                hasNewWebPages = false;
+            }
+            hostsForWebCheck.ForEach(w =>
+            {
+                if (journalWebPages.Any(jw => jw.host_and_port_id == w.id))
+                {
+                    var _ = journalWebPages.First(jw => jw.host_and_port_id == w.id);
+                    if (_.size != w.size)
+                    {
+                        _.size = w.size;
+                        queryString += String.Format("({0},{1},{2}),", w.id, w.size, currentPeriodId);
+                    }
+                }
+                else
+                {
+                    hasNewWebPages = true;
+                }
+            });
         }
         // получить id интерфейса зная его guid
         private static int getInterfaceIdFromGuid(string guid)
