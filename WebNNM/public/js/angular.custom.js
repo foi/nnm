@@ -1,3 +1,5 @@
+"use strict";
+
 var nnm = angular.module('nnm', ['ngRoute', 'ngResource', 'xeditable']);
 
 nnm.run(function(editableOptions, editableThemes) {
