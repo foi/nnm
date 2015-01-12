@@ -76,7 +76,20 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
   error(function () {
     $scope.minutes = "ERROR";
   });
-
+  $scope.ping_chart_data = [];
+  $scope.load_ping_data_chart = function () {
+    Host.query(function (data) {
+      var hosts = [];
+      angular.forEach(data, function (e) {
+        hosts.push(e.id);
+      });
+      $http.get('/extra/api/ping/' + hosts.join('&')).success(function (ping_data) {
+        $scope.ping_chart_data = ping_data;
+      });
+    }, function (err) {
+      console.log(err);
+    });
+  };
   
 
 }]);

@@ -1,7 +1,7 @@
-<div ng-show="dbConnected">
+<div ng-show="dbConnected" ng-init="load_ping_data_chart()">
 	<div class="panel panel-default">
     <div class="panel-heading">График пинга за последние {{ minutes }} минут</div>
     <div class="panel-body">
-    
+    {{ping_chart_data}}
 	</div>
 </div>
