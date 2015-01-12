@@ -10,7 +10,9 @@
   "dependencies": {
     "body-parser": "*",
     "express": "4.x",
+    "express-init": "0.0.1",
     "js-methods": "*",
+    "moment": "*",
     "mssql": "*",
     "q": "^1.1.2",
     "strftime": "^0.8.2",

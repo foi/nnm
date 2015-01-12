@@ -12,7 +12,6 @@ var sys = require('sys');
 var Q = require('q');
 var exec = require('child_process').exec;
 // для layout.ejs без этого не работает
-var expressLayouts = require('express-ejs-layouts');
 var app = express();
 // Для парсинга объекта request
 app.use(bodyParser.json());

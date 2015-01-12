@@ -77,7 +77,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
     $scope.minutes = "ERROR";
   });
 
-  };
+  
 
 }]);
 
