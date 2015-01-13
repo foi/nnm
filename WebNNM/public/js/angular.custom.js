@@ -80,8 +80,21 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
   });
   $scope.ping_chart_data = { 
     data: {
+      x: "periods",
+      xFormat: "%Y-%m-%dT%H:%M:%S.%LZ",
       columns: [],
       type: 'spline'
+    },
+    padding: { right: 50 },
+    axis: {
+      x: {
+        type: 'timeseries',
+        localtime: true,
+        tick: {
+          format: "%H:%M"
+        }
+
+      }
     }
     
   };
