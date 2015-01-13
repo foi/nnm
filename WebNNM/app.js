@@ -394,10 +394,8 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
           // создадим массив с периодами, тот, что по оси Х
           var periods_array = ['periods'];
           _.each(periods, function (p) {
-            periods_array.push(p.period);
+            periods_array.push(strftime("%Y-%m-%dT%H:%M:%S", p.period));
           });
-          //periods_array.push("period");
-          console.log(periods_array);
           // заменим host_id на полноценное имя
           _.each(grouped_by_host_id, function (v, k) {
             var hostname = _.findWhere(hosts, {id: parseInt(k)}).name;

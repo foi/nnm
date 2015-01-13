@@ -81,7 +81,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
   $scope.ping_chart_data = { 
     data: {
       x: "periods",
-      xFormat: "%Y-%m-%dT%H:%M:%S.%LZ",
+      xFormat: "%Y-%m-%dT%H:%M:%S",
       columns: [],
       type: 'spline'
     },
@@ -92,7 +92,10 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
         localtime: true,
         tick: {
           format: "%H:%M"
-        }
+        },
+      y: {
+        label: "время пинга в мс"
+      }
 
       }
     }
@@ -105,6 +108,23 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
         hosts.push(e.id);
       });
       $http.get('/extra/api/ping/' + hosts.join('&')).success(function (ping_data) {
+        // var periods_utc_array = ping_data[ping_data.length -1];
+        // var periods_with_localtime = [];
+        // angular.forEach(periods_utc_array, function (p, i) {
+        //   if (i != 0) { 
+        //     var tmp = new Date(p);
+        //     periods_with_localtime.push(tmp.toString());
+        //   }
+        //   else { periods_with_localtime.push("periods") }
+        // });
+        // console.log(periods_with_localtime);
+        // console.log(ping_data);
+        // ping_data[ping_data.length -1] = periods_with_localtime;
+        // angular.forEach(ping_data[ping_data.length -1], function (p, i) {
+        //   if (i != 0) {
+        //     p = (new Date(p)).toString();
+        //   };
+        // });
         $scope.ping_chart_data.data.columns = ping_data;
       });
     }, function (err) {
