@@ -78,7 +78,13 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
   error(function () {
     $scope.minutes = "ERROR";
   });
-  $scope.ping_chart_data = [];
+  $scope.ping_chart_data = { 
+    data: {
+      columns: [],
+      type: 'spline'
+    }
+    
+  };
   $scope.load_ping_data_chart = function () {
     Host.query(function (data) {
       var hosts = [];
@@ -86,7 +92,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
         hosts.push(e.id);
       });
       $http.get('/extra/api/ping/' + hosts.join('&')).success(function (ping_data) {
-        $scope.ping_chart_data = ping_data;
+        $scope.ping_chart_data.data.columns = ping_data;
       });
     }, function (err) {
       console.log(err);
@@ -275,3 +281,18 @@ nnm.controller('NavCtrl', ['$rootScope','$scope', '$http', '$location', function
     return route === $location.path();
   };
 }]);
+
+// директива для графика пинга 
+nnm.directive('pingChart', [function () {
+  return {
+    restrict: 'E',
+    scope: { config: '=' },
+    template: "<div></div>",
+    link: function (scope, element, attrs) {
+      scope.config.bindto = "#" + attrs.id;
+      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+        var chart = c3.generate(scope.config);
+      });
+    }
+  };
+}])
