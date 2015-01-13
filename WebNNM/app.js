@@ -356,7 +356,6 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
   // Сначала получим таблицу с хостами
   q.query(queries.select_all_from.format(['hosts']), function (err, _hosts) {
     hosts = _hosts;
-    console.log(_hosts);
     // теперь будет разветвление на то, если не указаны даты начала и конца, и если указаны
     if (_.isUndefined(start_date) && _.isUndefined(end_date)) {
       q.query(queries.select_latest_n_periods.format([public_config.chart.minutes]), function (err, _periods) {
