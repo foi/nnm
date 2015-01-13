@@ -387,7 +387,6 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
           });
           // заменить period_id на полноценную дату
           //setPeriodForPeriodId(ping_data, periods);
-          console.log(periods);
           var grouped_by_host_id = _.groupBy(ping_data, 'host_id');
           var host_and_latency = {};
           var hostname_and_latencies = [];
