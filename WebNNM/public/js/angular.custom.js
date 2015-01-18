@@ -1,6 +1,6 @@
 "use strict";
 
-var nnm = angular.module('nnm', ['ngRoute', 'ngResource', 'xeditable']);
+var nnm = angular.module('nnm', ['ngRoute', 'ngResource', 'xeditable', 'ui.bootstrap']);
 
 nnm.run(function(editableOptions, editableThemes) {
   editableThemes.bs3.inputClass = 'input-sm';

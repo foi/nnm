@@ -68,6 +68,7 @@ var queries = {
   get_last_record: "SELECT TOP 1 * FROM %0 ORDER BY ID DESC",
   check_db_connection: "SELECT TOP 1 * FROM groups",
   get_ping_stats_from_till_period_for_hosts: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1 AND host_id IN (%2)",
+  agents: "SELECT * FROM hosts_and_ports WHERE type_of_host_and_port_id=3" 
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -419,6 +420,18 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
     }
   });
 });
+
+// получить информацию для агентов
+app.get('/extra/api/agent/:id', function (req, res) {
+  // body...
+});
+
+app.get('/extra/api/get_agents_ids', function (req, res) {
+  queryAll(queries.agents).then(function (data) {
+    res.send(data);
+  });
+});
+
   // // Если стартовая и последующие даты не указаны
   // if (_.isUndefined(start_date) && _.isUndefined(end_date)) {
   //   getPeriodsForN(public_config.chart.minutes - 1).
@@ -630,100 +643,12 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
 //     res.sendStatus(404);
 //   }
 // });
-// // Получить данные из таблицы не все, а определенное количество
-// app.get('/get_last_/:quantity/_records_from_/:table', function (req, res) {
-//   var quantity = req.params.quantity;
-//   var table_name = req.params.table;
-//   q = new sql.Request(connection);
-//   q.query(queries.select_last_n_entries.format([table_name, quantity]), function (err, entries) {
-//     res.send(entries);
-//   });
-// });
-// // получить статистику за сегодня
-// app.get('/latest/:table_name', function(req, res){
-//   // получаем сегодняшний день
-//   var today = moment.utc().format('YYYYMMDD');
-//   var tomorrow = moment().utc().add(1, 'day').format('YYYYMMDD');
-//   // если нужен пинг
-//   if (req.params.table_name == "ping") {
-//    // выберем первый  и последний id периода на сегодня
-//     var qGetFirstPeriodOfThisDay = new sql.Request(connection);
-//     qGetFirstPeriodOfThisDay.query(queries.get_all_today_periods.format([today, tomorrow]), function(err, entries){
-//       var minPeriod = entries[0]['id']; 
-//       var maxPeriod = entries[entries.length - 1]['id'];
-//      });
-//   };
-// });
 
-// // Запрос графика пинга для  1  хоста
-// app.get('/chart/ping/:host_id/', function(req, res) {
-//   q = new sql.Request(connection);
-//   q.query(queries.get_latest_n_journal_of_ping_entries_about_host.format([public_config.chart.minutes, req.params.host_id]), function(err, entries) {
-//     res.send(entries);
-//   });
-// });
 
-// // дать идишники агентов + группу ид и ид хоста
-// app.get('/agents/all', function(req, res){
-//   q = new sql.Request(connection);
-//   q.query(queries.select_hp_ids_agents, function(err, entries){
-//     res.send(entries);
-//   });
-// });
-// // get latest periods
-// app.get("/periods/latest", function(req, res){
-//   var q = new sql.Request(connection);
-//   q.query(queries.id_period_maximum, function(err, data){
-//     var p_ids = _.range(data[0][''] - (public_config.chart.minutes), data[0][''] + 1, 1);
-//     var clean_ids = p_ids.toString();
-//     q.query(queries.select_this_periods.format([clean_ids]), function(err, data){
-//       res.send(data);
-//     });
-//   });
-// });
 
-// // передать периоды с ид и самим периодом
-// app.get("/period/:from/:to", function(req, res){
-//   var q = new sql.Request(connection);
-//   q.query(queries.select_periods_from_between_ids.format([req.params.from, req.params.to]), function(err, result){
-//     _.each(result, function(a){
-//       a.period = strftime("%H:%M", new Date(a.period));
-//     });
-//     res.send(result);
-//   });
-// });
 
-// app.post("/ping/:host_id", function(req, res){
-//   var q = new sql.Request(connection);
-//   var host_id = req.params.host_id;
-//   var start_date = req.body.from;
-//   var end_date = req.body.upto;
-//   var resp = {};
-//   // Если не будет данных о периоде, за какой нужна информация
-//   if (_.isUndefined(start_date) && _.isUndefined(end_date)) {
-//     q.query(queries.select_latest_n_periods.format([(public_config.chart.minutes - 1)]), function(err, p_data){
-//       var latest_periods_ids = _.pluck(p_data, "id");
-//       q.query(queries.select_latest_ping_stat_till_period_from_period_for_host.format([_.first(latest_periods_ids), _.last(latest_periods_ids), host_id]), function(err, ping_data){
-//         var missed_periods = _.difference(latest_periods_ids, _.pluck(ping_data, "period_id"));
-//         _.each(missed_periods, function(p){
-//           ping_data.push({ "host_id": host_id, "latency": null, "period_id": p });
-//         });
-//         // заменить 0 на null, чтобы были разрывы в графике
-//         _.each(ping_data, function(p){
-//           if (p.latency == 0) { p.latency = null };
-//         });
-//         console.log(ping_data);
-//         var sorted = _.sortBy(ping_data, "period_id");
-//         resp[host_id] = sorted;
-//         res.send(resp);
-//       });
-//     });
-//   }
-//   else {
-//     // Если все-таки будет
-//     console.log(start_date);
-//   };
-//});
+
+
 // // получаем последнюю статистику за последние 30 минут для определенного агента 
 // app.get("/agents/stat/latest/:id", function(req, res){
 //   var agent_id = req.params.id;
