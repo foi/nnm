@@ -63,7 +63,12 @@ nnm.factory('Agents', ['$http' ,function ($http) {
       return $http.get('/extra/api/get_agents_ids').then(function (data) {
         return data.data;
       })
-    }
+    },
+    getAgentData: function (i) {
+      return $http.get('/extra/api/agents/' + i).then(function (data) {
+        return data.data;
+      })
+    }  
   };
 }])
 // nnm.service('ConfigService', ['$http' ,function ($http) {
@@ -101,14 +106,14 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
         localtime: true,
         tick: {
           format: "%H:%M"
-        },
+        }
+      },
       y: {
-        label: "время пинга в мс"
-      }
 
       }
     }
   };
+  $scope.agent_cpu_chart_default = angular.copy($scope.ping_chart_data);
   $scope.load_ping_data_chart = function () {
     Host.query(function (data) {
       var hosts = [];
@@ -122,11 +127,21 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
       console.log(err);
     });
   };
-  $scope.load_agents_charts = function () {
+  // Загрузить таблицу с агентами
+  $scope.load_agents = function () {
     Agents.getAgentsIds().then(function (data) {
-      console.log(data);
+      $scope.agents = data;
     });
-  }
+  };
+  // получить данные об агенте
+  $scope.getAgentData = function (i) {
+    Agents.getAgentData(i).then(function (data) {
+      $scope.agent_cpu_chart = angular.copy($scope.agent_cpu_chart_default);
+      $scope.agent_cpu_chart["axis"]["y"]["max"] = 90;
+       $scope.agent_cpu_chart["data"]["type"] = 'line';
+      $scope.agent_cpu_chart.data.columns = data[i]["cpu_load"];
+    })
+  };
 }]);
 
 // Справочники
@@ -319,6 +334,27 @@ nnm.directive('pingChart', [function () {
       scope.config.bindto = "#" + attrs.id;
       scope.$watch('config.data.columns', function(newSeries, oldSeries) {
         var chart = c3.generate(scope.config);
+      });
+    }
+  };
+}]);
+
+nnm.directive('cpuChart', [function () {
+  return {
+    restrict: 'E',
+    scope: {
+      config: '='
+    },
+    link: function (scope, element, attrs) {
+      scope.config.bindto = "#" + attrs.id;
+      var chart;
+      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+        if (_.isUndefined(chart)) {
+          chart = c3.generate(scope.config);
+        }
+        else {
+          chart.flow({columns: newSeries, duration: 1});
+        }
       });
     }
   };

@@ -1,8 +1,27 @@
 <div ng-show="dbConnected" ng-init="load_ping_data_chart()">
-	<div class="panel panel-default">
+  <div class="panel panel-default">
     <div class="panel-heading">График пинга за последние {{ minutes }} минут [<a ng-click="load_ping_data_chart()">Обновить</a>]</div>
     <div class="panel-body">
-    	<ping-chart config="ping_chart_data" id="latest_ping_chart"></ping-chart>
-	</div>
+      <ping-chart config="ping_chart_data" id="latest_ping_chart"></ping-chart>
+  </div>
 </div>
-<div ng-init="load_agents_charts()"></div>
+<!-- Панель со статистикой агентов -->
+<div class="panel panel-default" ng-init="load_agents()">
+  <div class="panel-heading">Статистика агентов за последние {{ minutes }} минут</div>
+  <div class="panel-body">
+  <!-- Панель с ссылками ан агентов -->
+  <div class="col-md-3">
+    <div class="btn-group-vertical">
+      <button type="button" class="btn btn-default" ng-repeat="agent in agents" ng-click="getAgentData(agent.id)" id="agentList">{{agent.name}}</button>
+    </div>
+  </div>
+  <!-- Панель с графиками -->
+  <div class="col-md-9">
+    <div ng-if="agent_cpu_chart">
+      <h4>Загрузка ЦПУ</h4>
+      <cpu-chart config="agent_cpu_chart" id="cpu_chart"></cpu-chart>
+    </div>
+  </div>
+  <!-- Конец панели с графиками -->
+  </div>
+</div>

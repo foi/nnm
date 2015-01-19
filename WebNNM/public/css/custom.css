@@ -26,3 +26,7 @@ input.ng-invalid {
 .form-inline {
   padding: 10px;
 }
+
+button#agentList{
+  width: 300px;
+}

@@ -69,6 +69,7 @@ var queries = {
   check_db_connection: "SELECT TOP 1 * FROM groups",
   get_ping_stats_from_till_period_for_hosts: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1 AND host_id IN (%2)",
   agents: "SELECT * FROM hosts_and_ports WHERE id IN (%0)",
+  agents_for_list: "SELECT * FROM hosts_and_ports WHERE type_of_host_and_port_id=3",
   select_cpu_mem_load_for_agents: "SELECT agent_id, cpu_load, free_mem, period_id  FROM agents_cpu_mem_load WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)" 
 }
 
@@ -412,7 +413,7 @@ function ddd () {
 }
 
 app.get('/extra/api/get_agents_ids', function (req, res) {
-  queryAll(queries.agents).then(function (data) {
+  queryAll(queries.agents_for_list).then(function (data) {
     res.send(data);
   });
 });
@@ -454,7 +455,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
   // сначала соберем информацию о процессоре и оперативке и о потеряных периодах
   q.query(queries.select_cpu_mem_load_for_agents.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, cpmem) {
     var missed_periods = {}; // потерянные периоды
-    var periods_readable = ["date"];
+    var periods_readable = ["periods"];
     // создадим строки даты/времени 
     _.each(periods, function (p) {
       periods_readable.push(strftime("%Y-%m-%dT%H:%M:%S", p.period));
@@ -473,7 +474,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
     });
     cpmem = _.sortBy(cpmem, "period_id");
     // набьем данные в финальный ответ для статистики цпу и памяти, а также добавим сколько всего оперативки, и макс на разделе места 
-    //console.log(_.findWhere(memory, {"host_and_port_agent_id": 9}).memory_overall);
+    console.log(hdds);
     cpmem = _.groupBy(cpmem, "agent_id");
     _.each(cpmem, function (v, k) {
       full_response[k] = { "cpu_load": [], "used_ram":[]};
@@ -484,13 +485,21 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       full_response[k]["used_ram"][0] = mem;
       full_response[k]["used_ram"][1] = periods_readable;
       full_response[k]["memory_max"] = _.findWhere(memory, {"host_and_port_agent_id": parseInt(k)}).memory_overall;
-      console.log(k);
+      // var _hdds = _.where(hdds, {"host_and_port_agent_id": parseInt(k)});
+      // var _hdds_final = {};
+      // _.each(_hdds, function (h) {
+      //   if (_.isUndefined(_hdds_final[h["partition_letter"]])) {
+      //     _hdds_final[h["partition_letter"]] = 
+      //   }
+      //   else {
+
+      //   };
+      // });
     });
     // ой, все. Отсылаем финальный вариант
     response.send(full_response);
   }); 
 };
-
 
 // получить стат. информации об агенте/агентах
 app.get('/extra/api/agents/:agents', function (req, res) {
