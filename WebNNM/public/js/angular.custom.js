@@ -125,7 +125,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   };
   $scope.agent_cpu_chart_default = angular.copy($scope.ping_chart_data);
   $scope.agent_cpu_chart_default["tooltip"]["show"] = false;
-  $scope.agent_cpu_chart_default["size"]["height"] = 200
+  $scope.agent_cpu_chart_default["size"]["height"] = 250
   $scope.load_ping_data_chart = function () {
     Host.query(function (data) {
       var hosts = [];

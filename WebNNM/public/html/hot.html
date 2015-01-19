@@ -15,10 +15,14 @@
   </div>
   <!-- Панель с графиками -->
   <div ng-if="agent_cpu_chart">
+  <div class="col-md-6">
     <h4>Загрузка ЦПУ</h4>
     <cpu-chart config="agent_cpu_chart" id="cpu_chart"></cpu-chart>
+  </div>
+  <div class="col-md-6">
     <h4>Объем используемой оперативной памяти</h4>
     <mem-chart config="agent_mem_chart" id="mem_chart"></mem-chart>
+    </div>
   </div>
   <!-- Конец панели с графиками -->
   </div>
