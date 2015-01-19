@@ -105,15 +105,27 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
         type: 'timeseries',
         localtime: true,
         tick: {
+          fit: false,
           format: "%H:%M"
         }
       },
       y: {
-
+        min: 0
       }
+    },
+    point: {
+      show: false
+    },
+    tooltip: {
+      show: true
+    },
+    size: {
+      height: 300
     }
   };
   $scope.agent_cpu_chart_default = angular.copy($scope.ping_chart_data);
+  $scope.agent_cpu_chart_default["tooltip"]["show"] = false;
+  $scope.agent_cpu_chart_default["size"]["height"] = 200
   $scope.load_ping_data_chart = function () {
     Host.query(function (data) {
       var hosts = [];
@@ -136,10 +148,14 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   // получить данные об агенте
   $scope.getAgentData = function (i) {
     Agents.getAgentData(i).then(function (data) {
+      //  график с загрузкой процессора
       $scope.agent_cpu_chart = angular.copy($scope.agent_cpu_chart_default);
       $scope.agent_cpu_chart["axis"]["y"]["max"] = 90;
-       $scope.agent_cpu_chart["data"]["type"] = 'line';
       $scope.agent_cpu_chart.data.columns = data[i]["cpu_load"];
+      // данные для графика с размером оперативной памяти
+      $scope.agent_mem_chart = angular.copy($scope.agent_cpu_chart_default);
+      $scope.agent_mem_chart["axis"]["y"]["max"] = data[i]["memory_max"];
+      $scope.agent_mem_chart.data.columns = data[i]["used_ram"];
     })
   };
 }]);
@@ -340,6 +356,27 @@ nnm.directive('pingChart', [function () {
 }]);
 
 nnm.directive('cpuChart', [function () {
+  return {
+    restrict: 'E',
+    scope: {
+      config: '='
+    },
+    link: function (scope, element, attrs) {
+      scope.config.bindto = "#" + attrs.id;
+      var chart;
+      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+        if (_.isUndefined(chart)) {
+          chart = c3.generate(scope.config);
+        }
+        else {
+          chart.flow({columns: newSeries, duration: 1});
+        }
+      });
+    }
+  };
+}]);
+
+nnm.directive('memChart', [function () {
   return {
     restrict: 'E',
     scope: {
