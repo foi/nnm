@@ -82,26 +82,6 @@ var conf = {};
 
 // хелперы
 
-// Ни одно из значений не пусто
-// function allFilled(array) {
-//   var should_be_correct_count = array.length;
-//   var correct_count = 0;
-//   array.forEach(function(element) {
-//     if (element != '') {
-//       correct_count += 1;
-//     }
-//   });
-//   if (correct_count == should_be_correct_count) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
-
-// Получить исходя из ид имя
-
-//process.env.TZ = "Asia/Krasnoyarsk";
-
 function setPeriodForPeriodId(array, periods_array){
   _.map(array, function(e){
     e.date = new Date((_.findWhere(periods_array, { "id": e.period_id} )).period);

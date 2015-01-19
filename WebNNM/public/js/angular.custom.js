@@ -57,6 +57,15 @@ nnm.factory('Subscriber', ['$resource', function ($resource) {
   return $resource('/api/subscribers/:id', {id: '@id'}, {}); 
 }]);
 
+nnm.factory('Agents', ['$http' ,function ($http) {
+  return {
+    getAgentsIds: function () {
+      return $http.get('/extra/api/get_agents_ids').then(function (data) {
+        return data.data;
+      })
+    }
+  };
+}])
 // nnm.service('ConfigService', ['$http' ,function ($http) {
 //   this.get = function () {
 //     $http.get('/config/').then(function (data) {
@@ -69,7 +78,7 @@ nnm.factory('Subscriber', ['$resource', function ($resource) {
 // }]);
  
 // Свежие новости
-nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($scope, $http, $rootScope, Host) {
+nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', function ($scope, $http, $rootScope, Host, Agents) {
   // на какое время график
   $http.get('/public/public_config.json').
   success(function (data) {
@@ -99,7 +108,6 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
 
       }
     }
-    
   };
   $scope.load_ping_data_chart = function () {
     Host.query(function (data) {
@@ -108,31 +116,17 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', function ($sc
         hosts.push(e.id);
       });
       $http.get('/extra/api/ping/' + hosts.join('&')).success(function (ping_data) {
-        // var periods_utc_array = ping_data[ping_data.length -1];
-        // var periods_with_localtime = [];
-        // angular.forEach(periods_utc_array, function (p, i) {
-        //   if (i != 0) { 
-        //     var tmp = new Date(p);
-        //     periods_with_localtime.push(tmp.toString());
-        //   }
-        //   else { periods_with_localtime.push("periods") }
-        // });
-        // console.log(periods_with_localtime);
-        // console.log(ping_data);
-        // ping_data[ping_data.length -1] = periods_with_localtime;
-        // angular.forEach(ping_data[ping_data.length -1], function (p, i) {
-        //   if (i != 0) {
-        //     p = (new Date(p)).toString();
-        //   };
-        // });
         $scope.ping_chart_data.data.columns = ping_data;
       });
     }, function (err) {
       console.log(err);
     });
   };
-  
-
+  $scope.load_agents_charts = function () {
+    Agents.getAgentsIds().then(function (data) {
+      console.log(data);
+    });
+  }
 }]);
 
 // Справочники
