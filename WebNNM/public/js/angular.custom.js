@@ -369,7 +369,7 @@ nnm.directive('cpuChart', [function () {
           chart = c3.generate(scope.config);
         }
         else {
-          chart.flow({columns: newSeries, duration: 1});
+          chart.load({columns: newSeries, duration: 1});
         }
       });
     }
@@ -385,12 +385,13 @@ nnm.directive('memChart', [function () {
     link: function (scope, element, attrs) {
       scope.config.bindto = "#" + attrs.id;
       var chart;
-      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+      scope.$watch('config', function(newColumns, oldColumns) {
         if (_.isUndefined(chart)) {
           chart = c3.generate(scope.config);
         }
         else {
-          chart.flow({columns: newSeries, duration: 1});
+          chart.axis.max({y: newColumns.axis.y.max});
+          chart.load({columns: newColumns.data.columns, duration: 1});
         }
       });
     }
