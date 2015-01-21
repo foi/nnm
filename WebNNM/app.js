@@ -70,7 +70,8 @@ var queries = {
   get_ping_stats_from_till_period_for_hosts: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1 AND host_id IN (%2)",
   agents: "SELECT * FROM hosts_and_ports WHERE id IN (%0)",
   agents_for_list: "SELECT * FROM hosts_and_ports WHERE type_of_host_and_port_id=3",
-  select_cpu_mem_load_for_agents: "SELECT agent_id, cpu_load, free_mem, period_id  FROM agents_cpu_mem_load WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)" 
+  select_cpu_mem_load_for_agents: "SELECT agent_id, cpu_load, free_mem, period_id  FROM agents_cpu_mem_load WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)",
+  select_hdd_part_stat: "SELECT agent_id, hdd_partition_id, size, period_id FROM hdd_stat_journal WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)" 
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -435,14 +436,13 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
 
   // ответ будет следующего формата 
   // {
-  //   "agent1":{
-  //     "dates": ["dates", 15.01.2015 21 30, 15.01.2015 21 31...],
-  //     "cpu_load": ["загрузка ЦПУ %", 1,2,4,5...],
-  //     "memory": ["занято ОЗУ МБ", 1000, 1024, 1300...],
+  //   "1":{
+  //     "cpu_load": ["загрузка ЦПУ %", 1,2,4,5...],["periods", 15.01.2015 21 30, 15.01.2015 21 31...],
+  //     "memory": ["занято ОЗУ МБ", 1000, 1024, 1300...],["periods", 15.01.2015 21 30, 15.01.2015 21 31...],
   //     "interfaces": {
   //       "interface1": ["download", 1,2,3,4,5], ["upload", 1,2,3,4,5,6]
   //     },
-  //     "hdd_partitions": ["c:/", 1,2,3,4,7,76,67],
+  //     "hdd_partitions": ["c:/", 1,2,3,4,7,76,67], 
   //     "overall": {
   //       "memory": 1200,
   //       "size": {
@@ -485,19 +485,48 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       full_response[k]["used_ram"][0] = mem;
       full_response[k]["used_ram"][1] = periods_readable;
       full_response[k]["memory_max"] = _.findWhere(memory, {"host_and_port_agent_id": parseInt(k)}).memory_overall;
-      // var _hdds = _.where(hdds, {"host_and_port_agent_id": parseInt(k)});
-      // var _hdds_final = {};
-      // _.each(_hdds, function (h) {
-      //   if (_.isUndefined(_hdds_final[h["partition_letter"]])) {
-      //     _hdds_final[h["partition_letter"]] = 
-      //   }
-      //   else {
+      // ага, еще для разделов ветка
+      full_response[k]["partitions"] = [];
+      // Считаем размеры разделов накопителей
+      var _hdds = _.where(hdds, {"host_and_port_agent_id": parseInt(k)});
+      var hdd_names_and_space = {};
+      _.each(_hdds, function (h) {
+        hdd_names_and_space[h['partition_letter']] = h['total_space'];
+      });
+      full_response[k]["partitions_info"] = hdd_names_and_space;
+      // теперь соберем информацию о разделах
+      q.query(queries.select_hdd_part_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, hdd_part_stat) {
+        var g_partitions = _.groupBy(hdd_part_stat, 'agent_id');
+        // заменим размер, если он 0 на null, а также заменим ид партишна на его букву
+        _.each(g_partitions, function (v, k) {
+          _.each(v, function (p) {
+            if (p.size == 0) { p.size = null };
+            p['partition_letter'] = _.findWhere(hdds, p.hdd_partition_id).partition_letter;
+          });
+        });
 
-      //   };
-      // });
-    });
-    // ой, все. Отсылаем финальный вариант
+        // _.each(g_partitions, function (v, k) {
+        //   g_partitions[k] = _.groupBy(v, 'partition_letter');
+        // });
+        // добавим недостающие периоды
+        _.each(missed_periods, function (v, k) {
+          if (!_.isEmpty(missed_periods[k])) {
+            _.each(missed_periods[k], function (p) {
+              var uniq_letters = _.uniq(_.pluck(g_partitions[k], "partition_letter"));
+              _.each(uniq_letters, function (letter) {
+                g_partitions[k].push({"size": null, "partition_letter": letter});
+              })
+            });
+          };
+        });
+        full_response['sdsdsd'] = g_partitions;
+        console.log(missed_periods);
+        // ой, все. Отсылаем финальный вариант
     response.send(full_response);
+      });
+
+    });
+    
   }); 
 };
 

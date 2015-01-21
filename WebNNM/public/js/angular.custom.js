@@ -385,13 +385,13 @@ nnm.directive('memChart', [function () {
     link: function (scope, element, attrs) {
       scope.config.bindto = "#" + attrs.id;
       var chart;
-      scope.$watch('config', function(newColumns, oldColumns) {
+      scope.$watch('config', function(newD, old) {
         if (_.isUndefined(chart)) {
           chart = c3.generate(scope.config);
         }
         else {
-          chart.axis.max({y: newColumns.axis.y.max});
-          chart.load({columns: newColumns.data.columns, duration: 1});
+          chart.axis.max({y: newD.axis.y.max});
+          chart.load({columns: newD.data.columns, duration: 1});
         }
       });
     }
