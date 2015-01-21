@@ -514,11 +514,14 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
             _.each(missed_periods[k], function (p) {
               var uniq_letters = _.uniq(_.pluck(g_partitions[k], "partition_letter"));
               _.each(uniq_letters, function (letter) {
-                g_partitions[k].push({"size": null, "partition_letter": letter});
-              })
+                g_partitions[k].push({"size": null, "partition_letter": letter, "period_id": p});
+              });
+              g_partitions[k] = _.sortBy(g_partitions[k], "period_id"); // упорядочиваем по period_id
             });
           };
         });
+        // сделаем так [1:[[c:\, 1,2,3,4,], [d:\, 3,43,5]] c помощью флаттен, но сначала сгруппируем по имени раздела
+
         full_response['sdsdsd'] = g_partitions;
         console.log(missed_periods);
         // ой, все. Отсылаем финальный вариант
