@@ -445,9 +445,13 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
   //     "hdd_partitions": ["c:/", 1,2,3,4,7,76,67], 
   //     "overall": {
   //       "memory": 1200,
-  //       "size": {
-  //         "c:/": 1300,
-  //         "d:/": 2000
+  //       "partitions_info": {
+  //         1 : {
+  //          size: 100,
+  //          name: "c:/"
+  //         },
+  //         2 ...
+  //         
   //       }
   //     }
   //   }
@@ -474,7 +478,6 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
     });
     cpmem = _.sortBy(cpmem, "period_id");
     // набьем данные в финальный ответ для статистики цпу и памяти, а также добавим сколько всего оперативки, и макс на разделе места 
-    console.log(hdds);
     cpmem = _.groupBy(cpmem, "agent_id");
     _.each(cpmem, function (v, k) {
       full_response[k] = { "cpu_load": [], "used_ram":[]};
@@ -491,7 +494,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       var _hdds = _.where(hdds, {"host_and_port_agent_id": parseInt(k)});
       var hdd_names_and_space = {};
       _.each(_hdds, function (h) {
-        hdd_names_and_space[h['partition_letter']] = h['total_space'];
+        hdd_names_and_space[h['id']] = { size: h['total_space'], name: h['partition_letter'] };
       });
       full_response[k]["partitions_info"] = hdd_names_and_space;
       // теперь соберем информацию о разделах
@@ -501,31 +504,54 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
         _.each(g_partitions, function (v, k) {
           _.each(v, function (p) {
             if (p.size == 0) { p.size = null };
-            p['partition_letter'] = _.findWhere(hdds, p.hdd_partition_id).partition_letter;
+            //p['partition_letter'] = _.findWhere(hdds, p.hdd_partition_id).partition_letter;
           });
         });
 
         // _.each(g_partitions, function (v, k) {
         //   g_partitions[k] = _.groupBy(v, 'partition_letter');
         // });
-        // добавим недостающие периоды
+        //var partitions_names = [];
+        // еще более сгруппированные данные разделов
+        var g_f_partitions = {};
+        // добавим недостающие периоды и причешем данные в тот формат, что требует c3js
         _.each(missed_periods, function (v, k) {
           if (!_.isEmpty(missed_periods[k])) {
             _.each(missed_periods[k], function (p) {
-              var uniq_letters = _.uniq(_.pluck(g_partitions[k], "partition_letter"));
-              _.each(uniq_letters, function (letter) {
-                g_partitions[k].push({"size": null, "partition_letter": letter, "period_id": p});
+              var uniq_ids = _.keys(full_response[k]["partitions_info"]);
+              _.each(uniq_ids, function (p_id) {
+                g_partitions[k].push({"agent_id": k, "size": null, "hdd_partition_id": p_id, "period_id": p});
               });
-              g_partitions[k] = _.sortBy(g_partitions[k], "period_id"); // упорядочиваем по period_id
             });
+            g_partitions[k] = _.sortBy(g_partitions[k], "period_id"); // упорядочиваем по period_id
           };
+          // заменим hdd_partitions_id на "c:\ (465гб)"
+          _.each(g_partitions[k], function (vh, vk) {
+            var name = "%0 (%1ГБ)".format([full_response[k]["partitions_info"][vh["hdd_partition_id"]].name, full_response[k]["partitions_info"][vh["hdd_partition_id"]].size]);
+            vh["partition_name"] = name;
+            //if (!_.contains(partitions_names, name)) partitions_names.push(name);
+          });
+          // теперь необходимо сгруппировать по partition_name
+          g_f_partitions[k] = _.groupBy(g_partitions[k], "partition_name");
+          // свернем до такого состояния [c:\, 1,2,3,4,], [d:\, 3,43,5]
+          _.each(g_f_partitions[k], function (vh, vk) {
+            var tmp = [vk];
+            _.each(vh, function (value) {
+              tmp.push(value['size']);
+            }); 
+            full_response[k]["partitions"].push(tmp);
+          });
+          // добавим массив с датами
+          full_response[k]["partitions"].push(full_response[k]["cpu_load"][1]);
+          // теперь преобразуем "partitions_info" в тот вид, который требует c3js для грида
+          var partitions_info = [];
+          _.each(full_response[k]["partitions_info"], function (vh, vk) {
+            partitions_info.push({value: vh['size'], text: ("максимум на " + vh['name'])});
+          });
+          full_response[k]["partitions_info"] = partitions_info;
         });
-        // сделаем так [1:[[c:\, 1,2,3,4,], [d:\, 3,43,5]] c помощью флаттен, но сначала сгруппируем по имени раздела
-
-        full_response['sdsdsd'] = g_partitions;
-        console.log(missed_periods);
         // ой, все. Отсылаем финальный вариант
-    response.send(full_response);
+        response.send(full_response);
       });
 
     });

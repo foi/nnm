@@ -92,7 +92,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   error(function () {
     $scope.minutes = "ERROR";
   });
-  $scope.ping_chart_data = { 
+  $scope.ping_chart_data = {
     data: {
       x: "periods",
       xFormat: "%Y-%m-%dT%H:%M:%S",
@@ -100,6 +100,11 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
       type: 'spline'
     },
     padding: { right: 50 },
+    grid: {
+      y: {
+        lines: []
+      }
+    },
     axis: {
       x: {
         type: 'timeseries',
@@ -125,7 +130,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   };
   $scope.agent_cpu_chart_default = angular.copy($scope.ping_chart_data);
   $scope.agent_cpu_chart_default["tooltip"]["show"] = false;
-  $scope.agent_cpu_chart_default["size"]["height"] = 250
+  $scope.agent_cpu_chart_default["size"]["height"] = 250;
   $scope.load_ping_data_chart = function () {
     Host.query(function (data) {
       var hosts = [];
@@ -156,7 +161,12 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
       $scope.agent_mem_chart = angular.copy($scope.agent_cpu_chart_default);
       $scope.agent_mem_chart["axis"]["y"]["max"] = data[i]["memory_max"];
       $scope.agent_mem_chart.data.columns = data[i]["used_ram"];
-    })
+      // данные для графика с занятым объемов разделов жестких дисков
+      $scope.agent_partitions_chart = angular.copy($scope.agent_cpu_chart_default);
+      $scope.agent_partitions_chart["size"]["height"] = 350;
+      $scope.agent_partitions_chart["grid"]["y"]["lines"] = data[i]["partitions_info"];
+      $scope.agent_partitions_chart.data.columns = data[i]["partitions"];
+    });
   };
 }]);
 
@@ -345,7 +355,6 @@ nnm.directive('pingChart', [function () {
   return {
     restrict: 'E',
     scope: { config: '=' },
-    template: "<div></div>",
     link: function (scope, element, attrs) {
       scope.config.bindto = "#" + attrs.id;
       scope.$watch('config.data.columns', function(newSeries, oldSeries) {
@@ -354,7 +363,7 @@ nnm.directive('pingChart', [function () {
     }
   };
 }]);
-
+// директира для графика cpu
 nnm.directive('cpuChart', [function () {
   return {
     restrict: 'E',
@@ -375,7 +384,7 @@ nnm.directive('cpuChart', [function () {
     }
   };
 }]);
-
+// директива для графика объема занятой оперативной памяти
 nnm.directive('memChart', [function () {
   return {
     restrict: 'E',
@@ -396,4 +405,26 @@ nnm.directive('memChart', [function () {
       });
     }
   };
-}])
+}]);
+// директива для занятого места на разделах
+nnm.directive('partitionsChart', [function () {
+  return {
+    restrict: 'E',
+    scope: {
+      config: "="
+    },
+    link: function (scope, element, attrs) {
+      
+      var chart;
+      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+        scope.config.bindto = "#" + attrs.id;
+        if (_.isUndefined(chart)) {
+          chart = c3.generate(scope.config);
+        }
+        else {
+          chart.load({columns: newSeries, duration: 1});
+        }
+      });
+    }
+  };
+}]);
