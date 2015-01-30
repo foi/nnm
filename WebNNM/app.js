@@ -546,7 +546,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
           // теперь преобразуем "partitions_info" в тот вид, который требует c3js для грида
           var partitions_info = [];
           _.each(full_response[k]["partitions_info"], function (vh, vk) {
-            partitions_info.push({value: vh['size'], text: ("максимум на " + vh['name'])});
+            partitions_info.push({value: vh['size'], text: ("предел на " + vh['name'])});
           });
           full_response[k]["partitions_info"] = partitions_info;
         });

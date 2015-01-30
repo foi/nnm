@@ -7,7 +7,7 @@
 </div>
 <!-- Панель со статистикой агентов -->
 <div class="panel panel-default" ng-init="load_agents()">
-  <div class="panel-heading">Статистика агентов за последние {{ minutes }} минут</div>
+  <div class="panel-heading">Статистика агентов за последние {{ minutes }} минут [<a ng-click="load_agents()">Обновить</a>]</div>
   <div class="panel-body">
   <!-- Панель с ссылками ан агентов -->
   <div class="btn-group">
@@ -22,13 +22,13 @@
   <div class="col-md-6">
     <h4>Объем используемой оперативной памяти</h4>
     <mem-chart config="agent_mem_chart" id="mem_chart"></mem-chart>
-    </div>
   </div>
-  <!-- Панель в объемом занятого пространства на жетских дисках -->
+   <!-- Панель в объемом занятого пространства на жетских дисках -->
   <h4>Занятое пространство на разделах жестких дисков</h4>
   <partitions-chart config="agent_partitions_chart" id="partitions_chart"></partitions-chart>
-{{agent_partitions_chart.data.columns}}
+  {{agent_cpu_chart}}
   <!-- конец напенили я занятым  пространством на жестких дисках -->
+  </div>
   <!-- Конец панели с графиками -->
   </div>
 </div>

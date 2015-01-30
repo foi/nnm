@@ -84,6 +84,8 @@ nnm.factory('Agents', ['$http' ,function ($http) {
  
 // Свежие новости
 nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', function ($scope, $http, $rootScope, Host, Agents) {
+  $scope.agents_data;
+  var agent_index;
   // на какое время график
   $http.get('/public/public_config.json').
   success(function (data) {
@@ -115,7 +117,10 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
         }
       },
       y: {
-        min: 0
+        min: 0,
+        tick: {
+
+        }
       }
     },
     point: {
@@ -148,25 +153,50 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   $scope.load_agents = function () {
     Agents.getAgentsIds().then(function (data) {
       $scope.agents = data;
+      var agent_ids = [];
+      angular.forEach($scope.agents, function (v, k) {
+        agent_ids.push(v.id);
+      });
+      agent_ids = agent_ids.join('&');
+      // получим информацию сразу для всех агентов
+      Agents.getAgentData(agent_ids).then(function (agents_data) {
+        $scope.agents_data = agents_data;
+        if (!angular.isUndefined(agent_index)) { $scope.getAgentData(agent_index) };
+      });
+      // !!!!!!!!!!!!!! сделать чтобы здесь уже все загружалось! а на гетагент дата будет просто индекс по массиву переключаться.
     });
   };
   // получить данные об агенте
   $scope.getAgentData = function (i) {
-    Agents.getAgentData(i).then(function (data) {
-      //  график с загрузкой процессора
-      $scope.agent_cpu_chart = angular.copy($scope.agent_cpu_chart_default);
-      $scope.agent_cpu_chart["axis"]["y"]["max"] = 90;
-      $scope.agent_cpu_chart.data.columns = data[i]["cpu_load"];
-      // данные для графика с размером оперативной памяти
-      $scope.agent_mem_chart = angular.copy($scope.agent_cpu_chart_default);
-      $scope.agent_mem_chart["axis"]["y"]["max"] = data[i]["memory_max"];
-      $scope.agent_mem_chart.data.columns = data[i]["used_ram"];
-      // данные для графика с занятым объемов разделов жестких дисков
-      $scope.agent_partitions_chart = angular.copy($scope.agent_cpu_chart_default);
-      $scope.agent_partitions_chart["size"]["height"] = 350;
-      $scope.agent_partitions_chart["grid"]["y"]["lines"] = data[i]["partitions_info"];
-      $scope.agent_partitions_chart.data.columns = data[i]["partitions"];
-    });
+    agent_index = i;
+    $scope.agent_cpu_chart = angular.copy($scope.agent_cpu_chart_default);
+    $scope.agent_cpu_chart["axis"]["y"]["max"] = 90;
+    $scope.agent_cpu_chart["axis"]["y"]["tick"]["values"] = [0, 25, 50, 75, 100];
+    $scope.agent_cpu_chart["axis"]["y"]["tick"]["format"] = function (x) { return x + "%" };
+    $scope.agent_cpu_chart.data.columns = $scope.agents_data[i]["cpu_load"];
+    // данные для графика с размером оперативной памяти
+    $scope.agent_mem_chart = angular.copy($scope.agent_cpu_chart_default);
+    $scope.agent_mem_chart["axis"]["y"]["max"] = $scope.agents_data[i]["memory_max"];
+    $scope.agent_mem_chart["axis"]["y"]["tick"]["values"] = [
+      0, 
+      Math.round($scope.agents_data[i]["memory_max"]*0.25), 
+      Math.round($scope.agents_data[i]["memory_max"]*0.5), 
+      Math.round($scope.agents_data[i]["memory_max"]*0.75), 
+      $scope.agents_data[i]["memory_max"]
+    ];
+    $scope.agent_mem_chart["axis"]["y"]["tick"]["format"] = function (x) { return x + " МБ" };
+    $scope.agent_mem_chart.data.columns = $scope.agents_data[i]["used_ram"];
+    // данные для графика с занятым объемов разделов жестких дисков
+    $scope.agent_partitions_chart = angular.copy($scope.agent_cpu_chart_default);
+    // найдем максимальный объем раздела, чтобы выставить максимум на графике
+    var maximum_partition_size = 0;
+    angular.forEach($scope.agents_data[i]["partitions_info"], function (v, k) {
+      if (v.value > maximum_partition_size) maximum_partition_size = v.value;
+    }); 
+    $scope.agent_partitions_chart["size"]["height"] = 300;
+    $scope.agent_partitions_chart["axis"]["y"]["max"] = maximum_partition_size;
+    $scope.agent_partitions_chart["grid"]["y"]["lines"] = $scope.agents_data[i]["partitions_info"];
+    $scope.agent_partitions_chart.data.columns = $scope.agents_data[i]["partitions"];
   };
 }]);
 
@@ -356,9 +386,15 @@ nnm.directive('pingChart', [function () {
     restrict: 'E',
     scope: { config: '=' },
     link: function (scope, element, attrs) {
+      var chart;
       scope.config.bindto = "#" + attrs.id;
       scope.$watch('config.data.columns', function(newSeries, oldSeries) {
-        var chart = c3.generate(scope.config);
+        if (_.isUndefined(chart)) {
+          chart = c3.generate(scope.config);
+        }
+        else {
+          chart.load({columns: newSeries, duration: 100});
+        }
       });
     }
   };
@@ -366,21 +402,21 @@ nnm.directive('pingChart', [function () {
 // директира для графика cpu
 nnm.directive('cpuChart', [function () {
   return {
-    restrict: 'E',
-    scope: {
-      config: '='
-    },
-    link: function (scope, element, attrs) {
-      scope.config.bindto = "#" + attrs.id;
-      var chart;
-      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
-        if (_.isUndefined(chart)) {
-          chart = c3.generate(scope.config);
-        }
-        else {
-          chart.load({columns: newSeries, duration: 1});
-        }
-      });
+  restrict: 'E',
+  scope: {
+    config: '='
+  },
+  link: function (scope, element, attrs) {
+    scope.config.bindto = "#" + attrs.id;
+    var chart;
+    scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+      if (_.isUndefined(chart)) {
+        chart = c3.generate(scope.config);
+      }
+      else {
+        chart.load({columns: newSeries, duration: 100});
+      }
+    });
     }
   };
 }]);
@@ -400,7 +436,7 @@ nnm.directive('memChart', [function () {
         }
         else {
           chart.axis.max({y: newD.axis.y.max});
-          chart.load({columns: newD.data.columns, duration: 1});
+          chart.load({columns: newD.data.columns, duration: 100});
         }
       });
     }
@@ -414,15 +450,26 @@ nnm.directive('partitionsChart', [function () {
       config: "="
     },
     link: function (scope, element, attrs) {
-      
+      scope.config.bindto = "#" + attrs.id;
       var chart;
-      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
-        scope.config.bindto = "#" + attrs.id;
+      scope.$watch('config', function(newSeries, oldSeries) { 
         if (_.isUndefined(chart)) {
           chart = c3.generate(scope.config);
         }
         else {
-          chart.load({columns: newSeries, duration: 1});
+          if (oldSeries) {
+            // это для ывгрузки старых значений, а то бывает...
+            var unload_partitions_names = [];
+            _.each(oldSeries.data.columns, function (value) {
+              unload_partitions_names.push(value[0]);
+            });
+            chart.axis.max({y: newSeries.axis.y.max});
+            chart.load({columns: newSeries.data.columns, duration: 100, unload: unload_partitions_names});
+          } 
+          else {
+            chart.load({columns: newSeries.data.columns, duration: 100});
+          }
+          chart.ygrids(newSeries.grid.y.lines);
         }
       });
     }
