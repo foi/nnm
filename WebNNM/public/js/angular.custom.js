@@ -167,7 +167,6 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', 'Sp
         $scope.agents_data = agents_data;
         if (!angular.isUndefined(agent_index)) { $scope.getAgentData(agent_index) };
       });
-      // !!!!!!!!!!!!!! сделать чтобы здесь уже все загружалось! а на гетагент дата будет просто индекс по массиву переключаться.
     });
   };
   // получить данные об агенте

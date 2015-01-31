@@ -433,12 +433,35 @@ function getIdFromAgentName(agents, name) {
 
 // формирование информации об агентах
 function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, periods, q, response) {
+  var hdd_partitions_with_names = {};
+  var agents_and_partitions_ids = {};
+  var limits_on_partitions_in_agents = {};
+  var tmp_partitions = _.groupBy(hdds, "host_and_port_agent_id");
+  var hdd_partitions = _.groupBy(hdds, "id");
+  // коллекция ид раздела : { объем, имя }
+  _.each(hdd_partitions, function (v, k) {
+    hdd_partitions_with_names[k] = {size: v[0]['total_space'], name: v[0]['partition_letter']};
+  });
+  // Для подписей к пределам разделов
+  _.each(tmp_partitions, function (v, k) {
+    limits_on_partitions_in_agents[k] = [];
+    _.each(v, function (partition_data) {
+      limits_on_partitions_in_agents[k].push({value: partition_data["total_space"], text: "предел раздела " + partition_data["partition_letter"] });
+    });
+  });
+  // список ид разделов, для агентов
+  _.each(tmp_partitions, function (v, k) {
+    agents_and_partitions_ids[k] = [];
+    _.each(v, function (partition_data) {
+      agents_and_partitions_ids[k].push(partition_data["id"]);
+    });
+  });
+  //console.log(hdd_partitions_with_names);
   var full_response = {};
   var periods = periods;
   var periods_ids = _.pluck(periods, "id");
   var partitions_size_name = {};
   // ответ будет следующего формата вставить сслыку на гист гитхаба
-
   // сначала соберем информацию о процессоре и оперативке и о потеряных периодах
   q.query(queries.select_cpu_mem_load_for_agents.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, cpmem) {
     var missed_periods = {}; // потерянные периоды
@@ -473,14 +496,6 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       full_response[k]["memory_max"] = _.findWhere(memory, {"host_and_port_agent_id": parseInt(k)}).memory_overall;
       // ага, еще для разделов ветка
       full_response[k]["partitions"] = [];
-      // Считаем размеры разделов накопителей
-      var _hdds = _.where(hdds, {"host_and_port_agent_id": parseInt(k)});
-      var hdd_names_and_space = {};
-      _.each(_hdds, function (h) {
-        hdd_names_and_space[h['id']] = { size: h['total_space'], name: h['partition_letter'] };
-      });
-      full_response[k]["partitions_info"] = hdd_names_and_space;
-      partitions_size_name[k] = hdd_names_and_space;
       // теперь соберем информацию о разделах
       q.query(queries.select_hdd_part_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, hdd_part_stat) {
         var g_partitions = _.groupBy(hdd_part_stat, 'agent_id');
@@ -492,8 +507,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
         _.each(missed_periods, function (v, k) {
           if (!_.isEmpty(missed_periods[k])) {
             _.each(missed_periods[k], function (p) {
-              var uniq_ids = _.keys(full_response[k]["partitions_info"]);
-              _.each(uniq_ids, function (p_id) {
+              _.each(agents_and_partitions_ids[k], function (p_id) {
                 g_partitions[k].push({"agent_id": k, "size": null, "hdd_partition_id": p_id, "period_id": p});
               });
             });
@@ -501,8 +515,11 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
           };
           // заменим hdd_partitions_id на "c:\ (465гб)"
           _.each(g_partitions[k], function (vh) {
-            var name = "%0 (%1ГБ)".format([partitions_size_name[k][vh["hdd_partition_id"]].name, partitions_size_name[k][vh["hdd_partition_id"]].size]);
-            vh["partition_name"] = name;
+            console.log(vh);
+            if (vh["hdd_partition_id"] != 0) {
+              var name = "%0 (%1ГБ)".format([hdd_partitions_with_names[vh["hdd_partition_id"]]["name"], hdd_partitions_with_names[vh["hdd_partition_id"]]["size"]]);
+              vh["partition_name"] = name;
+            };
           });
           // теперь необходимо сгруппировать по partition_name
           g_f_partitions[k] = _.groupBy(g_partitions[k], "partition_name");
@@ -521,15 +538,17 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
           _.each(full_response[k]["partitions_info"], function (vh, vk) {
             partitions_info.push({value: vh['size'], text: ("предел на " + vh['name'])});
           });
-          full_response[k]["partitions_info"] = partitions_info;
+          full_response[k]["partitions_info"] = limits_on_partitions_in_agents[k];
+          // теперь будем считывать информацию об интерфейсах 
+          q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
+            // как всегда, сначала группируем по agent_id
+            var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
+            changeZerosOnNull(interfaces_grouped_by_agent_id, "upload");
+            changeZerosOnNull(interfaces_grouped_by_agent_id, "download");
+            // ой, все. Отсылаем финальный вариант
+            response.send(full_response);
+          });
         });
-        // теперь будем считывать информацию об интерфейсах 
-        q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
-          var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
-          // ой, все. Отсылаем финальный вариант
-          
-        });
-        response.send(full_response);
       });
     });
   }); 
@@ -543,7 +562,7 @@ app.get('/extra/api/agents/:agents', function (req, res) {
   var start_date = req.body.from;
   var end_date = req.body.till;
   var q = new sql.Request(connection);
-  // собираем информации об агентах
+  // собираем информацию об агентах
   q.query(queries.agents.format([agents_string]), function (err, _agents) {
     q.query(queries.table.format(["hdd_partitions"]), function (err, _hdd_partitions) {
       q.query(queries.table.format(["interfaces"]), function (err, _interfaces) {
