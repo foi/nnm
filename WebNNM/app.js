@@ -358,9 +358,7 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
       q.query(queries.select_latest_n_periods.format([public_config.chart.minutes]), function (err, _periods) {
         periods = _periods;
         periods_ids = _.pluck(periods, "id");
-        //console.log(err);
         q.query(queries.get_ping_stats_from_till_period_for_hosts.format([_.first(periods_ids), _.last(periods_ids), hosts_string]), function (err, _ping_data) {
-          //console.log(err);
           // найдем недостающие периоды
           var ping_data = _ping_data;
           var missed_periods = {};
@@ -382,7 +380,6 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
              if (p.latency == 0) { p.latency = null };
           });
           // заменить period_id на полноценную дату
-          //setPeriodForPeriodId(ping_data, periods);
           var grouped_by_host_id = _.groupBy(ping_data, 'host_id');
           var host_and_latency = {};
           var hostname_and_latencies = [];
@@ -396,7 +393,6 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
             var hostname = _.findWhere(hosts, {id: parseInt(k)}).name;
             host_and_latency[hostname] = [];
             _.each(v, function (val) {
-              //console.log(val);
               host_and_latency[hostname].push(val['latency']);
             });
           });
@@ -436,6 +432,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
   var hdd_partitions_with_names = {};
   var agents_and_partitions_ids = {};
   var limits_on_partitions_in_agents = {};
+  var agents_and_interfaces_ids = {};
   var tmp_partitions = _.groupBy(hdds, "host_and_port_agent_id");
   var hdd_partitions = _.groupBy(hdds, "id");
   // коллекция ид раздела : { объем, имя }
@@ -456,7 +453,15 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       agents_and_partitions_ids[k].push(partition_data["id"]);
     });
   });
-  //console.log(hdd_partitions_with_names);
+  // создадим коллекцию в ид агентов и их ид интерфейсов
+  var tmp_interfaces = _.groupBy(interfaces, "host_and_port_agent_id");
+  _.each(tmp_interfaces, function (v, k) {
+    agents_and_interfaces_ids[k] = [];
+    _.each(v, function (interface_data) {
+      agents_and_interfaces_ids[k].push(interface_data["id"]);
+    }); 
+  });
+  console.log(agents_and_interfaces_ids);
   var full_response = {};
   var periods = periods;
   var periods_ids = _.pluck(periods, "id");
@@ -515,11 +520,8 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
           };
           // заменим hdd_partitions_id на "c:\ (465гб)"
           _.each(g_partitions[k], function (vh) {
-            console.log(vh);
-            if (vh["hdd_partition_id"] != 0) {
-              var name = "%0 (%1ГБ)".format([hdd_partitions_with_names[vh["hdd_partition_id"]]["name"], hdd_partitions_with_names[vh["hdd_partition_id"]]["size"]]);
-              vh["partition_name"] = name;
-            };
+            var name = "%0 (%1ГБ)".format([hdd_partitions_with_names[vh["hdd_partition_id"]]["name"], hdd_partitions_with_names[vh["hdd_partition_id"]]["size"]]);
+            vh["partition_name"] = name;
           });
           // теперь необходимо сгруппировать по partition_name
           g_f_partitions[k] = _.groupBy(g_partitions[k], "partition_name");
@@ -543,8 +545,8 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
           q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
             // как всегда, сначала группируем по agent_id
             var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
-            changeZerosOnNull(interfaces_grouped_by_agent_id, "upload");
-            changeZerosOnNull(interfaces_grouped_by_agent_id, "download");
+            ////// !!!!!!! В базе попраить! Если удаляешь хост и порт, а у него есть интерфейсы, он не удаляетсяЙЙЙЙ !!!  с cpu_mem_load_поставить_каскад и в интерфейсах
+            //console.log(interfaces_grouped_by_agent_id);
             // ой, все. Отсылаем финальный вариант
             response.send(full_response);
           });
