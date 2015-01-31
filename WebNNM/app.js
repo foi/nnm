@@ -436,6 +436,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
   var full_response = {};
   var periods = periods;
   var periods_ids = _.pluck(periods, "id");
+  var partitions_size_name = {};
   // ответ будет следующего формата вставить сслыку на гист гитхаба
 
   // сначала соберем информацию о процессоре и оперативке и о потеряных периодах
@@ -479,7 +480,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
         hdd_names_and_space[h['id']] = { size: h['total_space'], name: h['partition_letter'] };
       });
       full_response[k]["partitions_info"] = hdd_names_and_space;
-      console.log(full_response[k]["partitions_info"]);
+      partitions_size_name[k] = hdd_names_and_space;
       // теперь соберем информацию о разделах
       q.query(queries.select_hdd_part_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, hdd_part_stat) {
         var g_partitions = _.groupBy(hdd_part_stat, 'agent_id');
@@ -500,21 +501,8 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
           };
           // заменим hdd_partitions_id на "c:\ (465гб)"
           _.each(g_partitions[k], function (vh) {
-              var key = vh["hdd_partition_id"];
-              if (!_.isUndefined(full_response[k]["partitions_info"][key])) {
-              //  console.log(key);
-             // console.log(full_response[k]["partitions_info"][key]);
-              var name = "%0 (%1ГБ)".format([
-                hdd_names_and_space[key]["name"], 
-                hdd_names_and_space[key]["size"]]
-              );
-              vh["partition_name"] = name;
-
-              };
-              
-              
-              
-
+            var name = "%0 (%1ГБ)".format([partitions_size_name[k][vh["hdd_partition_id"]].name, partitions_size_name[k][vh["hdd_partition_id"]].size]);
+            vh["partition_name"] = name;
           });
           // теперь необходимо сгруппировать по partition_name
           g_f_partitions[k] = _.groupBy(g_partitions[k], "partition_name");
@@ -539,11 +527,9 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
         q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
           var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
           // ой, все. Отсылаем финальный вариант
-          //console.log(err);
-          //console.log(interfaces_stat);
-          response.send(full_response);
+          
         });
-        //response.send(full_response);
+        response.send(full_response);
       });
     });
   }); 
