@@ -27,6 +27,7 @@
   <h4>Занятое пространство на разделах жестких дисков</h4>
   <partitions-chart config="agent_partitions_chart" id="partitions_chart"></partitions-chart>
   {{ agent_partitions_chart | json}}
+  {{ ping_chart_data.data | json }}
   <!-- конец напенили я занятым  пространством на жестких дисках -->
   </div>
   <!-- Конец панели с графиками -->

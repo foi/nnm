@@ -392,7 +392,16 @@ nnm.directive('pingChart', [function () {
           chart = c3.generate(scope.config);
         }
         else {
-          chart.load({columns: newSeries, duration: 100});
+          if (oldSeries) {
+            var hostnames = [];
+            _.each(oldSeries, function (v) {
+              hostnames.push(v[0]);
+            });
+            chart.load({columns: newSeries, duration: 100, unload: hostnames});
+          } 
+          else {
+            chart.load({columns: newSeries, duration: 100 });
+          }
         }
       });
     }
