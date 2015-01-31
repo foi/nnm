@@ -71,7 +71,8 @@ var queries = {
   agents: "SELECT * FROM hosts_and_ports WHERE id IN (%0)",
   agents_for_list: "SELECT * FROM hosts_and_ports WHERE type_of_host_and_port_id=3",
   select_cpu_mem_load_for_agents: "SELECT agent_id, cpu_load, free_mem, period_id  FROM agents_cpu_mem_load WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)",
-  select_hdd_part_stat: "SELECT agent_id, hdd_partition_id, size, period_id FROM hdd_stat_journal WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)" 
+  select_hdd_part_stat: "SELECT agent_id, hdd_partition_id, size, period_id FROM hdd_stat_journal WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)",
+  select_interfaces_stat: "SELECT * FROM interfaces_stat_journal WHERE (period_id BETWEEN %0 AND %1) AND agent_id IN (%2)" 
 }
 
 var html_folder = __dirname + '/public/html/';
@@ -88,7 +89,6 @@ var conf = {};
 function setPeriodForPeriodId(array, periods_array){
   _.map(array, function(e){
     e.date = new Date((_.findWhere(periods_array, { "id": e.period_id} )).period);
-    //e.date = moment.format(e.date, )
   });
 }; 
 // получить ид из строки вида 1&2&3
@@ -98,7 +98,15 @@ function getIdsFromAndArray(str) {
     tmp.push(parseInt(e));
   });
   return tmp;
-}
+};
+// заменить 0 на null во вложенной коллекции
+function changeZerosOnNull(collection, nullify_field) {
+  _.each(collection, function (v, k) {
+    _.each(v, function (p) {
+      if (p[nullify_field] == 0) { p[nullify_field] = null };
+    });
+  });
+};
 
 // получить все данные из таблицы
 function queryAll (query) {
@@ -409,10 +417,6 @@ app.get('/extra/api/ping/:hosts', function (req, res) {
   });
 });
 
-function ddd () {
-  console.log(memory);
-}
-
 app.get('/extra/api/get_agents_ids', function (req, res) {
   queryAll(queries.agents_for_list).then(function (data) {
     res.send(data);
@@ -432,30 +436,8 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
   var full_response = {};
   var periods = periods;
   var periods_ids = _.pluck(periods, "id");
+  // ответ будет следующего формата вставить сслыку на гист гитхаба
 
-
-  // ответ будет следующего формата 
-  // {
-  //   "1":{
-  //     "cpu_load": ["загрузка ЦПУ %", 1,2,4,5...],["periods", 15.01.2015 21 30, 15.01.2015 21 31...],
-  //     "memory": ["занято ОЗУ МБ", 1000, 1024, 1300...],["periods", 15.01.2015 21 30, 15.01.2015 21 31...],
-  //     "interfaces": {
-  //       "interface1": ["download", 1,2,3,4,5], ["upload", 1,2,3,4,5,6]
-  //     },
-  //     "hdd_partitions": ["c:/", 1,2,3,4,7,76,67], 
-  //     "overall": {
-  //       "memory": 1200,
-  //       "partitions_info": {
-  //         1 : {
-  //          size: 100,
-  //          name: "c:/"
-  //         },
-  //         2 ...
-  //         
-  //       }
-  //     }
-  //   }
-  // }
   // сначала соберем информацию о процессоре и оперативке и о потеряных периодах
   q.query(queries.select_cpu_mem_load_for_agents.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, cpmem) {
     var missed_periods = {}; // потерянные периоды
@@ -497,21 +479,12 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
         hdd_names_and_space[h['id']] = { size: h['total_space'], name: h['partition_letter'] };
       });
       full_response[k]["partitions_info"] = hdd_names_and_space;
+      console.log(full_response[k]["partitions_info"]);
       // теперь соберем информацию о разделах
       q.query(queries.select_hdd_part_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, hdd_part_stat) {
         var g_partitions = _.groupBy(hdd_part_stat, 'agent_id');
         // заменим размер, если он 0 на null, а также заменим ид партишна на его букву
-        _.each(g_partitions, function (v, k) {
-          _.each(v, function (p) {
-            if (p.size == 0) { p.size = null };
-            //p['partition_letter'] = _.findWhere(hdds, p.hdd_partition_id).partition_letter;
-          });
-        });
-
-        // _.each(g_partitions, function (v, k) {
-        //   g_partitions[k] = _.groupBy(v, 'partition_letter');
-        // });
-        //var partitions_names = [];
+        changeZerosOnNull(g_partitions, "size");
         // еще более сгруппированные данные разделов
         var g_f_partitions = {};
         // добавим недостающие периоды и причешем данные в тот формат, что требует c3js
@@ -526,10 +499,22 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
             g_partitions[k] = _.sortBy(g_partitions[k], "period_id"); // упорядочиваем по period_id
           };
           // заменим hdd_partitions_id на "c:\ (465гб)"
-          _.each(g_partitions[k], function (vh, vk) {
-            var name = "%0 (%1ГБ)".format([full_response[k]["partitions_info"][vh["hdd_partition_id"]].name, full_response[k]["partitions_info"][vh["hdd_partition_id"]].size]);
-            vh["partition_name"] = name;
-            //if (!_.contains(partitions_names, name)) partitions_names.push(name);
+          _.each(g_partitions[k], function (vh) {
+              var key = vh["hdd_partition_id"];
+              if (!_.isUndefined(full_response[k]["partitions_info"][key])) {
+              //  console.log(key);
+             // console.log(full_response[k]["partitions_info"][key]);
+              var name = "%0 (%1ГБ)".format([
+                hdd_names_and_space[key]["name"], 
+                hdd_names_and_space[key]["size"]]
+              );
+              vh["partition_name"] = name;
+
+              };
+              
+              
+              
+
           });
           // теперь необходимо сгруппировать по partition_name
           g_f_partitions[k] = _.groupBy(g_partitions[k], "partition_name");
@@ -550,12 +535,17 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
           });
           full_response[k]["partitions_info"] = partitions_info;
         });
-        // ой, все. Отсылаем финальный вариант
-        response.send(full_response);
+        // теперь будем считывать информацию об интерфейсах 
+        q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
+          var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
+          // ой, все. Отсылаем финальный вариант
+          //console.log(err);
+          //console.log(interfaces_stat);
+          response.send(full_response);
+        });
+        //response.send(full_response);
       });
-
     });
-    
   }); 
 };
 
@@ -587,283 +577,5 @@ app.get('/extra/api/agents/:agents', function (req, res) {
     
   });
 });
-
-  // // Если стартовая и последующие даты не указаны
-  // if (_.isUndefined(start_date) && _.isUndefined(end_date)) {
-  //   getPeriodsForN(public_config.chart.minutes - 1).
-  //   then(function (_p) {
-  //     var periods = _p; 
-  //     periods_ids = _.pluck(_p, "id");
-  //     getPingData(_.first(periods_ids), _.last(periods_ids), hosts).
-  //     then(function (_p_d) {
-  //       var ping_data = _p_d;
-  //       var missed_periods = {};
-  //       // найдем недостающие периоды
-  //       _.each(hosts_int, function (host) {
-  //         var m = _.where(ping_data, {host_id: host});
-  //         if (_.size(m) != 0)
-  //           missed_periods[host] = _.difference(periods_ids, _.pluck(m, "period_id"));
-  //       });
-  //       // теперь необходимо заполнить добавить недостающие периоды  и null
-  //       _.each(missed_periods, function (missed, host_id) {
-  //         _.each(missed, function (m) {
-  //           ping_data.push({host_id: host_id, latency: null, period_id: m});
-  //         });
-  //       });
-  //       // отсортируем по period_id
-  //       ping_data = _.sortBy(ping_data, "period_id");
-  //       // заменить 0 на null, чтобы были разрывы в графике
-  //       _.each(ping_data, function(p){
-  //         if (p.latency == 0) { p.latency = null };
-  //       });
-  //       var by_host_id = _.groupBy(ping_data, 'host_id');
-  //       var fin = {};
-  //       _.each(by_host_id, function (v, k) {
-  //         //console.log(k);
-  //         //console.log(v);
-  //           fin[k] = [];
-  //         _.each(v, function (val) {
-  //           console.log(val);
-  //           fin[k].push(val['latency']);
-  //         });
-          
-  //       });
-  //       var f = [];
-  //       _.each(fin, function (val, key) {
-
-  //         _.each(val, function (elm) {
-            
-  //         })
-          
-  //       });
-        
-  //       // заменим period_id часами и минутами
-  //       //setPeriodForPeriodId(ping_data, "%H:%M", periods);
-
-  //       res.send(fin);
-  //       //res.send(ping_data);
-  //     })
-  //   }, 
-  //   function (err) {
-  //     console.log(err);
-  //   });
-  // }
-  // else {
-
-  // }
-//});
-
-
-
-// app.post('/extra/api/ping/:hosts', function (req, res) {
-//   var hosts = [];
-//   _.each(req.params.hosts.split('&'), function (e) {
-//     hosts.push(parseInt(e));
-//   });
-//   var hosts_int = hosts;
-//   hosts = hosts.join();
-//   var start_date = req.body.from;
-//   var end_date = req.body.till;
-//   var response = {};
-//   var periods_ids = [];
-//   // Если стартовая и последующие даты не указаны
-//   if (_.isUndefined(start_date) && _.isUndefined(end_date)) {
-//     getPeriodsForN(public_config.chart.minutes - 1).
-//     then(function (_p) {
-//       var periods = _p; 
-//       periods_ids = _.pluck(_p, "id");
-//       getPingData(_.first(periods_ids), _.last(periods_ids), hosts).
-//       then(function (_p_d) {
-//         var ping_data = _p_d;
-//         var missed_periods = {};
-//         // найдем недостающие периоды
-//         _.each(hosts_int, function (host) {
-//           var m = _.where(ping_data, {host_id: host});
-//           if (_.size(m) != 0)
-//             missed_periods[host] = _.difference(periods_ids, _.pluck(m, "period_id"));
-//         });
-//         // теперь необходимо заполнить добавить недостающие периоды  и null
-//         _.each(missed_periods, function (missed, host_id) {
-//           _.each(missed, function (m) {
-//             ping_data.push({host_id: host_id, latency: null, period_id: m});
-//           });
-//         });
-//         // отсортируем по period_id
-//         ping_data = _.sortBy(ping_data, "period_id");
-//         // заменить 0 на null, чтобы были разрывы в графике
-//         _.each(ping_data, function(p){
-//           if (p.latency == 0) { p.latency = null };
-//         });
-//         var by_host_id = _.groupBy(ping_data, 'host_id');
-//         var fin = {};
-//         _.each(by_host_id, function (v, k) {
-//           //console.log(k);
-//           //console.log(v);
-//             fin[k] = [];
-//           _.each(v, function (val) {
-//             console.log(val);
-//             fin[k].push(val['latency']);
-//           });
-          
-//         });
-//         var f = [];
-//         _.each(fin, function (val, key) {
-
-//           _.each(val, function (elm) {
-            
-//           })
-          
-//         });
-        
-//         // заменим period_id часами и минутами
-//         //setPeriodForPeriodId(ping_data, "%H:%M", periods);
-
-//         res.send(fin);
-//         //res.send(ping_data);
-//       })
-//     }, 
-//     function (err) {
-//       console.log(err);
-//     });
-//   }
-//   else {
-
-//   }
-// });
-
-
-// получить последнюю информацию о пинге для всех хостов
-// app.get('/latest/ping/all', function(req, res){
-//   var q = new sql.Request(connection);
-//   q.query(queries.get_latest_ping_data.format([public_config.chart.minutes]), function(err, entries){
-//     res.send(entries);
-//   });
-// });
-// Получить статистику по одному хосту
-// app.get('/stat/single/:type/:id', function (req, res) {
-//   var id = req.params.id;
-//   var type = req.params.type;
-//   var result_stat_ping = { "id_periods_when_it_is_down": [], "count": 0, "avg_latency": 0, "times_of_down": 0 };
-//   var result_stat_ports = { "id_periods_when_it_is_down": [], "count": 0, "times_of_down": 0 }
-//   var ping_data = 0;
-//   // если статистика по пингу
-//   if (type == 'ping') {
-//     var q = new sql.Request(connection);
-//     q.query(queries.select_ping_stat_for_host.format([id]), function (err, entries) {
-//       entries.forEach(function(e){
-//         if (e.latency == 0) {
-//           result_stat_ping['id_periods_when_it_is_down'].push(e.period_id);
-//         };
-//         ping_data += e.latency;
-//       });
-//       result_stat_ping['count'] = entries.length;
-//       result_stat_ping['times_of_down'] = result_stat_ping['id_periods_when_it_is_down'].length;
-//       result_stat_ping['avg_latency'] = parseInt(ping_data / result_stat_ping['count']);
-//       res.send(result_stat_ping);
-//     });
-//   }
-//   // Если статистика по портам
-//   else if (type == 'check_port') {
-//     var q = new sql.Request(connection);
-//     q.query(queries.select_check_port_stat_for_host_and_port.format([id]), function (err, entries) {
-//       console.log(err);
-//       entries.forEach(function(e){
-//         if (e.is_alive == false) {
-//           result_stat_ports["id_periods_when_it_is_down"].push(e.period_id);
-//         };
-//       });
-//       result_stat_ports['count'] = entries.length;
-//       result_stat_ports['times_of_down'] = result_stat_ports['id_periods_when_it_is_down'].length;
-//       console.log(result_stat_ports);
-//       res.send(result_stat_ports);
-//     });
-//   }
-// });
-
-// // получить данные из таблицы в json
-// app.get('/get/:table', function(req, res) {
-//   //var tables = ["interfaces", "periods" ];
-//   var table_name = req.params.table;
-//   var q = new sql.Request(connection);
-//   if (table_name.indexOf(' ') == -1) {
-//     if (_.include(public_config.tables, table_name)) {
-//       q.query(queries.table.format([table_name]), function(err, entries) {
-//         res.send(entries);
-//       });
-//     } else {
-//       q.query("SELECT * FROM memory", function(err, entries){
-//         res.send(entries);
-//       });
-//     }
-//   } else {
-//     res.sendStatus(404);
-//   }
-// });
-
-
-
-
-
-
-// // получаем последнюю статистику за последние 30 минут для определенного агента 
-// app.get("/agents/stat/latest/:id", function(req, res){
-//   var agent_id = req.params.id;
-//   var response = {};
-//   response[agent_id] = {};
-//   var q = new sql.Request(connection);
-//   q.query(queries.table.format(["hdd_partitions"]), function(err, hdd_partitions){
-//     q.query(queries.select_latest_n_periods.format([(public_config.chart.minutes - 1)]), function(err, p_data){
-//       var latest_periods = _.pluck(p_data, "id");
-//       var periods_range_and_agent_id = [_.first(latest_periods), _.last(latest_periods), agent_id];
-//       q.query(queries.select_cpu_mem_load_till_period_from_period_for_agent.format(periods_range_and_agent_id), function(err, cpu_mem_data){
-//         //теперь нужно найти каких периодов нет в cpu_mem_data и вставить значения
-//         var missed_periods = _.difference(latest_periods, _.pluck(cpu_mem_data, "period_id"));
-//         if (!_.isEmpty(missed_periods)) {
-//           _.each(missed_periods, function(p){
-//             cpu_mem_data.push({ "cpu_load": null, "free_mem": null, "period_id": p });
-//           });
-//         };
-//         // заменим period_id на нормальную дату 
-//         setPeriodForPeriodId(cpu_mem_data, "%H:%M", p_data);
-//         response[agent_id]["cpu_mem"] = cpu_mem_data;
-//         q.query(queries.select_interfaces_stat_till_period_from_period_for_agent.format(periods_range_and_agent_id), function(err, interface_stat_data) {
-//           // снова найдем в interface_stat_data каких периодов нет, и вставим их
-//           var missed_periods_for_interface = _.difference(latest_periods, _.pluck(interface_stat_data, "period_id"));
-//           var grouped_interfaces = _.groupBy(interface_stat_data, function(i){ return i.interface_id });
-//           if (!_.isEmpty(missed_periods_for_interface)) {
-//             _.each(grouped_interfaces, function(i){
-//               _.each(missed_periods_for_interface, function(p){
-//                 i.push({"upload": null, "download": null, "period_id": p });
-//               });
-//             });
-//           };
-//           // заменим period_id на нормальную дату 
-//           _.each(grouped_interfaces, function(i){
-//             setPeriodForPeriodId(i, "%H:%M", p_data);
-//           });
-//           response[agent_id]["interfaces_stat"] = grouped_interfaces;
-//           // выбирай статистику для разделов
-//           q.query(queries.select_hdd_partitions_stat_till_period_from_period_for_agent.format(periods_range_and_agent_id), function(err, partitions_stat_data){
-//            // !сделать единый метод для вставки недостающих, добавить сортировку по периоду.
-//             var missed_periods_for_disks = _.difference(latest_periods, _.pluck(partitions_stat_data, "period_id"));
-//             var grouped_partitions = _.groupBy(partitions_stat_data, function(p){ return p.hdd_partition_id });
-//             if (!_.isEmpty(missed_periods_for_disks)) {
-//               _.each(grouped_partitions, function(p){
-//                 _.each(missed_periods_for_disks, function(missed_p){
-//                   p.push({ "size": null, "period_id": missed_p });
-//                 });
-//               });
-//             };
-//             _.each(grouped_partitions, function(p){
-//               setPeriodForPeriodId(p, "%H:%M", p_data);
-//             });
-//             response[agent_id]["partitions_stat"] = grouped_partitions;
-//             res.send(response);
-//           });
-//         });
-//       });
-//     }); 
-//   });
-// });
 
 app.listen(process.env.PORT || 80);
