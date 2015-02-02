@@ -180,6 +180,7 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 * expressjs
 * strftime из js-methods
 * twitter bootstrap
+* angularjs
 * angular x-editable
 * :heartbeat: c3js :heartbeat:
 
