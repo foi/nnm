@@ -21,43 +21,8 @@ app.use(bodyParser.urlencoded({
 var sql = require('mssql');
 // SQL Запросы
 var queries = {
-  hosts_with_group_name: "SELECT h.id, h.name, h.ip_or_name, h.group_id, g.name AS group_name FROM hosts AS h INNER JOIN groups AS g ON h.group_id = g.id ORDER BY h.id ASC",
-  add_host: "INSERT INTO hosts (name, ip_or_name, group_id) VALUES ('%0','%1',%2)",
-  select_types_of_host_and_port: "SELECT * FROM types_of_host_and_port ORDER BY id ASC",
-  add_new_type_of_host_and_port: "INSERT INTO types_of_host_and_port (name) VALUES ('%0')",
-  add_new_group: "insert into groups (name) values ('%0')",
-  add_subscriber: "INSERT INTO subscribers (email) values ('%0')",
-  hosts_and_ports: "SELECT hp.id, hp.name, hp.port, hp.host_id, hp.type_of_host_and_port_id, h.name AS hostname, t.name AS typename FROM hosts_and_ports AS hp INNER JOIN hosts AS h ON hp.host_id = h.id INNER JOIN types_of_host_and_port AS t ON hp.type_of_host_and_port_id = t.id",
-  add_new_host_with_port: "INSERT INTO hosts_and_ports (host_id, port, name, type_of_host_and_port_id, route) VALUES (%0,%1,'%2',%3,'%4')",
   table: "SELECT * FROM %0 ORDER BY id ASC",
-  groups: "SELECT * FROM groups ORDER BY id ASC",
-  for_chart_on_single_host_ping: "SELECT p.period AS period, latency, h.name AS hostname FROM journal_of_ping_hosts INNER JOIN hosts AS h ON host_id = h.id INNER JOIN (SELECT top %0 * FROM periods where id <= (SELECT MAX(ID) FROM periods) ORDER BY id ASC) AS p ON period_id = p.id WHERE host_id = %1",
-  all_ping_stats: "SELECT latency, h.name AS hostname FROM journal_of_ping_hosts INNER JOIN hosts AS h ON host_id = h.id INNER JOIN (SELECT top %0 * FROM periods where id BETWEEN %1 AND %2 ORDER BY id ASC) AS p ON period_id = p.id",
-  id_period_maximum: "select max(id) from periods",
-  get_latest_periods: "SELECT period from periods WHERE id BETWEEN %0 AND %1",
-  get_subscribers: "SELECT id, email FROM subscribers",
-  chart_for_group: "SELECT p.period AS period, latency, h.name AS hostname FROM journal_of_ping_hosts INNER JOIN (select * FROM hosts WHERE group_id = %0) AS h ON host_id = h.id INNER JOIN (SELECT top %1 * FROM periods where id <= (SELECT MAX(ID) FROM periods) ORDER BY id ASC) AS p ON period_id = p.id",
-  select_last_n_entries: "DECLARE @max_id int = (SELECT MAX(id) FROM %0) DECLARE @min_id int = @max_id - %1 SELECT * FROM %0 WHERE id BETWEEN @min_id AND @max_id",
-  select_ping_stat_for_host: "SELECT TOP 1000 period_id, latency FROM journal_of_ping_hosts WHERE host_id = %0",
-  select_check_port_stat_for_host_and_port: "SELECT period_id, is_alive FROM journal_of_check_ports WHERE host_and_port_id = %0",
-  get_latest_n_journal_of_ping_entries_about_host: "DECLARE @max_id int = (SELECT MAX(id) FROM periods) DECLARE @min_id int = @max_id - %0 select top %0 j.latency as latency, p.period AS period from (SELECT * FROM journal_of_ping_hosts WHERE period_id BETWEEN @min_id AND @max_id) AS j INNER JOIN periods AS p ON j.period_id = p.id where j.host_id = %1",
-  get_begin_or_end_day_period_id: "SELECT top 1 * FROM periods WHERE period >= '%0'",
-  get_latest_ping_data: "DECLARE @max_id int = (SELECT MAX(period_id) FROM journal_of_ping_hosts) DECLARE @min_id int = @max_id - %0 select j.latency as latency, p.period AS period, host_id from (SELECT * FROM journal_of_ping_hosts WHERE period_id BETWEEN @min_id AND @max_id) AS j INNER JOIN periods AS p ON j.period_id = p.id",
-  get_all_today_periods: "SELECT id FROM periods WHERE period BETWEEN '%0' AND '%1'",
-  select_hp_ids_agents: "SELECT hp.id AS id, hp.host_id AS host_id, h.group_id AS group_id FROM hosts_and_ports AS hp INNER JOIN hosts AS h ON hp.host_id = h.id WHERE hp.type_of_host_and_port_id = 3",
-  select_latest_agents_and_periods_for_agent: "DECLARE @max_id int = (SELECT MAX(period_id) FROM agents_and_periods) DECLARE @min_id int = @max_id - %0 SELECT id, period_id FROM agents_and_periods WHERE period_id BETWEEN @min_id AND @max_id AND host_and_port_agent_id = %1",
-  select_cpu_mem_load_for_agent: "SELECT cpu_load, free_mem FROM agents_cpu_mem_load WHERE agent_and_period_id IN (%0)",
-  select_interfaces_stat: "SELECT interface_id, upload, download FROM interfaces_stat_journal WHERE agent_and_period_id IN (%0)",
-  select_this_periods: "SELECT * FROM periods WHERE id IN (%0)",
-  update_table_field_string_value_with_id: "UPDATE %0 SET %1 = '%2' WHERE id = %3",
-  update_table_field_int_value_with_id: "UPDATE %0 SET %1 = %2 WHERE id = %3",
-  delete_from_table_with_this_id: "DELETE FROM %0 WHERE id=%1",
   select_latest_n_periods: "DECLARE @max_id int = (SELECT MAX(id) FROM periods) DECLARE @min_id int = @max_id - %0 SELECT id, period FROM periods WHERE id BETWEEN @min_id AND @max_id",
-  select_cpu_mem_load_till_period_from_period_for_agent: "SELECT cpu_load, free_mem, period_id FROM agents_cpu_mem_load WHERE (period_id BETWEEN %0 AND %1) AND agent_id = %2",
-  select_interfaces_stat_till_period_from_period_for_agent: "SELECT interface_id, upload, download, period_id FROM interfaces_stat_journal WHERE (period_id BETWEEN %0 and %1) AND agent_id = %2",
-  select_hdd_partitions_stat_till_period_from_period_for_agent: "SELECT hdd_partition_id, size, period_id FROM hdd_stat_journal WHERE (period_id BETWEEN %0 AND %1) AND agent_id = %2",
-  select_latest_ping_stat_till_period_from_period: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1",
-  select_latest_ping_stat_till_period_from_period_for_host: "SELECT host_id, latency, period_id FROM journal_of_ping_hosts WHERE period_id BETWEEN %0 AND %1 AND host_id = %2",
   select_periods_from_between_ids: "SELECT * FROM periods WHERE id BETWEEN %0 AND %1",
   select_all_from: "SELECT * FROM %0",
   select_by_id: "SELECT * FROM %0 WHERE id=%1",
@@ -229,7 +194,7 @@ app.get('/config/db_connection', function(req, res){
 
 // Проверка, работает ли служба ServiceNNM
 app.get('/config/servicennm', function (req, res) {
-  exec('sc query "pinger"', function (error, stdout, stderr) {
+  exec('sc query "ServiceNNM"', function (error, stdout, stderr) {
     if (stdout.indexOf("RUNNING") != -1)
       res.send("RUNNING");
     else if (stdout.indexOf("STOPPED") != -1)
