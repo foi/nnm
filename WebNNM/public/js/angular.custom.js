@@ -175,12 +175,15 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
     angular.forEach($scope.agents_data[i]["partitions_info"], function (v, k) {
       if (v.value > maximum_partition_size) maximum_partition_size = v.value;
     }); 
-    // тоже сделать тики!!! и вообще воздать сервис. который будет дробить на...
     $scope.agent_partitions_chart["axis"]["y"]["tick"]["format"] = function (x) { return x + " ГБ" };
     $scope.agent_partitions_chart["size"]["height"] = 300;
     $scope.agent_partitions_chart["axis"]["y"]["max"] = maximum_partition_size;
     $scope.agent_partitions_chart["grid"]["y"]["lines"] = $scope.agents_data[i]["partitions_info"];
     $scope.agent_partitions_chart.data.columns = $scope.agents_data[i]["partitions"];
+    // теперь заполним инфу для графика, на которой будут отображаться данные интерфейсов
+    $scope.agent_interfaces_chart = angular.copy($scope.agent_cpu_chart_default);
+    $scope.agent_interfaces_chart["axis"]["y"]["tick"]["format"] = function (x) { return x + " кб/с" };
+    $scope.agent_interfaces_chart["data"]["columns"] = $scope.agents_data[i]["interfaces_data"];
   };
 }]);
 
@@ -463,6 +466,34 @@ nnm.directive('partitionsChart', [function () {
             chart.load({columns: newSeries.data.columns, duration: 100});
           }
           chart.ygrids(newSeries.grid.y.lines);
+        }
+      });
+    }
+  };
+}]);
+// директива для графика статистика интерфейсов
+nnm.directive('interfacesChart', [function () {
+  return {
+    restrict: 'E',
+    scope: { config: '=' },
+    link: function (scope, element, attrs) {
+      var chart;
+      scope.config.bindto = "#" + attrs.id;
+      scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+        if (_.isUndefined(chart)) {
+          chart = c3.generate(scope.config);
+        }
+        else {
+          if (oldSeries) {
+            var interfaces_names = [];
+            _.each(oldSeries, function (v) {
+              interfaces_names.push(v[0]);
+            });
+            chart.load({columns: newSeries, duration: 100, unload: interfaces_names});
+          } 
+          else {
+            chart.load({columns: newSeries, duration: 100 });
+          }
         }
       });
     }

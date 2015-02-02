@@ -539,10 +539,9 @@ function agents_helper_fill_partitions_data(missed_periods, hdd_partitions_with_
   });
 };
 // создание данных для интерфейсов
-function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces_ids, interface_id_and_name, full_response, periods_ids) {
+function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces_ids, interface_id_and_name, full_response, periods_ids, periods_readable) {
   // как всегда, сначала группируем по agent_id
   // новая колелкция где все данные для интерфейсов уже должны быть причесаны
-  var agent_id_with_interfaces_statistics = {};
   var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
   // ////// !!!!!!! В базе попраить! Если удаляешь хост и порт, а у него есть интерфейсы, он не удаляетсяЙЙЙЙ !!!  с cpu_mem_load_поставить_каскад и в интерфейсах
   // теперь набьем недостающее периоды
@@ -552,22 +551,59 @@ function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces
       _.each(agents_and_interfaces_ids[agent_id], function (i) {
         if (_.isUndefined(_.findWhere(interfaces_grouped_by_agent_id[agent_id], {interface_id: i, period_id: p}))) {
           interfaces_grouped_by_agent_id[agent_id].push({"period_id": p, interface_id: i, "upload": null, "download": null});
+          //console.log({"period_id": p, interface_id: i});
         };
       });
     });
     interfaces_grouped_by_agent_id[agent_id] = _.sortBy(interfaces_grouped_by_agent_id[agent_id], "period_id"); 
     console.log(_.size(interfaces_grouped_by_agent_id[agent_id]));
-    // теперь необходимо сгруппировать следующим образом {agent_id: [["подключение по локальной сети1 UL", 1,3,4 ], ["подключение по лок сети DL", 2,3,4,5,1]]}
-    // сначала добавим имя интерфейса, a также уберем период_ид и агент_ид
+    // сначала добавим имя интерфейса
     _.each(interfaces_grouped_by_agent_id[agent_id], function (i) {
       i["interface_name"] = interface_id_and_name[i["interface_id"]];
     });
     // теперь еще и группируем по имени интерфейса
     interfaces_grouped_by_agent_id[agent_id] = _.groupBy(interfaces_grouped_by_agent_id[agent_id], "interface_name");
-  });
-  
-  full_response["interfacessss"] = interfaces_grouped_by_agent_id;
-  //console.log(interfaces_grouped_by_agent_id);
+    // теперь необходимо сгруппировать следующим образом {agent_id: [["подключение по локальной сети1 UL", 1,3,4 ], ["подключение по лок сети DL", 2,3,4,5,1]]}
+    var agent_i, tmp_interfaces_data;
+    var i_index = 0;
+    _.each(interfaces_grouped_by_agent_id[agent_id], function (_interface_data) {
+      console.log(_interface_data);
+      if (_.isUndefined(agent_i)) {
+        agent_i = agent_id;
+        tmp_interfaces_data = [];
+      } else {
+        if (agent_i != agent_id) {
+          agent_i = agent_id;
+          tmp_interfaces_data = [];
+        };
+      };
+      // сначала заполним UL для интерфейсов
+      _.each(_interface_data, function (i, idx) {
+        if (_.isUndefined(tmp_interfaces_data[i_index])) {
+          tmp_interfaces_data.push(["UL " + i["interface_name"]]);
+          tmp_interfaces_data[i_index].push(i["upload"]);
+        } 
+        else {
+          tmp_interfaces_data[i_index].push(i["upload"]);
+          if (idx == _.size(periods_ids - 1)) i_index += 1;
+        };
+      });
+      // а теперь и DL
+      _.each(_interface_data, function (i, idx) {
+        if (_.isUndefined(tmp_interfaces_data[i_index])) {
+          tmp_interfaces_data.push(["DL " + i["interface_name"]]);
+          tmp_interfaces_data[i_index].push(i["download"]);
+        } 
+        else {
+          tmp_interfaces_data[i_index].push(i["download"]);
+          if (idx == _.size(periods_ids - 1)) i_index += 1;
+        };
+      });
+      full_response[agent_id]["interfaces_data"] = tmp_interfaces_data;
+    });
+  // добавим периоды
+  full_response[agent_id]["interfaces_data"].push(periods_readable);
+  }); 
 };
 // формирование информации об агентах
 function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, periods, q, response) {
@@ -599,34 +635,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       agents_helper_fill_partitions_data(missed_periods, hdd_partitions_with_names, agents_and_partitions_ids, limits_on_partitions_in_agents, periods_readable, full_response, hdd_part_stat);
       // теперь будем считывать информацию об интерфейсах 
       q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
-        agent_helper_interfaces_sorting(interfaces_stat, agents_and_interfaces_ids, interface_id_and_name, full_response, periods_ids);
-            // //console.log(missed_key);
-            // _.each(interfaces_grouped_by_agent_id[missed_key], function (_interface_data) {
-            //   console.log(_.size(_interface_data));
-            //   agent_id_with_interfaces_statistics[missed_key] = [];
-            //   // теперь необходимо добавить Имя интерфейса UL
-            //   var idx_interface_data = 0;
-            //   _.each(_interface_data, function (_interface_data_final_raw, int_data_index) {
-            //     //console.log(idx_interface_data);
-            //     // нужно [[]]
-            //     if (!_.isUndefined(agent_id_with_interfaces_statistics[missed_key][idx_interface_data])) {
-            //       agent_id_with_interfaces_statistics[missed_key][idx_interface_data].push(_interface_data_final_raw["upload"]);
-            //       if (int_data_index == public_config.chart.minutes) idx_interface_data += 1;
-            //     } 
-            //     else {
-            //       agent_id_with_interfaces_statistics[missed_key].push([_interface_data_final_raw["interface_name"] + " UL"]);
-            //       agent_id_with_interfaces_statistics[missed_key][idx_interface_data].push(_interface_data_final_raw["upload"]);
-            //       //console.log(agent_id_with_interfaces_statistics);
-            //     }
-            //   });
-            //   // теперь и Имя интерфейса DL
-            // });
-          //};
-       // });
-        //console.log(interfaces_grouped_by_agent_id);
-        //console.log(agent_id_with_interfaces_statistics);
-        // ой, все. Отсылаем финальный вариант
-        //full_response['sasaasasas'] = interfaces_grouped_by_agent_id;
+        agent_helper_interfaces_sorting(interfaces_stat, agents_and_interfaces_ids, interface_id_and_name, full_response, periods_ids, periods_readable);
         response.send(full_response);
       });
     });

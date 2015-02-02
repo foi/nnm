@@ -26,9 +26,11 @@
    <!-- Панель в объемом занятого пространства на жетских дисках -->
   <h4>Занятое пространство на разделах жестких дисков</h4>
   <partitions-chart config="agent_partitions_chart" id="partitions_chart"></partitions-chart>
-  {{ agent_partitions_chart | json}}
-  {{ ping_chart_data.data | json }}
   <!-- конец напенили я занятым  пространством на жестких дисках -->
+  <!-- данные интерфейсов -->
+  <h4>Активность сетевых интерфейсов</h4>
+  <interfaces-chart config="agent_interfaces_chart" id="interfaces_chart"></interfaces-chart>
+  <!-- конец данных интерфейсов -->
   </div>
   <!-- Конец панели с графиками -->
   </div>
