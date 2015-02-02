@@ -71,23 +71,9 @@ nnm.factory('Agents', ['$http' ,function ($http) {
     }  
   };
 }]);
-// для создания  тиков, указывая целое значение и количество промежутков до 0
-nnm.factory('SplitService', [function () {
-  return {
-    on: function (value, tick) {
-      var result = [0];
-      var init = value / tick;
-      for (var i = 1; i < tick; i++) {
-        result.push(Math.round(i * init));
-      };
-      result.push(value);
-      return result;
-    }
-  };
-}]);
  
 // Свежие новости
-nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', 'SplitService', function ($scope, $http, $rootScope, Host, Agents, SplitService) {
+nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', function ($scope, $http, $rootScope, Host, Agents) {
   $scope.agents_data;
   var agent_index;
   // на какое время график
@@ -180,7 +166,6 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', 'Sp
     // данные для графика с размером оперативной памяти
     $scope.agent_mem_chart = angular.copy($scope.agent_cpu_chart_default);
     $scope.agent_mem_chart["axis"]["y"]["max"] = $scope.agents_data[i]["memory_max"];
-    $scope.agent_mem_chart["axis"]["y"]["tick"]["values"] = SplitService.on($scope.agents_data[i]["memory_max"], 4); 
     $scope.agent_mem_chart["axis"]["y"]["tick"]["format"] = function (x) { return x + " МБ" };
     $scope.agent_mem_chart.data.columns = $scope.agents_data[i]["used_ram"];
     // данные для графика с занятым объемов разделов жестких дисков

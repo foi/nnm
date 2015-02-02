@@ -482,9 +482,62 @@ function agents_helper_make_dictionaries (interfaces, interface_id_and_name, hdd
     }); 
   });
 };
+// хелпер нанолняющий данные уже в тот формат, что требует c3js
+function agents_helper_fill_for_c3js (cpmem, full_response, memory, periods_readable) {
+  cpmem = _.groupBy(cpmem, "agent_id");
+  _.each(cpmem, function (v, k) {
+    full_response[k] = { "cpu_load": [], "used_ram":[]};
+    var cpu = ["загрузка %"].concat(_.pluck(v, "cpu_load"));
+    var mem = ["занято МБ"].concat(_.pluck(v, "free_mem"));
+    full_response[k]["cpu_load"][0] = cpu;
+    full_response[k]["cpu_load"][1] = periods_readable;
+    full_response[k]["used_ram"][0] = mem;
+    full_response[k]["used_ram"][1] = periods_readable;
+    full_response[k]["memory_max"] = _.findWhere(memory, {"host_and_port_agent_id": parseInt(k)}).memory_overall;
+    // ага, еще для разделов ветка
+    full_response[k]["partitions"] = [];
+  });
+};
 // хелпер для наполнения информации о разделах жестких дисков
-function agents_helper_fill_partitions_data (argument) {
-  // body...
+function agents_helper_fill_partitions_data(missed_periods, hdd_partitions_with_names, agents_and_partitions_ids, limits_on_partitions_in_agents, periods_readable, full_response, hdd_part_stat) {
+  var g_partitions = _.groupBy(hdd_part_stat, 'agent_id');
+  // заменим размер, если он 0 на null, а также заменим ид партишна на его букву
+  // еще более сгруппированные данные разделов
+  var g_f_partitions = {};
+  // добавим недостающие периоды и причешем данные в тот формат, что требует c3js
+  _.each(missed_periods, function (v, k) {
+    if (!_.isEmpty(missed_periods[k])) {
+      _.each(missed_periods[k], function (p) {
+        _.each(agents_and_partitions_ids[k], function (p_id) {
+          g_partitions[k].push({"agent_id": k, "size": null, "hdd_partition_id": p_id, "period_id": p});
+        });
+      });
+      g_partitions[k] = _.sortBy(g_partitions[k], "period_id"); // упорядочиваем по period_id
+    };
+    // заменим hdd_partitions_id на "c:\ (465гб)"
+    _.each(g_partitions[k], function (vh) {
+      var name = "%0 (%1ГБ)".format([hdd_partitions_with_names[vh["hdd_partition_id"]]["name"], hdd_partitions_with_names[vh["hdd_partition_id"]]["size"]]);
+      vh["partition_name"] = name;
+    });
+    // теперь необходимо сгруппировать по partition_name
+    g_f_partitions[k] = _.groupBy(g_partitions[k], "partition_name");
+    // свернем до такого состояния [c:\, 1,2,3,4,], [d:\, 3,43,5]
+    _.each(g_f_partitions[k], function (vh, vk) {
+      var tmp = [vk];
+      _.each(vh, function (value) {
+        tmp.push(value['size']);
+      }); 
+      full_response[k]["partitions"].push(tmp);
+    });
+    // добавим массив с датами
+    full_response[k]["partitions"].push(periods_readable);
+    // теперь преобразуем "partitions_info" в тот вид, который требует c3js для грида
+    var partitions_info = [];
+    _.each(full_response[k]["partitions_info"], function (vh, vk) {
+      partitions_info.push({value: vh['size'], text: ("предел на " + vh['name'])});
+    });
+    full_response[k]["partitions_info"] = limits_on_partitions_in_agents[k];
+  });
 };
 
 // формирование информации об агентах
@@ -510,122 +563,72 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
     // поиск потерянных периодов для агентов, а также сырое заполнение данных для статистики цпу и памяти
     agents_helper_periods_and_append_into_cpumem(periods, periods_readable, periods_ids, agents_ids, cpmem, missed_periods);
     // набьем данные в финальный ответ для статистики цпу и памяти, а также добавим сколько всего оперативки, и макс на разделе места 
-    cpmem = _.groupBy(cpmem, "agent_id");
-    _.each(cpmem, function (v, k) {
-      full_response[k] = { "cpu_load": [], "used_ram":[]};
-      var cpu = ["загрузка %"].concat(_.pluck(v, "cpu_load"));
-      var mem = ["занято МБ"].concat(_.pluck(v, "free_mem"));
-      full_response[k]["cpu_load"][0] = cpu;
-      full_response[k]["cpu_load"][1] = periods_readable;
-      full_response[k]["used_ram"][0] = mem;
-      full_response[k]["used_ram"][1] = periods_readable;
-      full_response[k]["memory_max"] = _.findWhere(memory, {"host_and_port_agent_id": parseInt(k)}).memory_overall;
-      // ага, еще для разделов ветка
-      full_response[k]["partitions"] = [];
-    });
-      // теперь соберем информацию о разделах
-      q.query(queries.select_hdd_part_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, hdd_part_stat) {
-        var g_partitions = _.groupBy(hdd_part_stat, 'agent_id');
-        // заменим размер, если он 0 на null, а также заменим ид партишна на его букву
-        // еще более сгруппированные данные разделов
-        var g_f_partitions = {};
-        // добавим недостающие периоды и причешем данные в тот формат, что требует c3js
-        _.each(missed_periods, function (v, k) {
-          if (!_.isEmpty(missed_periods[k])) {
-            _.each(missed_periods[k], function (p) {
-              _.each(agents_and_partitions_ids[k], function (p_id) {
-                g_partitions[k].push({"agent_id": k, "size": null, "hdd_partition_id": p_id, "period_id": p});
-              });
-            });
-            g_partitions[k] = _.sortBy(g_partitions[k], "period_id"); // упорядочиваем по period_id
-          };
-          // заменим hdd_partitions_id на "c:\ (465гб)"
-          _.each(g_partitions[k], function (vh) {
-            var name = "%0 (%1ГБ)".format([hdd_partitions_with_names[vh["hdd_partition_id"]]["name"], hdd_partitions_with_names[vh["hdd_partition_id"]]["size"]]);
-            vh["partition_name"] = name;
-          });
-          // теперь необходимо сгруппировать по partition_name
-          g_f_partitions[k] = _.groupBy(g_partitions[k], "partition_name");
-          // свернем до такого состояния [c:\, 1,2,3,4,], [d:\, 3,43,5]
-          _.each(g_f_partitions[k], function (vh, vk) {
-            var tmp = [vk];
-            _.each(vh, function (value) {
-              tmp.push(value['size']);
-            }); 
-            full_response[k]["partitions"].push(tmp);
-          });
-          // добавим массив с датами
-          full_response[k]["partitions"].push(full_response[k]["cpu_load"][1]);
-          // теперь преобразуем "partitions_info" в тот вид, который требует c3js для грида
-          var partitions_info = [];
-          _.each(full_response[k]["partitions_info"], function (vh, vk) {
-            partitions_info.push({value: vh['size'], text: ("предел на " + vh['name'])});
-          });
-          full_response[k]["partitions_info"] = limits_on_partitions_in_agents[k];
-        });
-        // теперь будем считывать информацию об интерфейсах 
-        q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
-          //interfaces_sorting(k, interfaces_stat, missed_periods);
+    agents_helper_fill_for_c3js(cpmem, full_response, memory, periods_readable, full_response);
+    // теперь соберем информацию о разделах
+    q.query(queries.select_hdd_part_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, hdd_part_stat) {
+      // выполним все необходимые процедуры для форматирования ответа как этого требет c3js
+      agents_helper_fill_partitions_data(missed_periods, hdd_partitions_with_names, agents_and_partitions_ids, limits_on_partitions_in_agents, periods_readable, full_response, hdd_part_stat);
+      // теперь будем считывать информацию об интерфейсах 
+      q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
+        //interfaces_sorting(k, interfaces_stat, missed_periods);
 
-          // как всегда, сначала группируем по agent_id
-          // новая колелкция где все данные для интерфейсов уже должны быть причесаны
-          // var agent_id_with_interfaces_statistics = {};
-          // var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
-          // ////// !!!!!!! В базе попраить! Если удаляешь хост и порт, а у него есть интерфейсы, он не удаляетсяЙЙЙЙ !!!  с cpu_mem_load_поставить_каскад и в интерфейсах
-          // // теперь набьем недостающее периоды
-          // _.each(missed_periods, function (missed_value, missed_key) {
-          //   console.log("Потерянные периоды для " + missed_key + " " + missed_value);
-          //   if (!_.isEmpty(missed_periods[missed_key])) {
-          //     _.each(missed_periods[missed_key], function (missed_period) {
-          //       _.each(agents_and_interfaces_ids[missed_key], function (interface_id) {
-          //         interfaces_grouped_by_agent_id[missed_key].push({"agent_id": missed_key, "upload": null, "download": null, "period_id": missed_period, interface_id: interface_id});
-          //       });
-          //     });
-          //   };
-          //   // упорядочиваем по period_id
-          //   interfaces_grouped_by_agent_id[missed_key] = _.sortBy(interfaces_grouped_by_agent_id[missed_key], "period_id"); 
-          //   console.log(_.size(interfaces_grouped_by_agent_id[missed_key]));
-              // // теперь необходимо сгруппировать следующим образом {agent_id: [["подключение по локальной сети1 UL", 1,3,4 ], ["подключение по лок сети DL", 2,3,4,5,1]]}
-              // // сначала добавим имя интерфейса
-              // _.each(interfaces_grouped_by_agent_id[missed_key], function (_interface_data) {
-              //   _interface_data["interface_name"] = interface_id_and_name[_interface_data["interface_id"]];
-              // });
-              // //console.log(interfaces_grouped_by_agent_id);
+        // как всегда, сначала группируем по agent_id
+        // новая колелкция где все данные для интерфейсов уже должны быть причесаны
+        // var agent_id_with_interfaces_statistics = {};
+        // var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
+        // ////// !!!!!!! В базе попраить! Если удаляешь хост и порт, а у него есть интерфейсы, он не удаляетсяЙЙЙЙ !!!  с cpu_mem_load_поставить_каскад и в интерфейсах
+        // // теперь набьем недостающее периоды
+        // _.each(missed_periods, function (missed_value, missed_key) {
+        //   console.log("Потерянные периоды для " + missed_key + " " + missed_value);
+        //   if (!_.isEmpty(missed_periods[missed_key])) {
+        //     _.each(missed_periods[missed_key], function (missed_period) {
+        //       _.each(agents_and_interfaces_ids[missed_key], function (interface_id) {
+        //         interfaces_grouped_by_agent_id[missed_key].push({"agent_id": missed_key, "upload": null, "download": null, "period_id": missed_period, interface_id: interface_id});
+        //       });
+        //     });
+        //   };
+        //   // упорядочиваем по period_id
+        //   interfaces_grouped_by_agent_id[missed_key] = _.sortBy(interfaces_grouped_by_agent_id[missed_key], "period_id"); 
+        //   console.log(_.size(interfaces_grouped_by_agent_id[missed_key]));
+            // // теперь необходимо сгруппировать следующим образом {agent_id: [["подключение по локальной сети1 UL", 1,3,4 ], ["подключение по лок сети DL", 2,3,4,5,1]]}
+            // // сначала добавим имя интерфейса
+            // _.each(interfaces_grouped_by_agent_id[missed_key], function (_interface_data) {
+            //   _interface_data["interface_name"] = interface_id_and_name[_interface_data["interface_id"]];
+            // });
+            // //console.log(interfaces_grouped_by_agent_id);
 
-              // // теперь еще и группируем по имени интерфейса
-              // interfaces_grouped_by_agent_id[missed_key] = _.groupBy(interfaces_grouped_by_agent_id[missed_key], "interface_name");
-              // //console.log(missed_key);
-              // _.each(interfaces_grouped_by_agent_id[missed_key], function (_interface_data) {
-              //   console.log(_.size(_interface_data));
-              //   agent_id_with_interfaces_statistics[missed_key] = [];
-              //   // теперь необходимо добавить Имя интерфейса UL
-              //   var idx_interface_data = 0;
-              //   _.each(_interface_data, function (_interface_data_final_raw, int_data_index) {
-              //     //console.log(idx_interface_data);
-              //     // нужно [[]]
-              //     if (!_.isUndefined(agent_id_with_interfaces_statistics[missed_key][idx_interface_data])) {
-              //       agent_id_with_interfaces_statistics[missed_key][idx_interface_data].push(_interface_data_final_raw["upload"]);
-              //       if (int_data_index == public_config.chart.minutes) idx_interface_data += 1;
-              //     } 
-              //     else {
-              //       agent_id_with_interfaces_statistics[missed_key].push([_interface_data_final_raw["interface_name"] + " UL"]);
-              //       agent_id_with_interfaces_statistics[missed_key][idx_interface_data].push(_interface_data_final_raw["upload"]);
-              //       //console.log(agent_id_with_interfaces_statistics);
-              //     }
-              //   });
-              //   // теперь и Имя интерфейса DL
-              // });
-            //};
-         // });
-          //console.log(interfaces_grouped_by_agent_id);
-          //console.log(agent_id_with_interfaces_statistics);
-          // ой, все. Отсылаем финальный вариант
-          //full_response['sasaasasas'] = interfaces_grouped_by_agent_id;
-          response.send(full_response);
-        });
-        //});//
+            // // теперь еще и группируем по имени интерфейса
+            // interfaces_grouped_by_agent_id[missed_key] = _.groupBy(interfaces_grouped_by_agent_id[missed_key], "interface_name");
+            // //console.log(missed_key);
+            // _.each(interfaces_grouped_by_agent_id[missed_key], function (_interface_data) {
+            //   console.log(_.size(_interface_data));
+            //   agent_id_with_interfaces_statistics[missed_key] = [];
+            //   // теперь необходимо добавить Имя интерфейса UL
+            //   var idx_interface_data = 0;
+            //   _.each(_interface_data, function (_interface_data_final_raw, int_data_index) {
+            //     //console.log(idx_interface_data);
+            //     // нужно [[]]
+            //     if (!_.isUndefined(agent_id_with_interfaces_statistics[missed_key][idx_interface_data])) {
+            //       agent_id_with_interfaces_statistics[missed_key][idx_interface_data].push(_interface_data_final_raw["upload"]);
+            //       if (int_data_index == public_config.chart.minutes) idx_interface_data += 1;
+            //     } 
+            //     else {
+            //       agent_id_with_interfaces_statistics[missed_key].push([_interface_data_final_raw["interface_name"] + " UL"]);
+            //       agent_id_with_interfaces_statistics[missed_key][idx_interface_data].push(_interface_data_final_raw["upload"]);
+            //       //console.log(agent_id_with_interfaces_statistics);
+            //     }
+            //   });
+            //   // теперь и Имя интерфейса DL
+            // });
+          //};
+       // });
+        //console.log(interfaces_grouped_by_agent_id);
+        //console.log(agent_id_with_interfaces_statistics);
+        // ой, все. Отсылаем финальный вариант
+        //full_response['sasaasasas'] = interfaces_grouped_by_agent_id;
+        response.send(full_response);
       });
-    //}); //
+    });
   }); 
 };
 // создание данных для интерфейсов
