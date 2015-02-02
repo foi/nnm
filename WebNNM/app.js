@@ -194,7 +194,7 @@ app.get('/config/db_connection', function(req, res){
 
 // Проверка, работает ли служба ServiceNNM
 app.get('/config/servicennm', function (req, res) {
-  exec('sc query "ServiceNNM"', function (error, stdout, stderr) {
+  exec('sc query "servicennm"', function (error, stdout, stderr) {
     if (stdout.indexOf("RUNNING") != -1)
       res.send("RUNNING");
     else if (stdout.indexOf("STOPPED") != -1)
