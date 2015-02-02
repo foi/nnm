@@ -99,11 +99,17 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 В качестве альтернативы можно использовать [iisnode](https://github.com/tjanczuk/iisnode) модуль. 
 
 Как выглядит веб-интерфейс WebNNM:
+
 Справочники:
+
 ![Справочники](https://www.dropbox.com/s/4g5h33sktbumc0s/nnmdictionaries.png?dl=1)
+
 HOT:
+
 ![Статистика за последние Х минут](https://www.dropbox.com/s/7lx6zmx520vw3gq/c3jschartsHot.png?dl=1)
+
 Конфигурация:
+
 ![Конфигурация](https://www.dropbox.com/s/647dj5ueszy6jmx/nnmconfig.png?dl=1)
 
 *Для того, чтобы WebNNM могла останавливать/запускать службу, ее необходимо запускать от имени администратора*
