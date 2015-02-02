@@ -73,7 +73,7 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 
 ![Агент для .net 4.0 +](http://i.imgur.com/bPfSOJh.jpg)
 
-Агент используется вместе с noname network monitor service :family:
+Агент используется вместе с ServiceNNM
 
 #### Использование
 
@@ -174,7 +174,7 @@ HOT:
 ```
 
 ## В разработке приложения использовались следующие ЯП и библиотеки
-### Noname Network Web
+### WebNNM
 * nodejs/io.js
 * underscore.js
 * expressjs
@@ -183,7 +183,7 @@ HOT:
 * angular x-editable
 * :heartbeat: c3js :heartbeat:
 
-### Noname Network Service
+### ServiceNNM
 * C#
 * Newtonsoft JSON.net
 
