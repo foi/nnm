@@ -94,6 +94,8 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 
 ## Установка как службы WebNNM т.е. веб-интерфейса
 
+Первое, что необходимо сделать, это перейти в папку с WebNNM и установить необходимые модули командой *npm install*
+
 Установка в качестве службы выполняется при помощи утилиты [non sucking service manager (описание примера настройки на английском)](https://nssm.cc/usage), [Описание примера настройки на русском](http://nix-sa.blogspot.ru/2013/05/windows-nssm.html).  
 
 В качестве альтернативы можно использовать [iisnode](https://github.com/tjanczuk/iisnode) модуль. 
