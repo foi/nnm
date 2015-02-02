@@ -8,7 +8,6 @@ var strftime = require('strftime');
 var bodyParser = require("body-parser");
 var fs = require("fs");
 var _ = require("underscore");
-var sys = require('sys');
 var Q = require('q');
 var exec = require('child_process').exec;
 // для layout.ejs без этого не работает
@@ -539,7 +538,37 @@ function agents_helper_fill_partitions_data(missed_periods, hdd_partitions_with_
     full_response[k]["partitions_info"] = limits_on_partitions_in_agents[k];
   });
 };
-
+// создание данных для интерфейсов
+function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces_ids, interface_id_and_name, full_response, periods_ids) {
+  // как всегда, сначала группируем по agent_id
+  // новая колелкция где все данные для интерфейсов уже должны быть причесаны
+  var agent_id_with_interfaces_statistics = {};
+  var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
+  // ////// !!!!!!! В базе попраить! Если удаляешь хост и порт, а у него есть интерфейсы, он не удаляетсяЙЙЙЙ !!!  с cpu_mem_load_поставить_каскад и в интерфейсах
+  // теперь набьем недостающее периоды
+  console.log("ид периодов, которые есть в данном запросе " + periods_ids);
+  _.each(_.keys(agents_and_interfaces_ids), function (agent_id) {
+    _.each(periods_ids, function (p) {
+      _.each(agents_and_interfaces_ids[agent_id], function (i) {
+        if (_.isUndefined(_.findWhere(interfaces_grouped_by_agent_id[agent_id], {interface_id: i, period_id: p}))) {
+          interfaces_grouped_by_agent_id[agent_id].push({"period_id": p, interface_id: i, "upload": null, "download": null});
+        };
+      });
+    });
+    interfaces_grouped_by_agent_id[agent_id] = _.sortBy(interfaces_grouped_by_agent_id[agent_id], "period_id"); 
+    console.log(_.size(interfaces_grouped_by_agent_id[agent_id]));
+    // теперь необходимо сгруппировать следующим образом {agent_id: [["подключение по локальной сети1 UL", 1,3,4 ], ["подключение по лок сети DL", 2,3,4,5,1]]}
+    // сначала добавим имя интерфейса, a также уберем период_ид и агент_ид
+    _.each(interfaces_grouped_by_agent_id[agent_id], function (i) {
+      i["interface_name"] = interface_id_and_name[i["interface_id"]];
+    });
+    // теперь еще и группируем по имени интерфейса
+    interfaces_grouped_by_agent_id[agent_id] = _.groupBy(interfaces_grouped_by_agent_id[agent_id], "interface_name");
+  });
+  
+  full_response["interfacessss"] = interfaces_grouped_by_agent_id;
+  //console.log(interfaces_grouped_by_agent_id);
+};
 // формирование информации об агентах
 function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, periods, q, response) {
   var hdd_partitions_with_names = {};
@@ -570,35 +599,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       agents_helper_fill_partitions_data(missed_periods, hdd_partitions_with_names, agents_and_partitions_ids, limits_on_partitions_in_agents, periods_readable, full_response, hdd_part_stat);
       // теперь будем считывать информацию об интерфейсах 
       q.query(queries.select_interfaces_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, interfaces_stat) {
-        //interfaces_sorting(k, interfaces_stat, missed_periods);
-
-        // как всегда, сначала группируем по agent_id
-        // новая колелкция где все данные для интерфейсов уже должны быть причесаны
-        // var agent_id_with_interfaces_statistics = {};
-        // var interfaces_grouped_by_agent_id = _.groupBy(interfaces_stat, "agent_id");
-        // ////// !!!!!!! В базе попраить! Если удаляешь хост и порт, а у него есть интерфейсы, он не удаляетсяЙЙЙЙ !!!  с cpu_mem_load_поставить_каскад и в интерфейсах
-        // // теперь набьем недостающее периоды
-        // _.each(missed_periods, function (missed_value, missed_key) {
-        //   console.log("Потерянные периоды для " + missed_key + " " + missed_value);
-        //   if (!_.isEmpty(missed_periods[missed_key])) {
-        //     _.each(missed_periods[missed_key], function (missed_period) {
-        //       _.each(agents_and_interfaces_ids[missed_key], function (interface_id) {
-        //         interfaces_grouped_by_agent_id[missed_key].push({"agent_id": missed_key, "upload": null, "download": null, "period_id": missed_period, interface_id: interface_id});
-        //       });
-        //     });
-        //   };
-        //   // упорядочиваем по period_id
-        //   interfaces_grouped_by_agent_id[missed_key] = _.sortBy(interfaces_grouped_by_agent_id[missed_key], "period_id"); 
-        //   console.log(_.size(interfaces_grouped_by_agent_id[missed_key]));
-            // // теперь необходимо сгруппировать следующим образом {agent_id: [["подключение по локальной сети1 UL", 1,3,4 ], ["подключение по лок сети DL", 2,3,4,5,1]]}
-            // // сначала добавим имя интерфейса
-            // _.each(interfaces_grouped_by_agent_id[missed_key], function (_interface_data) {
-            //   _interface_data["interface_name"] = interface_id_and_name[_interface_data["interface_id"]];
-            // });
-            // //console.log(interfaces_grouped_by_agent_id);
-
-            // // теперь еще и группируем по имени интерфейса
-            // interfaces_grouped_by_agent_id[missed_key] = _.groupBy(interfaces_grouped_by_agent_id[missed_key], "interface_name");
+        agent_helper_interfaces_sorting(interfaces_stat, agents_and_interfaces_ids, interface_id_and_name, full_response, periods_ids);
             // //console.log(missed_key);
             // _.each(interfaces_grouped_by_agent_id[missed_key], function (_interface_data) {
             //   console.log(_.size(_interface_data));
@@ -630,23 +631,6 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
       });
     });
   }); 
-};
-// создание данных для интерфейсов
-function interfaces_sorting (agent_id, interfaces_data, missed_periods) {
-  console.log("Пошел агент с id = " + agent_id);
-  //как всегда, сначала группируем по agent_id
-  //новая колелкция где все данные для интерфейсов уже должны быть причесаны
-  var agent_id_with_interfaces_statistics = {};
-  var interfaces_grouped_by_agent_id = _.groupBy(interfaces_data, "agent_id");
-   // теперь набьем недостающее периоды
-  if (!_.isEmpty(missed_periods[agent_id])) {
-    _.each(missed_periods[agent_id], function (missed_period) {
-      _.each(agents_and_interfaces_ids[agent_id], function (interface_id) {
-        interfaces_grouped_by_agent_id[agent_id].push({"agent_id": agent_id, "upload": null, "download": null, "period_id": missed_period, interface_id: interface_id});
-      });
-    });
-  };
-  console.log(interfaces_grouped_by_agent_id);
 };
 
 // получить стат. информации об агенте/агентах
