@@ -511,7 +511,7 @@ function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces
   // ////// !!!!!!! В базе попраить! Если удаляешь хост и порт, а у него есть интерфейсы, он не удаляетсяЙЙЙЙ !!!  с cpu_mem_load_поставить_каскад и в интерфейсах
   // теперь набьем недостающее периоды
   console.log("ид периодов, которые есть в данном запросе " + periods_ids);
-  _.each(_.keys(agents_and_interfaces_ids), function (agent_id) {
+  _.each(_.keys(interfaces_grouped_by_agent_id), function (agent_id) {
     _.each(periods_ids, function (p) {
       _.each(agents_and_interfaces_ids[agent_id], function (i) {
         if (_.isUndefined(_.findWhere(interfaces_grouped_by_agent_id[agent_id], {interface_id: i, period_id: p}))) {
