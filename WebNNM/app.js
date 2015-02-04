@@ -391,7 +391,7 @@ function getIdFromAgentName(agents, name) {
   return _.findWhere(agents, {name: name}).id;
 };
 // вспомогательные функции для маршрута, который дает статистику для агентов
-function agents_helper_periods_and_append_into_cpumem (periods, periods_readable, periods_ids, agents_ids, cpmem, missed_periods) {
+function agents_helper_periods_and_append_into_cpumem (periods, periods_readable, periods_ids, agents_ids, cpmem, missed_periods, full_response, memory) {
   // создадим строки даты/времени 
   _.each(periods, function (p) {
     periods_readable.push(strftime("%Y-%m-%dT%H:%M:%S", p.period));
@@ -401,14 +401,37 @@ function agents_helper_periods_and_append_into_cpumem (periods, periods_readable
     if (_.size(agents_cpu_mem) != 0)
       missed_periods[e] = _.difference(periods_ids, _.pluck(agents_cpu_mem, "period_id"));
   });
+  // сгруппируем по ид агента
+  cpmem = _.groupBy(cpmem, "agent_id");
   _.each(missed_periods, function (v, k) {
     if (!_.isEmpty(missed_periods[k])) {
       _.each(missed_periods[k], function (p) {
-        cpmem.push({"cpu_load": null, "free_mem": null, "agent_id": parseInt(k), "period_id": p});
+        cpmem[k].push({"cpu_load": null, "free_mem": null, "period_id": p});
       });
+      cpmem[k] = _.sortBy(cpmem[k], "period_id");
     };
   });
-  cpmem = _.sortBy(cpmem, "period_id");
+  //console.log(cpmem);
+  // создадим хэш с ключем агент_ид и с массивом заченией статистики цпу или памяти
+  var cpu = {};
+  var mem = {};
+  _.each(agents_ids, function (id) {
+    cpu[id] = ["Загрузка ЦП %"];
+    mem[id] = ["Занято ОЗУ"];
+    full_response[id] = { "cpu_load": [], "used_ram":[]};
+    _.each(cpmem[id], function (values) {
+      cpu[id].push(values["cpu_load"]);
+      mem[id].push(values["free_mem"]);
+    });
+    full_response[id]["cpu_load"][0] = cpu[id];
+    full_response[id]["cpu_load"][1] = periods_readable;
+    full_response[id]["used_ram"][0] = mem[id];
+    full_response[id]["used_ram"][1] = periods_readable;
+    // установим объем оперативной памяти для каждого агента
+    full_response[id]["memory_max"] = _.findWhere(memory, {"host_and_port_agent_id": parseInt(id)}).memory_overall;
+    // ага, еще для разделов ветка
+    full_response[id]["partitions"] = [];
+  });
 };
 // создадим справочники, ид интерфейсов агентов ну и т.п.
 function agents_helper_make_dictionaries (interfaces, interface_id_and_name, hdds, hdd_partitions_with_names, limits_on_partitions_in_agents, agents_and_partitions_ids, agents_and_interfaces_ids) {
@@ -444,22 +467,6 @@ function agents_helper_make_dictionaries (interfaces, interface_id_and_name, hdd
     _.each(v, function (interface_data) {
       agents_and_interfaces_ids[k].push(interface_data["id"]);
     }); 
-  });
-};
-// хелпер нанолняющий данные уже в тот формат, что требует c3js
-function agents_helper_fill_for_c3js (cpmem, full_response, memory, periods_readable) {
-  cpmem = _.groupBy(cpmem, "agent_id");
-  _.each(cpmem, function (v, k) {
-    full_response[k] = { "cpu_load": [], "used_ram":[]};
-    var cpu = ["загрузка %"].concat(_.pluck(v, "cpu_load"));
-    var mem = ["занято МБ"].concat(_.pluck(v, "free_mem"));
-    full_response[k]["cpu_load"][0] = cpu;
-    full_response[k]["cpu_load"][1] = periods_readable;
-    full_response[k]["used_ram"][0] = mem;
-    full_response[k]["used_ram"][1] = periods_readable;
-    full_response[k]["memory_max"] = _.findWhere(memory, {"host_and_port_agent_id": parseInt(k)}).memory_overall;
-    // ага, еще для разделов ветка
-    full_response[k]["partitions"] = [];
   });
 };
 // хелпер для наполнения информации о разделах жестких дисков
@@ -521,7 +528,7 @@ function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces
       });
     });
     interfaces_grouped_by_agent_id[agent_id] = _.sortBy(interfaces_grouped_by_agent_id[agent_id], "period_id"); 
-    console.log(_.size(interfaces_grouped_by_agent_id[agent_id]));
+    //console.log(_.size(interfaces_grouped_by_agent_id[agent_id]));
     // сначала добавим имя интерфейса
     _.each(interfaces_grouped_by_agent_id[agent_id], function (i) {
       i["interface_name"] = interface_id_and_name[i["interface_id"]];
@@ -532,7 +539,7 @@ function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces
     var agent_i, tmp_interfaces_data;
     var i_index = 0;
     _.each(interfaces_grouped_by_agent_id[agent_id], function (_interface_data) {
-      console.log(_interface_data);
+      //console.log(_interface_data);
       if (_.isUndefined(agent_i)) {
         agent_i = agent_id;
         tmp_interfaces_data = [];
@@ -571,7 +578,7 @@ function agent_helper_interfaces_sorting (interfaces_stat, agents_and_interfaces
   }); 
 };
 // формирование информации об агентах
-function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, periods, q, response) {
+function agentsStatFormat(agents_int, agents_string, agents, hdds, interfaces, memory, periods, q, response) {
   var hdd_partitions_with_names = {};
   var agents_ids = _.pluck(agents, "id");
   var interface_id_and_name = {};
@@ -582,7 +589,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
   var periods_readable = ["periods"];
   // наполним справочники
   agents_helper_make_dictionaries(interfaces, interface_id_and_name, hdds, hdd_partitions_with_names, limits_on_partitions_in_agents, agents_and_partitions_ids, agents_and_interfaces_ids);
-  console.log(agents_and_interfaces_ids);
+  //console.log(agents_and_interfaces_ids);
   var full_response = {};
   var periods = periods;
   var periods_ids = _.pluck(periods, "id");
@@ -591,9 +598,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
   // сначала соберем информацию о процессоре и оперативке и о потеряных периодах
   q.query(queries.select_cpu_mem_load_for_agents.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, cpmem) {
     // поиск потерянных периодов для агентов, а также сырое заполнение данных для статистики цпу и памяти
-    agents_helper_periods_and_append_into_cpumem(periods, periods_readable, periods_ids, agents_ids, cpmem, missed_periods);
-    // набьем данные в финальный ответ для статистики цпу и памяти, а также добавим сколько всего оперативки, и макс на разделе места 
-    agents_helper_fill_for_c3js(cpmem, full_response, memory, periods_readable, full_response);
+    agents_helper_periods_and_append_into_cpumem(periods, periods_readable, periods_ids, agents_ids, cpmem, missed_periods, full_response, memory);
     // теперь соберем информацию о разделах
     q.query(queries.select_hdd_part_stat.format([_.first(periods_ids), _.last(periods_ids), agents_string]), function (err, hdd_part_stat) {
       // выполним все необходимые процедуры для форматирования ответа как этого требет c3js
@@ -611,6 +616,7 @@ function agentsStatFormat(agents_string, agents, hdds, interfaces, memory, perio
 app.get('/extra/api/agents/:agents', function (req, res) {
   var agents = getIdsFromAndArray(req.params.agents);
   var agents_int = agents;
+  //console.log(agents_int);
   var agents_string = agents.join();
   var start_date = req.body.from;
   var end_date = req.body.till;
@@ -620,10 +626,11 @@ app.get('/extra/api/agents/:agents', function (req, res) {
     q.query(queries.table.format(["hdd_partitions"]), function (err, _hdd_partitions) {
       q.query(queries.table.format(["interfaces"]), function (err, _interfaces) {
         q.query("SELECT * FROM memory", function (err, _memory) {
+          console.log(_memory);
           // Если нет от какого до какого периода нужна статистика
           if (_.isUndefined(start_date) && _.isUndefined(end_date)) {
             q.query(queries.select_latest_n_periods.format([public_config.chart.minutes]), function (err ,_periods) {
-              agentsStatFormat(agents_string, _agents, _hdd_partitions, _interfaces, _memory, _periods, q, res);
+              agentsStatFormat(agents_int, agents_string, _agents, _hdd_partitions, _interfaces, _memory, _periods, q, res);
             });
           }
           else {

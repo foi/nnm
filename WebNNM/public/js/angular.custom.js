@@ -125,7 +125,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   };
   $scope.agent_cpu_chart_default = angular.copy($scope.ping_chart_data);
   $scope.agent_cpu_chart_default["tooltip"]["show"] = false;
-  $scope.agent_cpu_chart_default["size"]["height"] = 250;
+  $scope.agent_cpu_chart_default["size"]["height"] = 200;
   $scope.load_ping_data_chart = function () {
     Host.query(function (data) {
       var hosts = [];
@@ -159,7 +159,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   $scope.getAgentData = function (i) {
     agent_index = i;
     $scope.agent_cpu_chart = angular.copy($scope.agent_cpu_chart_default);
-    $scope.agent_cpu_chart["axis"]["y"]["max"] = 90;
+    $scope.agent_cpu_chart["axis"]["y"]["max"] = 100;
     $scope.agent_cpu_chart["axis"]["y"]["tick"]["values"] = [0, 25, 50, 75, 100];
     $scope.agent_cpu_chart["axis"]["y"]["tick"]["format"] = function (x) { return x + "%" };
     $scope.agent_cpu_chart.data.columns = $scope.agents_data[i]["cpu_load"];
@@ -182,6 +182,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
     $scope.agent_partitions_chart.data.columns = $scope.agents_data[i]["partitions"];
     // теперь заполним инфу для графика, на которой будут отображаться данные интерфейсов
     $scope.agent_interfaces_chart = angular.copy($scope.agent_cpu_chart_default);
+    $scope.agent_interfaces_chart["size"]["height"] = 300;
     $scope.agent_interfaces_chart["axis"]["y"]["tick"]["format"] = function (x) { return x + " кб/с" };
     $scope.agent_interfaces_chart["data"]["columns"] = $scope.agents_data[i]["interfaces_data"];
   };
@@ -376,13 +377,13 @@ nnm.directive('pingChart', [function () {
       var chart;
       scope.config.bindto = "#" + attrs.id;
       scope.$watch('config.data.columns', function(newSeries, oldSeries) {
-        if (_.isUndefined(chart)) {
+        if (chart == undefined) {
           chart = c3.generate(scope.config);
         }
         else {
           if (oldSeries) {
             var hostnames = [];
-            _.each(oldSeries, function (v) {
+            angular.forEach(oldSeries, function (v) {
               hostnames.push(v[0]);
             });
             chart.load({columns: newSeries, duration: 100, unload: hostnames});
@@ -406,11 +407,16 @@ nnm.directive('cpuChart', [function () {
     scope.config.bindto = "#" + attrs.id;
     var chart;
     scope.$watch('config.data.columns', function(newSeries, oldSeries) {
-      if (_.isUndefined(chart)) {
+      if (chart == undefined) {
         chart = c3.generate(scope.config);
       }
       else {
-        chart.load({columns: newSeries, duration: 100});
+        if (oldSeries) {
+          chart.load({columns: newSeries, duration: 100, unload: ["Загрузка ЦП %"]});
+        }
+        else {
+          chart.load({columns: newSeries, duration: 100});
+        }
       }
     });
     }
@@ -427,12 +433,17 @@ nnm.directive('memChart', [function () {
       scope.config.bindto = "#" + attrs.id;
       var chart;
       scope.$watch('config', function(newD, old) {
-        if (_.isUndefined(chart)) {
+        if (chart == undefined) {
           chart = c3.generate(scope.config);
         }
         else {
-          chart.axis.max({y: newD.axis.y.max});
-          chart.load({columns: newD.data.columns, duration: 100});
+          if (old) {
+            chart.axis.max({y: newD.axis.y.max});
+            chart.load({columns: newD.data.columns, duration: 100, unload: ["Занято ОЗУ"]});
+          } else {
+            chart.axis.max({y: newD.axis.y.max});
+            chart.load({columns: newD.data.columns, duration: 100});
+          };
         }
       });
     }
@@ -449,14 +460,14 @@ nnm.directive('partitionsChart', [function () {
       scope.config.bindto = "#" + attrs.id;
       var chart;
       scope.$watch('config', function(newSeries, oldSeries) { 
-        if (_.isUndefined(chart)) {
+        if (chart == undefined) {
           chart = c3.generate(scope.config);
         }
         else {
           if (oldSeries) {
             // это для ывгрузки старых значений, а то бывает...
             var unload_partitions_names = [];
-            _.each(oldSeries.data.columns, function (value) {
+            angular.forEach(oldSeries.data.columns, function (value) {
               unload_partitions_names.push(value[0]);
             });
             chart.axis.max({y: newSeries.axis.y.max});
@@ -480,13 +491,13 @@ nnm.directive('interfacesChart', [function () {
       var chart;
       scope.config.bindto = "#" + attrs.id;
       scope.$watch('config.data.columns', function(newSeries, oldSeries) {
-        if (_.isUndefined(chart)) {
+        if (chart == undefined) {
           chart = c3.generate(scope.config);
         }
         else {
           if (oldSeries) {
             var interfaces_names = [];
-            _.each(oldSeries, function (v) {
+            angular.forEach(oldSeries, function (v) {
               interfaces_names.push(v[0]);
             });
             chart.load({columns: newSeries, duration: 100, unload: interfaces_names});
