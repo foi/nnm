@@ -1,0 +1,30 @@
+{
+  "interfaceString": "*",
+  "Port": 9998,
+  "ignoring_name_interfaces": [
+    "Loopback Pseudo-Interface",
+    "isatap",
+    "Teredo Tunneling Pseudo-Interface",
+    "6TO4 Adapter"
+  ],
+  "services": [
+    "ALG",
+    "AppIDSvc",
+    "Appinfo",
+    "WSearch"
+  ],
+  "PerformPingAndNotify": false,
+  "IntervalOfPing": 30,
+  "SmtpServer": "smtp.yandex.ru",
+  "SmtpPort": 587,
+  "SmtpSsl": true,
+  "Login": "dsdd@yandex.ru",
+  "Password": "Qwerty123",
+  "Hosts": [],
+  "Subscribers": [],
+  "PerformWebCheck": true,
+  "ThoughtfulPing": true,
+  "ListOfPagesForWebCheck": [
+    "http://yandex.ru"
+  ]
+}

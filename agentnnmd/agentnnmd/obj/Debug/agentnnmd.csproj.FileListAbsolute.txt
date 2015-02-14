@@ -1,0 +1,9 @@
+F:\projects\nnm\agentnnmd\agentnnmd\obj\Debug\agentnnmd.csprojResolveAssemblyReference.cache
+F:\projects\nnm\agentnnmd\agentnnmd\bin\Debug\agentnnmd.exe
+F:\projects\nnm\agentnnmd\agentnnmd\bin\Debug\agentnnmd.pdb
+F:\projects\nnm\agentnnmd\agentnnmd\bin\Debug\Newtonsoft.Json.dll
+F:\projects\nnm\agentnnmd\agentnnmd\bin\Debug\Newtonsoft.Json.xml
+F:\projects\nnm\agentnnmd\agentnnmd\obj\Debug\agentnnmd.exe
+F:\projects\nnm\agentnnmd\agentnnmd\obj\Debug\agentnnmd.pdb
+F:\projects\nnm\agentnnmd\agentnnmd\obj\Debug\agentnnmd.csproj.GenerateResource.Cache
+F:\projects\nnm\agentnnmd\agentnnmd\obj\Debug\agentnnmd.Properties.Resources.resources
