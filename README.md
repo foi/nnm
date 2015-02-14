@@ -1,3 +1,5 @@
+![http://www.dafont.com/xxii-ultimate-black-metal.font?text=nonamenetworkmonitor&fpp=50&af=on&psize=l](https://www.dropbox.com/s/nfgb8z6zywg7m40/nonamenetworkmonitorlogo.png?dl=1 "noname network monitor")
+
 noname Network Monitor
 =====================
 
