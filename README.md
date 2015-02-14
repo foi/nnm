@@ -5,7 +5,14 @@ noname Network Monitor
 
 ### Релизы
 
-* [v0.1 - скачать](https://dl.dropboxusercontent.com/u/5433393/github/nonamenetworkmonitor/releases/NonameNetworkMonitor.v0.1.zip)
+[v0.1 - скачать](https://dl.dropboxusercontent.com/u/5433393/github/nonamenetworkmonitor/releases/NonameNetworkMonitor.v0.1.zip)
+- начальный релиз, кстати при первоначальной устновке есть проблема, что в package.json чего-то не хватает
+
+[v0.2 - скачать](https://www.dropbox.com/s/wqw28g8cxx2muc1/nnm_0.2.zip?dl=1)
+- веб-интерфейс переписан с jquery на angularjs
+- дял графиков вместо morrijs используется c3
+- добавлена возможно изменять конфигурацию и серввиса и веб-интерфейса из WebNNM
+- еще какие-то мелочи, даже и не помню
 
 ===========
 # Интро
@@ -109,6 +116,11 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 ![Конфигурация](https://www.dropbox.com/s/647dj5ueszy6jmx/nnmconfig.png?dl=1)
 
 *Для того, чтобы WebNNM могла останавливать/запускать службу, ее необходимо запускать от имени администратора*
+
+
+*** Для работы веб-интерфейса необходимо чтобы служба обозревателя SQL Server была запущена, а также в Сетевой конфигурации SQL SERVER должен быть включен протокол TCP/IP ***
+
+*** Перед первым запуском веб-интерфейса необходимо выполнить команду npm update из каталога WebNNM ***
 
 ## Файлы конфигурации
 ### ServiceNNM
