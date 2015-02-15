@@ -13,6 +13,9 @@ noname Network Monitor
 - дял графиков вместо morrijs используется c3
 - добавлена возможность изменять конфигурацию и серввиса и веб-интерфейса из WebNNM
 - еще какие-то мелочи, даже и не помню
+[v0.3 - скачать](https://www.dropbox.com/s/wqw28g8cxx2muc1/nnm_0.3.zip?dl=1)
+- агенты теперь тупо консольная утилита, для того, чтобы их удобно было оформлять в качестве службы nssm
+- вырезан интерфейс конфигурации config.json в отдельную программу agentconfig
 
 ===========
 # Интро
@@ -121,6 +124,14 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 **Для работы веб-интерфейса необходимо чтобы служба обозревателя SQL Server была запущена, а также в Сетевой конфигурации SQL SERVER должен быть включен протокол TCP/IP**
 
 **Перед первым запуском веб-интерфейса необходимо выполнить команду npm update из каталога WebNNM**
+
+## Установка демона агента как службы
+
+Доописать!!
+
+![1](https://www.dropbox.com/s/rq3kw7tm1o7sx2q/1.png?dl=1)
+![2](https://www.dropbox.com/s/mfjrr5qhi3tr9ic/2.png?dl=1)
+![3](https://www.dropbox.com/s/1sl0i3v33evzd7f/3.png?dl=1)
 
 ## Файлы конфигурации
 ### ServiceNNM

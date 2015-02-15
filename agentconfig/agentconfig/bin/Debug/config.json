@@ -1,0 +1,34 @@
+{
+  "interfaceString": "192.168.7.89",
+  "Port": 9998,
+  "ignoring_name_interfaces": [
+    "Loopback Pseudo-Interface",
+    "isatap",
+    "Teredo Tunneling Pseudo-Interface"
+  ],
+  "services": [
+    "AeLookupSvc",
+    "AppIDSvc",
+    "Appinfo",
+    "WSearch"
+  ],
+  "PerformPingAndNotify": true,
+  "IntervalOfPing": 30,
+  "SmtpServer": "smtp.yandex.ru",
+  "SmtpPort": 5834,
+  "SmtpSsl": true,
+  "Login": "eee@yandex.ru",
+  "Password": "Qwe2323123",
+  "Hosts": [
+    "192.168.0.2",
+    "198.80.90.21"
+  ],
+  "Subscribers": [
+    "hui@gmail.com"
+  ],
+  "PerformWebCheck": true,
+  "ThoughtfulPing": true,
+  "ListOfPagesForWebCheck": [
+    "http://yandex.ru"
+  ]
+}

@@ -1,0 +1,14 @@
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\obj\Debug\agentnnmd_3.5.csprojResolveAssemblyReference.cache
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\obj\Debug\agentconfig.AgentForm.resources
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\obj\Debug\AgentNonameNetworkMonitor.Properties.Resources.resources
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\obj\Debug\agentnnmd_3.5.csproj.GenerateResource.Cache
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\bin\Debug\agentconfig3.exe.config
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\bin\Debug\agentconfig3.exe
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\bin\Debug\agentconfig3.pdb
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\bin\Debug\Newtonsoft.Json.dll
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\bin\Debug\Newtonsoft.Json.xml
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\obj\Debug\agentconfig3.exe
+F:\projects\nnm\agentnnmd_3.5\agentnnmd_3.5\obj\Debug\agentconfig3.pdb
+F:\projects\nnm\agentnnmd_3.5\agentconfig3\bin\Debug\agentconfig3.exe.config
+F:\projects\nnm\agentnnmd_3.5\agentconfig3\obj\Debug\agentconfig3.exe
+F:\projects\nnm\agentnnmd_3.5\agentconfig3\obj\Debug\agentconfig3.pdb

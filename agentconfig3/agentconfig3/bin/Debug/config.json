@@ -1,0 +1,19 @@
+{
+  "interfaceString": "*",
+  "Port": 99934,
+  "ignoring_name_interfaces": [
+    "Loopback Pseudo-Interface",
+    "isatap",
+    "Teredo Tunneling Pseudo-Interface",
+    "6TO4 Adapter"
+  ],
+  "services": [
+    "ALG",
+    "AMD External Events Utility",
+    "AppMgmt",
+    "AppReadiness",
+    "aspnet_state",
+    "AxInstSV",
+    "BFE"
+  ]
+}

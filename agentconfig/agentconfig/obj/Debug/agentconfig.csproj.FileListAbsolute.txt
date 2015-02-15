@@ -1,0 +1,11 @@
+F:\projects\nnm\agentconfig\agentconfig\obj\Debug\agentconfig.csprojResolveAssemblyReference.cache
+F:\projects\nnm\agentconfig\agentconfig\obj\Debug\AgentNonameNetworkMonitor.Properties.Resources.resources
+F:\projects\nnm\agentconfig\agentconfig\obj\Debug\agentconfig.csproj.GenerateResource.Cache
+F:\projects\nnm\agentconfig\agentconfig\bin\Debug\agentconfig.exe.config
+F:\projects\nnm\agentconfig\agentconfig\bin\Debug\agentconfig.exe
+F:\projects\nnm\agentconfig\agentconfig\bin\Debug\agentconfig.pdb
+F:\projects\nnm\agentconfig\agentconfig\obj\Debug\agentconfig.AgentForm.resources
+F:\projects\nnm\agentconfig\agentconfig\obj\Debug\agentconfig.exe
+F:\projects\nnm\agentconfig\agentconfig\obj\Debug\agentconfig.pdb
+F:\projects\nnm\agentconfig\agentconfig\bin\Debug\Newtonsoft.Json.dll
+F:\projects\nnm\agentconfig\agentconfig\bin\Debug\Newtonsoft.Json.xml

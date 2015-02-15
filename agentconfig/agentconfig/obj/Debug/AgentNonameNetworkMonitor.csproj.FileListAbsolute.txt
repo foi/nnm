@@ -1,0 +1,39 @@
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\bin\Debug\Agent Noname Network Monitor.exe.config
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\bin\Debug\Agent Noname Network Monitor.exe
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\bin\Debug\Agent Noname Network Monitor.pdb
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\obj\Debug\AgentNonameNetworkMonitor.csprojResolveAssemblyReference.cache
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\obj\Debug\AgentNonameNetworkMonitor.csproj.GenerateResource.Cache
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\obj\Debug\Agent Noname Network Monitor.exe
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\obj\Debug\Agent Noname Network Monitor.pdb
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\obj\Debug\AgentNonameNetworkMonitor.AgentForm.resources
+C:\projects\miac_netmon\MiacAgentGUI\MiacAgentGUI\obj\Debug\AgentNonameNetworkMonitor.Properties.Resources.resources
+C:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\Agent Noname Network Monitor.exe.config
+C:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\Agent Noname Network Monitor.exe
+C:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\Agent Noname Network Monitor.pdb
+C:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csprojResolveAssemblyReference.cache
+C:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.AgentForm.resources
+C:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.Properties.Resources.resources
+C:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csproj.GenerateResource.Cache
+C:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\Agent Noname Network Monitor.exe
+C:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\Agent Noname Network Monitor.pdb
+G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csprojResolveAssemblyReference.cache
+G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.AgentForm.resources
+G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.Properties.Resources.resources
+G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csproj.GenerateResource.Cache
+G:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe.config
+G:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe
+G:\projects\miac_netmon\AgentNNM\AgentNNM\bin\Debug\AgentNNM.pdb
+G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNNM.exe
+G:\projects\miac_netmon\AgentNNM\AgentNNM\obj\Debug\AgentNNM.pdb
+G:\projects\nnm\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe.config
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNNM.exe
+G:\projects\nnm\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe
+G:\projects\nnm\AgentNNM\AgentNNM\bin\Debug\AgentNNM.pdb
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csprojResolveAssemblyReference.cache
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.AgentForm.resources
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.Properties.Resources.resources
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNonameNetworkMonitor.csproj.GenerateResource.Cache
+G:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNNM.pdb
+F:\projects\nnm\AgentNNM\AgentNNM\bin\Debug\AgentNNM.exe.config
+F:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNNM.exe
+F:\projects\nnm\AgentNNM\AgentNNM\obj\Debug\AgentNNM.pdb
