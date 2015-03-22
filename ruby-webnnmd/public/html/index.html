@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html ng-app="nnm">
+<head>
+  <!-- css -->
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="css/xeditable.css">
+  <link rel="stylesheet" type="text/css" href="css/c3.min.css">
+  <link rel="stylesheet" type="text/css" href="css/custom.css">
+
+  <!-- js libraries -->
+  <!-- third-party -->
+  <script type="text/javascript" src="js/strftime-min.js"></script>
+  <script type="text/javascript" src="js/d3.min.js"></script>
+  <script type="text/javascript" src="js/c3.min.js"></script>
+  <!-- angular -->
+  <script type="text/javascript" src="js/angular.js"></script>
+  <script type="text/javascript" src="js/angular-route.js"></script>
+  <script type="text/javascript" src="js/angular-resource.min.js"></script>
+  <script type="text/javascript" src="js/ui-bootstrap-0.12.0.min.js"></script>
+  <script type="text/javascript" src="js/xeditable.min.js"></script>
+  <!-- custom js -->
+  <script type="text/javascript" src="js/angular.custom.js"></script>
+  <title>Noname Network Monitor</title>
+</head>
+<body>
+  <header>
+  </header>
+    <div ng-controller="NavCtrl" ng-init="checkConnection()">
+      <ul class="nav nav-tabs">
+        <li ng-class="{active:isActive('/')}"><a href="/#/">HOT</a></li>
+        <li ng-class="{active:isActive('/dictionaries')}"><a href="/#/dictionaries">Словари</a></li>
+        <li ng-class="{active:isActive('/statistics')}"><a href="/#/details">Детальная статистика</a></li>
+        <li ng-class="{active:isActive('/config')}">
+          <a href="/#/config" >
+            <span ng-class="{worked: dbConnected === true, stopped: dbConnected === false}"></span>База данных
+            <span ng-class="{worked: ServiceNNM === 'true', stopped: ServiceNNM === 'false'}"></span>Служба NNM
+          </a>
+        </li>
+      </ul>
+    </div>
+  <div class="container-fluid">
+    <div ng-view>
+      
+    </div>
+  </div>
+  <footer></footer>
+</body>
+</html>

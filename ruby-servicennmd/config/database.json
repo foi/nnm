@@ -1,0 +1,9 @@
+{
+  "adapter": "mysql2",
+  "database": "noname_network_monitor",
+  "username": "root",
+  "password": "Red2784",
+  "encoding": "utf8",
+  "pool": 30,
+  "reaping_frequency": 3
+}

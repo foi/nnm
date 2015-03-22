@@ -1,0 +1,227 @@
+<div ng-show="dbConnected">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <!-- Таблица с хостами -->
+      <div class="panel panel-default">
+      <div class="panel-heading"><a  ng-click="show.hosts = !show.hosts">Хосты</a></div>
+      <div class="panel-body" ng-show="show.hosts">
+        <table class="table table-bordered table-hover table-condensed">
+        <tr style="font-weight: bold">
+          <td style="width:40%">Название</td>
+          <td style="width:35%">ip-адрес/доменное имя</td>
+          <td style="width:20%">Группа</td>
+          <td style="width:5%">X</td>
+        </tr>
+        <tr ng-repeat="host in hosts">
+          <td>
+            <a href="#" editable-text="host.name" onbeforesave="updateHost(host)">
+              {{ host.name || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-text="host.address" onbeforesave="updateHost(host)">
+              {{ host.address || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-select="host.group_id" e-ng-options="g.id as g.name for g in groups" onbeforesave="updateHost(host)">
+              {{ showGroup(host) }}
+            </a>
+          </td>
+          <td>
+            <button ng-click="deleteHost(host.id, $index)" href="#" class="btn btn-primary">
+              Удалить
+            </button>
+          </td>
+        </tr>
+      </table>
+      <div class="panel panel-default">
+        <div class="panel-heading">Добавить новый хост</div>
+        <form class="form-inline" name="addHostForm" novalidate>
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model='host.name' name="hostname" id="hostnameinput" placeholder="название хоста" required>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model='host.address' id="address" name="address" placeholder="ip-адрес или доменное имя" required>
+          </div>
+          <div class="form-group">
+            <select ng-model="host.group_id" ng-options="group.id as group.name for group in groups" name="group_id" class="form-control" required></select>
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="addHost(host)" ng-disabled="addHostForm.$invalid">Добавить</button>
+        </form>
+      </div>  
+      </div>
+      </div>
+      <!-- Конец таблицы с хостами -->
+      <!-- таблица с группами -->
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.groups = !show.groups">Группы</a></div>
+      <div class="panel-body" ng-show="show.groups">
+      <table class="table table-bordered table-hover table-condensed">
+        <tr style="font-weight: bold">
+          <td style="width:95%">Название</td>
+          <td style="width:5%">X</td>
+        </tr>
+        <tr ng-repeat="group in groups">
+          <td>
+            <a href="#" editable-text="group.name" onbeforesave="updateGroup(group)">
+              {{ group.name || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <button ng-click="deleteGroup(group.id, $index)" href="#" class="btn btn-primary">
+              Удалить
+            </button>
+          </td>
+        </tr>
+      </table>
+      <div class="panel panel-default">
+        <div class="panel-heading">Добавить новую группу</div>
+        <form class="form-inline" name="addGroupForm" novalidate>
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model='group.name' name="groupname" id="groupnameinput" placeholder="наименование группы" required>
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="addGroup(group)" ng-disabled="addGroupForm.$invalid">Добавить</button>
+        </form>
+      </div>
+      </div>
+      </div>
+      <!-- Конец таблицы с группами -->
+      <!-- Начало таблицы с хостами и портами -->
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.hp = !show.hp">Хосты и порты</a></div>
+      <div class="panel-body" ng-show="show.hp">
+      <table class="table table-bordered table-hover table-condensed">
+        <tr style="font-weight: bold">
+          <td style="width:30%">Наименование</td>
+          <td style="width:25%">Тип</td>
+          <td style="width:5%">Порт</td>
+          <td style="width:20%">Хост</td>
+          <td style="width:15%">Дополнительный маршрут</td>
+          <td style="width:5%">X</td>
+        </tr>
+        <tr ng-repeat="hp in hostswithports">
+          <td>
+            <a href="#" editable-text="hp.name" onbeforesave="updateHp(hp)">
+              {{ hp.name || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-select="hp.type_id" e-ng-options="t.id as t.name for t in types" onbeforesave="updateHp(hp)">
+              {{ showType(hp.type_id) }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-text="hp.port" onbeforesave="updateHp(hp)">
+              {{ hp.port || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-select="hp.host_id" e-ng-options="h.id as h.name for h in hosts" onbeforesave="updateHp(hp)">
+              {{ showHost(hp.host_id) }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-text="hp.route" onbeforesave="updateHp(hp)">
+              {{ hp.route || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <button ng-click="deleteHp(hp.id, $index)" href="#" class="btn btn-primary">
+              Удалить
+            </button>
+          </td>
+        </tr>
+      </table>
+      <div class="panel panel-default">
+        <div class="panel-heading">Добавить новый хост и порт</div>
+        <form class="form-inline" name="addHpFrom" novalidate>
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model='hp.name' name="hpname" id="hpnameinput" placeholder="наименование хоста и порта" required>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model='hp.port' name="hpport" id="hpportinput" placeholder="порт" required>
+          </div>
+          <div class="form-group">
+            <select ng-model="hp.type_id" ng-options="t.id as t.name for t in types" name="hptype_id" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <select ng-model="hp.host_id" ng-options="h.id as h.name for h in hosts" name="hphost_id" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" ng-model='hp.route' name="hproute" id="hprouteinput" placeholder="дополнительный маршрут/">
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="addHp(hp)" ng-disabled="addHpFrom.$invalid">Добавить</button>
+        </form>
+      </div>
+      </div>
+      </div>
+      <!-- Конец таблицы с хостами и портами -->
+      <!-- Начало таблицы с сервисами -->
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.services = !show.services">Сервисы</a></div>
+      <div class="panel-body" ng-show="show.services">
+      <table class="table table-bordered table-hover table-condensed">
+        <tr style="font-weight: bold">
+          <td style="width:40%">Название сервиса</td>
+          <td style="width:55%">Гуманное название</td>
+          <td style="width:5%">X</td>
+        </tr>
+        <tr ng-repeat="service in services">
+          <td>
+            <a href="#" editable-text="service.system_name" onbeforesave="updateService(service)">
+              {{ service.system_name || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-text="service.readable_name" onbeforesave="updateService(service)">
+              {{ service.readable_name || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <button ng-click="deleteService(service.id, $index)" href="#" class="btn btn-primary">
+              Удалить
+            </button>
+          </td>
+        </tr>
+      </table>
+      </div>
+      </div>
+      <!-- Конец таблицы с сервисами -->
+      <!-- Таблица с подписчиками -->
+      <div class="panel panel-default">
+      <div class="panel-heading"><a ng-click="show.subscribers = !show.subscribers">Подписчики</a></div>
+      <div class="panel-body" ng-show="show.subscribers">
+      <table class="table table-bordered table-hover table-condensed">
+        <tr style="font-weight: bold">
+          <td style="width:95%">Email</td>
+          <td style="width:5%">X</td>
+        </tr>
+        <tr ng-repeat="s in subscribers">
+          <td>
+            <a href="#" editable-text="s.email" onbeforesave="updateSubscriber(s)">
+              {{ s.email || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <button ng-click="deleteSubscriber(s.id, $index)" href="#" class="btn btn-primary">
+              Удалить
+            </button>
+          </td>
+        </tr>
+      </table>
+      <div class="panel panel-default">
+        <div class="panel-heading">Добавить подписчика</div>
+        <form class="form-inline" name="addSubscriberForm" novalidate>
+          <div class="form-group">
+            <input type="email" class="form-control" ng-model='s.email' name="subscriberemail" id="subscriberemailinput" placeholder="адрес электронной почты" required>
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="addSubscriber(s)" ng-disabled="addSubscriberForm.$invalid">Добавить</button>
+        </form>
+      </div>
+      </div>
+      </div>
+      <!-- конец таблицы с подписчиками -->
+    </div>
+  </div>
+</div>

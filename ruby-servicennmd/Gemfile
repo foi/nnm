@@ -1,0 +1,12 @@
+source "http://rubygems.org"
+
+gem "thread_safe"
+gem 'mysql2', platform: :ruby
+gem 'jdbc-mysql', platform: :jruby
+gem 'activerecord-jdbc-adapter', platform: :jruby
+gem "activerecord", :require => "active_record"
+gem "activesupport"
+gem "net-ping"
+gem "concurrent-ruby"
+gem "json_pure"
+gem "pony"

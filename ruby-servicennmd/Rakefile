@@ -1,0 +1,17 @@
+require 'active_record'
+require 'yaml'
+require 'mysql2' if !defined? JRUBY_VERSION
+require './db/migrate.rb'
+ 
+task :default => :migrate
+ 
+desc "Migrate the database through scripts in db/migrate. Target specific version with VERSION=x"
+task :migrate do
+  ActiveRecord::Base.establish_connection(JSON.load(File.open("config/database.json")))
+  CreateDatabase.send(:up)
+end
+
+task :destroy do 
+  ActiveRecord::Base.establish_connection(JSON.load(File.open("config/database.json")))
+  CreateDatabase.send(:down)
+end

@@ -1,0 +1,27 @@
+<div class="panel panel-default" ng-init="get_hosts()">
+  <div class="panel-heading">
+    <h3 class="panel-title">Статистика пинга во времени</h3>
+  </div>
+  <div class="panel-body">
+  <!-- Выбор даты и времени с по -->
+  <div class="col-md-3">
+    <div class="input-group input-group-sm">
+      <span class="input-group-addon" id="start_date" ng-model="start_date">с</span>
+      <input type="text" class="form-control" placeholder="29.10.2015T10:00:00">
+    </div>
+  </div>
+   <div class="col-md-3">
+     <div class="input-group input-group-sm">
+      <span class="input-group-addon" id="end_date" ng-model="end_date">по</span>
+      <input type="text" class="form-control" placeholder="29.10.2015T10:00:00">
+    </div>
+   </div> 
+   <!-- конец выбора даты -->
+   <!-- выбор хостов -->
+   <select ng-model="checked_host" ng-options="host.name for host in hosts"></select>
+   {{ checked_host }}
+   <!-- конец выбора хостов -->
+   <a class="btn btn-default" id="go-ping-stats" ng-click="get_ping(start_date, end_date, checked_host)">Go</a>
+  </div>
+  <ping-chart config="ping_data" id="ping_chart"></ping-chart>
+</div>

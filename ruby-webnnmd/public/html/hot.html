@@ -1,0 +1,48 @@
+<div ng-show="dbConnected" ng-init="load_ping_data_chart()">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      График пинга за последние {{ minutes }} минут [<a ng-click="load_ping_data_chart()">Обновить</a>]
+    </div>
+    <div class="panel-body">
+      <ping-chart config="ping_chart_data" id="latest_ping_chart"></ping-chart>
+  </div>
+</div>
+<!-- Панель со статистикой агентов -->
+<div class="panel panel-default" ng-init="load_agents()">
+  <div class="panel-heading">Статистика агентов за последние {{ minutes }} минут [<a ng-click="load_agents()">Обновить</a>]</div>
+  <div class="panel-body">
+  <!-- Панель с ссылками ан агентов -->
+  <div class="btn-group">
+    <button type="button" class="btn btn-default" ng-repeat="agent in agents" ng-click="getAgentData(agent.id)" id="agentList">{{agent.name}}</button>
+  </div>
+  <!-- Панель с графиками -->
+  <div ng-if="agent_cpu_chart">
+  <div class="col-md-6">
+    <h4>Загрузка ЦПУ</h4>
+    <cpu-chart config="agent_cpu_chart" id="cpu_chart"></cpu-chart>
+  </div>
+  <div class="col-md-6">
+    <h4>Объем используемой оперативной памяти</h4>
+     <mem-chart config="agent_mem_chart" id="mem_chart"></mem-chart>
+  </div>
+   <!-- Панель в объемом занятого пространства на жетских дисках -->
+  <h4>Занятое пространство на разделах жестких дисков</h4>
+  <ul class="list-group">
+    <li class="list-group-item" ng-repeat="p in partitions">
+      {{ p.letter }}
+      <div class="progress">
+        <div class="progress-bar" ng-class="{'progress-bar-warning': (p['usage_percent'] > 60 && p['usage_percent'] < 80), 'progress-bar-success': p['usage_percent'] < 60, 'progress-bar-danger': p['usage_percent'] > 80 }" style="width: {{p['usage_percent']}}%;">
+          {{ p.used_space }} / {{ p.total_space }} ГБ
+        </div>
+      </div>
+    </li>
+  </ul>
+  <!-- <partitions-chart config="agent_partitions_chart" id="partitions_chart"></partitions-chart> -->
+  <!-- конец напенили я занятым  пространством на жестких дисках -->
+  <!-- данные интерфейсов -->
+  <h4>Активность сетевых интерфейсов</h4>
+  <interfaces-chart config="agent_interfaces_chart" id="interfaces_chart"></interfaces-chart>
+  <!-- конец данных интерфейсов -->
+  <!-- Конец панели с графиками -->
+  </div>
+</div>

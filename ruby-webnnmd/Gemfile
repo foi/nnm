@@ -1,0 +1,8 @@
+source "http://rubygems.org"
+
+gem "thread_safe"
+gem 'sinatra', :github => 'sinatra/sinatra'
+gem "activerecord"
+gem "mysql2"
+gem "puma"
+gem "json"

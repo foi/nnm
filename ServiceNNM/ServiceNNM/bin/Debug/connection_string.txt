@@ -1,1 +1,0 @@
-Data Source=FOI-PC\SQLEXPRESS;Initial Catalog=miac_net_mon;User ID=sa;Password=Qwerty123;Connection Lifetime=0
