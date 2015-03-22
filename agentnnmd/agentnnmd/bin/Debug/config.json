@@ -8,9 +8,12 @@
     "6TO4 Adapter"
   ],
   "services": [
+    "AdobeFlashPlayerUpdateSvc",
     "ALG",
     "AppIDSvc",
     "Appinfo",
+    "AppReadiness",
+    "BITCOMET_HELPER_SERVICE",
     "WSearch"
   ],
   "PerformPingAndNotify": false,
@@ -20,8 +23,12 @@
   "SmtpSsl": true,
   "Login": "dsdd@yandex.ru",
   "Password": "Qwerty123",
-  "Hosts": [],
-  "Subscribers": [],
+  "Hosts": [
+    ""
+  ],
+  "Subscribers": [
+    ""
+  ],
   "PerformWebCheck": true,
   "ThoughtfulPing": true,
   "ListOfPagesForWebCheck": [
