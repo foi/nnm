@@ -1,22 +1,21 @@
 ![http://www.dafont.com/xxii-ultimate-black-metal.font?text=nonamenetworkmonitor&fpp=50&af=on&psize=l](https://www.dropbox.com/s/nfgb8z6zywg7m40/nonamenetworkmonitorlogo.png?dl=1 "noname network monitor")
 
-noname Network Monitor
+Noname Network Monitor
 =====================
+
+### Важные изменения проекта 
+
+22.03.2015 года была создана ветка [legacy](https://github.com/foi/nnm/tree/legacy), где распологается версия сервиса написанная на C# и веб-интерфейса на nodejs, использующие SQL SERVER, теперь это является наследием в связи с переориентацией проекта на linux-платформу. В текущей версии [master](https://github.com/foi/nnm/tree/master) ветке сервис и веб-интерфейс был переписан на ruby, а в качестве БД в приоритете MariaDB. 
 
 ### Релизы
 
-[v0.1 - скачать](https://dl.dropboxusercontent.com/u/5433393/github/nonamenetworkmonitor/releases/NonameNetworkMonitor.v0.1.zip)
-- начальный релиз, кстати при первоначальной устновке есть проблема, что в package.json чего-то не хватает
+#### Legacy
 
-[v0.2 - скачать](https://www.dropbox.com/s/wqw28g8cxx2muc1/nnm_0.2.zip?dl=1)
-- веб-интерфейс переписан с jquery на angularjs
-- дял графиков вместо morrijs используется c3
-- добавлена возможность изменять конфигурацию и серввиса и веб-интерфейса из WebNNM
-- еще какие-то мелочи, даже и не помню
+[v0.3.1 - скачать](https://www.dropbox.com/s/lm1bh2ranfgn3xx/nnm_v0.3.1.tar.gz?dl=1)
 
-[v0.3 - скачать](https://www.dropbox.com/s/1nyu2hri6mu451z/nnm_v0.3.zip?dl=1)
-- агенты теперь тупо консольная утилита, для того, чтобы их удобно было оформлять в качестве службы nssm
-- вырезан интерфейс конфигурации config.json в отдельную программу agentconfig
+#### Master
+
+На данный момент релиза нет, потому что не решена проблема оформления ruby-servicennmd как сервиса.
 
 ===========
 # Интро
@@ -27,39 +26,35 @@ _Это мое первое в жизни приложение, написанн
 
 ## Что необходимо?
 
-* любой Windows - x86, x64
-* .net framework 4.5 для ServiceNNM и 3.5 как минимум для агента
-* [nodejs 0.10.36 +](http://nodejs.org/download/) или [iojs 1.0.4 +](https://iojs.org/), node должна находится в PATH
-* MS SQL SERVER 2014, 2012 (на версиях ниже не проверял, но скорее всего все будет ок)
-* утилита [Non-Sucking Service Manager](https://nssm.cc/download) для оформления как службой ServiceNNM и WebNNM
-* Если вы любитель IIS, и желате чтобы WebNNM работал на нем, то нужны модули [URL REWRITE](http://www.iis.net/downloads/microsoft/url-rewrite), [ARR](http://www.iis.net/downloads/microsoft/application-request-routing), [IISNODE](https://github.com/tjanczuk/iisnode)
+* ruby 2.2.x/2.1.x/jruby (не в приоритете) (рекомендую использовать [rvm](http://rvm.io))
+* mariadb (nnm точно работает на ветке 5.5) [инструкция по её установке](https://stavrovski.net/blog/install-and-configure-nginx-mariadb-php-fpm-in-centos-7-rhel7)
+* bundler (``` gem install bundler ```)
+
+## Перед запуском
+
+* дать права на запись в директории ruby-servicennmd и ruby-webnnmd ``` chmod -R 777 ruby-servicennmd ```, ``` chmod -R 777 ruby-webnnmd ```
+* установить владельца папок в приложениями ``` chown -R someuser:somegroup ruby-servicennmd ```, ``` chown -R someuser:somegroup ruby-webnnmd ```
+* все команды выполняем с ``` sudo ```
+* установим необходимые зависимости командой ``` bundler ``` в каждой из папок
 
 ## Создание базы данных
 
-Отредактировать скрипт init_database.bat:
-```
-sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
-```
-Запустить .bat скрипт.
-
-Если неустраивает название базы данных, которая создается данным скриптом, правьте название в create_database_and_tables.sql.
-
-## Конфигурация модулей
-
-Для ServiceNNM и WebNNM необходимо отредактировать строку подключения файле config.json.
+* Необходимо создать базу данных и добавить пользователя (можно и не добавлять, а использовать root аккаунт) для доступа к ней: ``` mysql -u root -p ```, ``` CREATE DATABASE noname_network_monitor CHARACTER SET utf8; ```
+* Настроить параметры для подключения к БД в файле ``` ruby-servicennmd/config/database.json ```
+* перейти в ruby-servicennmd и выполнить ``` rake ```
 
 ## Смысл
 
 Мониторинг доступности пингом, получение информации от агентов о загрузке ЦП, памяти, и т.д., проверка размера веб-страниц.
 
 Система состоит из трех модулей: 
-* агент для windows (c#) AgentNNM, //агент для *nix будет позже//
-* служба windows (c#) ServiceNNM
-* веб-интерфейс (nodejs/io.js, javascript) WebNNM
+* агент для windows (c#) agentnnmd, //агент для *nix будет позже//
+* служба (ruby) ruby-servicennmd
+* веб-интерфейс (ruby, angularjs) ruby-webnnmd
 
 Возможности:
  - считывание информации с хостов с периодичностью в 1 минуту;
- - уведомление по email об недоступности хоста, порта (...) в течение X минут (настраивается в config.json "number_of_periods_after_to_send_notify");
+ - уведомление по email об [не]доступности хоста, порта (...) в течение X минут;
  - Проверка размера веб-страниц и отсылка уведомления об его изменении на email
  - статистика задержек пинга
  - веб-интерфейс для конфигурирования и просмотра статистики
@@ -101,30 +96,18 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 
 Далее необходимо запустить сервер.
 
-Пока что Агенты не оформлены как служба, поскольку нужно больше времени на тестирование их стабильности.
-
 Конфигурация агента хранится в файле _config.json_. Перед первым запуском нужно переименовать config.json.example в config.json
 
-## Установка как службы WebNNM т.е. веб-интерфейса
-
-Первое, что необходимо сделать, это перейти в папку с WebNNM и установить необходимые модули командой *npm install*
+## Установка как службы ruby-webnnmd т.е. веб-интерфейса
 
 Установка в качестве службы выполняется при помощи утилиты [non sucking service manager (описание примера настройки на английском)](https://nssm.cc/usage), [Описание примера настройки на русском](http://nix-sa.blogspot.ru/2013/05/windows-nssm.html).  
 
-В качестве альтернативы можно использовать [iisnode](https://github.com/tjanczuk/iisnode) модуль. 
-
 Как выглядит веб-интерфейс WebNNM:
 
-![Справочники](https://www.dropbox.com/s/4g5h33sktbumc0s/nnmdictionaries.png?dl=1)
-![Статистика за последние Х минут](https://www.dropbox.com/s/7lx6zmx520vw3gq/c3jschartsHot.png?dl=1)
-![Конфигурация](https://www.dropbox.com/s/647dj5ueszy6jmx/nnmconfig.png?dl=1)
+![Справочники](https://www.dropbox.com/s/ks3bddfdimh4i8q/dict.JPG?dl=1)
+![Страница HOT](https://www.dropbox.com/s/we6eg5umd5dfj8y/Hot_page.JPG?dl=1)
+![Конфигурация](https://www.dropbox.com/s/x4j0bh6sph69d9h/config.JPG?dl=1)
 
-*Для того, чтобы WebNNM могла останавливать/запускать службу, ее необходимо запускать от имени администратора*
-
-
-**Для работы веб-интерфейса необходимо чтобы служба обозревателя SQL Server была запущена, а также в Сетевой конфигурации SQL SERVER должен быть включен протокол TCP/IP**
-
-**Перед первым запуском веб-интерфейса необходимо выполнить команду npm update из каталога WebNNM**
 
 ## Установка демона агента как службы
 
@@ -134,92 +117,24 @@ sqlcmd -S FOI-PC\SQLEXPRESS -Usa -PQwerty123 -i create_database_and_tables.sql
 ![2](https://www.dropbox.com/s/mfjrr5qhi3tr9ic/2.png?dl=1)
 ![3](https://www.dropbox.com/s/1sl0i3v33evzd7f/3.png?dl=1)
 
-## Файлы конфигурации
-### ServiceNNM
-
-Пример config.json:
-```
-{
-  "connection_string": "Data Source=LOCALHOST\\SQLEXPRESS;Initial Catalog=noname_network_monitor;User ID=sa;Password=Qwerty123;Connection Lifetime=0",
-  "Smtp" : {
-    "server": "mail.gmailco.com",
-    "port": 25,
-    "ssl": false,
-    "from": "agent@gmailco.com",
-    "password": "y33Qwe12",
-    "notification": true,
-    "sleep_after_send_one_mail_message": 100
-  },
-  "Timeouts" : {
-    "for_web_page_check": 3000,
-    "for_smtp_mail_send": 1000,
-    "for_ping": 2000,
-    "for_check_port": 1000,
-    "for_get_from_agent": 5000,
-  },
-  "Sleep" : {
-    "when_operate": true,
-    "min_mseconds_sleep_when_operate": 1,
-    "max_mseconds_sleep_when_operate": 100,
-  },
-  "number_of_periods_after_to_send_notify": 1,
-  "count_after_host_is_considered_as_alive": 1,
-  // Если тщательную проверку не включать, то в случае если у вас некачественный интернет канал, вас засыпит уведомлениями, поэтому рекомендую включить
-  "ThoughtfulMode" : {
-    "Ping": true,
-    "Port": true,
-    "Web": true,
-    "Agent": true
-  }
-}
-```
-### WebNNM
-
-Пример config.json:
-```
-{
-    "user": "sa",
-    "password": "Qwerty123",
-    "server": "LOCALHOST",
-    "driver": "tedious",
-    "database": "noname_network_monitor",
-    "options": {
-        "instanceName": "SQLEXPRESS"
-    }
-}
-```
-
-Пример public_config.json:
-```
-{
-  // строить график пинга за последние Х минут
-  "chart" : {
-    "minutes": 30
-  }
-}
-```
 
 ## В разработке приложения использовались следующие ЯП и библиотеки
-### WebNNM
-* nodejs/io.js
-* underscore.js
-* expressjs
-* strftime из js-methods
+### ruby-webnnmd
+* ruby
+* activerecord
+* sinatra
 * twitter bootstrap
 * angularjs
 * angular x-editable
 * :heartbeat: c3js :heartbeat:
 
-### ServiceNNM
-* C#
-* Newtonsoft JSON.net
+### ruby-servicennmd
+* ruby
+* activerecord
 
-### NonameAgent
+### agentnnmd
 * C#
 
 ### Благодарю за стимуляцию в разработке :octocat:: 
 
 * bychkov
-* karamanov
-* serdyukov
-* stoyakin
