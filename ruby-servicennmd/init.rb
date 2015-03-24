@@ -21,7 +21,7 @@ OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 config = JSON.load File.open("config/database.json")
 
-%w{logger models modules/helpers modules/ping_helper modules/port_helper modules/page_helper modules/agent_helper modules/notify_helper gather_loop}.each do |file|
+%w{logger models modules/helpers modules/ping_helper modules/port_helper modules/page_helper modules/agent_helper modules/notify_helper modules/response_time_helper gather_loop}.each do |file|
   require file
 end
 

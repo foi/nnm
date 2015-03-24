@@ -118,10 +118,12 @@ class CreateDatabase < ActiveRecord::Migration
       t.integer :ping_timeout, null: false
       t.integer :port_timeout, null: false
       t.integer :agent_timeout, null: false
+      t.integer :response_time_timeout, null: false
       t.boolean :sleep, null: false
       t.float :sleep_min, null: false
       t.float :sleep_max, null: false
       t.integer :tries, null: false
+      t.integer :response_time_avg_from, null: false
       t.integer :hot_minutes, null: false
       t.integer :notify_after_period_n, null: false
       t.string :notify_agent_template, null: false
@@ -129,6 +131,8 @@ class CreateDatabase < ActiveRecord::Migration
       t.string :notify_host_template, null: false
       t.string :notify_page_template, null: false
       t.string :notify_host_alive_template, null: false
+      t.string :default_admin_name, null: false
+      t.string :default_admin_password, null: false 
     end
 
     # создадим записи по умолчанию
@@ -152,17 +156,21 @@ class CreateDatabase < ActiveRecord::Migration
       ping_timeout: 1,
       port_timeout: 1,
       agent_timeout: 10,
+      response_time_timeout: 3,
       sleep: true,
       sleep_min: 0.001,
       sleep_max: 1,
       tries: 3,
+      response_time_avg_from: 4,
       notify_after_period_n: 1,
       hot_minutes: 30,
       notify_agent_template: "[АГЕНТ] У {agent} сервис {service} изменил статус на {status}. Время события: {time}",
       notify_port_template: "[ПОРТ] {port_name} на {hostname} изменил статус на - {status}. Время события: {time}",
       notify_host_template: "[ПИНГ] {hostname} {status} в течение {fail_time}. Время события: {time}",
       notify_page_template: "[WEB] {page} на {hostname} изменила размер на {size}. Время события: {time}",
-      notify_host_alive_template: "[ПИНГ] {hostname} снова доступен. Время события: {time}"
+      notify_host_alive_template: "[ПИНГ] {hostname} снова доступен. Время события: {time}",
+      default_admin_name: "admin",
+      default_admin_password: "admin"
       )
 
   end
