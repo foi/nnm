@@ -101,6 +101,12 @@ class CreateDatabase < ActiveRecord::Migration
       t.integer :period_id, null: false
     end
 
+    create_table :response_time_statistics do |t|
+      t.integer :host_with_port_id, null: false
+      t.integer :time, null: false
+      t.integer :period_id, null: false
+    end
+
     create_table :configuration do |t|
       t.string :smtp_server, null: false
       t.integer :smtp_port, null: false
@@ -130,7 +136,7 @@ class CreateDatabase < ActiveRecord::Migration
       Group.create! name: e
     end
 
-    ["Web", "Проверка порта", "Agent"].each do |e|
+    ["Web", "Проверка порта", "Agent", "Время отклика ресурса"].each do |e|
       Type.create! name: e
     end
 
@@ -149,7 +155,7 @@ class CreateDatabase < ActiveRecord::Migration
       sleep: true,
       sleep_min: 0.001,
       sleep_max: 1,
-      tries: 1,
+      tries: 3,
       notify_after_period_n: 1,
       hot_minutes: 30,
       notify_agent_template: "[АГЕНТ] У {agent} сервис {service} изменил статус на {status}. Время события: {time}",
@@ -180,5 +186,6 @@ class CreateDatabase < ActiveRecord::Migration
     drop_table :types
     drop_table :services
     drop_table :cpu_ram_statistics
+    drop_table :response_time_statistics
   end
 end

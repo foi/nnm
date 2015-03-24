@@ -12,7 +12,8 @@ $SHARED_CONSTANTS = {
   INTERVAL: 60,
   TYPE_AGENT_ID: 3,
   TYPE_PAGE_ID: 1,
-  TYPE_PORT_ID: 2
+  TYPE_PORT_ID: 2,
+  TYPE_RESPONSE_ID: 4
 }
 
 # Чтобы не было проблем с проверкой https страниц с неподписаным сертификатом

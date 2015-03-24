@@ -1,4 +1,5 @@
 # encoding: utf-8
+# хелпер пинга хостов
 module PingHelper
 
   private 
@@ -7,7 +8,7 @@ module PingHelper
   end
 
   def ping_collection hosts
-    p "Началась проверка хостов  - #{Time.now}"
+    $logger.info "Началась пинг-проверка хостов"
     threads = []
     hosts.each do |host|
       threads << Thread.new do 

@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/sinatra/sinatra.git
-  revision: be9c18ac44214069f4709ced6da65abba9501d24
+  revision: 29c51d12fdd91ee254e51d4ce099535fcb6ea1a9
   specs:
-    sinatra (1.4.5)
+    sinatra (1.4.6)
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (>= 1.3, < 3)
@@ -10,14 +10,14 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
-    activemodel (4.2.0)
-      activesupport (= 4.2.0)
+    activemodel (4.2.1)
+      activesupport (= 4.2.1)
       builder (~> 3.1)
-    activerecord (4.2.0)
-      activemodel (= 4.2.0)
-      activesupport (= 4.2.0)
+    activerecord (4.2.1)
+      activemodel (= 4.2.1)
+      activesupport (= 4.2.1)
       arel (~> 6.0)
-    activesupport (4.2.0)
+    activesupport (4.2.1)
       i18n (~> 0.7)
       json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
@@ -28,13 +28,13 @@ GEM
     i18n (0.7.0)
     json (1.8.2)
     minitest (5.5.1)
-    mysql2 (0.3.17)
+    mysql2 (0.3.18)
     puma (2.11.1)
       rack (>= 1.1, < 2.0)
     rack (1.6.0)
     rack-protection (1.5.3)
       rack
-    thread_safe (0.3.4)
+    thread_safe (0.3.5)
     tilt (2.0.1)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
@@ -48,3 +48,4 @@ DEPENDENCIES
   mysql2
   puma
   sinatra!
+  thread_safe

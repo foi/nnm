@@ -7,6 +7,7 @@ class GatherLoop
   extend PageHelper
   extend AgentHelper
   extend NotifyHelper
+  extend ResponseTimeHelper
 
   @stop = false
 
@@ -51,6 +52,10 @@ class GatherLoop
       threads << Thread.new do
         check_agent_collection @agents
       end
+      # измерение времени отклика от ресурсов по url
+      threads << Thread.new do
+        measure_response_time_collection @urls_for_benchmark
+      end
       threads.map(&:join)
       p @trouble_counters
       p @issues
@@ -74,6 +79,7 @@ class GatherLoop
     @agents = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_AGENT_ID])   
     @ports = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PORT_ID])
     @pages = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PAGE_ID]) 
+    @urls_for_benchmark = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_RESPONSE_ID])
     @interfaces = Interface.all  
     @memory = RAM.all
     @services = Service.all
