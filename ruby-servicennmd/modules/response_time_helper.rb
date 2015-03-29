@@ -15,10 +15,10 @@ module ResponseTimeHelper
   # Измерить время отклика от веб-ресурса
   def measure_response_time url
     # Сколько раз измерять для вычисления среднего значения
+    @response_data = []
     @configuration["response_time_avg_from"].times do 
-      data ||= []
-      data << get_page(url)
-      $logger.info data
+      @response_data << get_page(url)
+      $logger.info @response_data
     end
   end
 

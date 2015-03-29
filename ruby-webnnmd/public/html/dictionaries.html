@@ -7,9 +7,10 @@
       <div class="panel-body" ng-show="show.hosts">
         <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
-          <td style="width:40%">Название</td>
+          <td style="width:30%">Название</td>
           <td style="width:35%">ip-адрес/доменное имя</td>
           <td style="width:20%">Группа</td>
+          <td style="width:10%">Уведомлять?</td>
           <td style="width:5%">X</td>
         </tr>
         <tr ng-repeat="host in hosts">
@@ -26,6 +27,11 @@
           <td>
             <a href="#" editable-select="host.group_id" e-ng-options="g.id as g.name for g in groups" onbeforesave="updateHost(host)">
               {{ showGroup(host) }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-checkbox="host.notify" e-title="Уверен?" onbeforesave="updateHost(host)">
+              {{ host.notify && "Ага" || "Неа" }}
             </a>
           </td>
           <td>
@@ -93,11 +99,12 @@
       <div class="panel-body" ng-show="show.hp">
       <table class="table table-bordered table-hover table-condensed">
         <tr style="font-weight: bold">
-          <td style="width:30%">Наименование</td>
-          <td style="width:25%">Тип</td>
+          <td style="width:20%">Наименование</td>
+          <td style="width:15%">Тип</td>
           <td style="width:5%">Порт</td>
           <td style="width:20%">Хост</td>
-          <td style="width:15%">Дополнительный маршрут</td>
+          <td style="width:25%">Дополнительный маршрут</td>
+          <td style="width:10%">Уведомлять?</td>
           <td style="width:5%">X</td>
         </tr>
         <tr ng-repeat="hp in hostswithports">
@@ -124,6 +131,11 @@
           <td>
             <a href="#" editable-text="hp.route" onbeforesave="updateHp(hp)">
               {{ hp.route || 'Пусто' }}
+            </a>
+          </td>
+          <td>
+            <a href="#" editable-checkbox="hp.notify" e-title="Уверен?" onbeforesave="updateHp(hp)">
+              {{ hp.notify && "Ага" || "Неа" }}
             </a>
           </td>
           <td>
