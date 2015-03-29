@@ -38,7 +38,6 @@ module AgentHelper
   ##### методы для обработки агентов
   #### Память
   def memory_work agent, agent_data
-    $logger.info "Началась работа с размерами памяти у агента #{agent.name}."
     memory = @memory.where(host_with_port_id: agent.id).first
     if memory.nil?
       with_connection { RAM.create! host_with_port_id: agent.id, total: agent_data["Ram"]["TotalRam"] }
@@ -53,7 +52,6 @@ module AgentHelper
 
   ##### работа с интерфейсами
   def interfaces_work agent, agent_data
-    $logger.info "Началась работа с интерфейсами агента #{agent.name}"
     interfaces = @interfaces.where host_with_port_id: agent.id
     guids = interfaces.pluck :guid
     # Просто добавим интерфейсы для хоста, если агент хоста впервые обнаружен
@@ -88,7 +86,6 @@ module AgentHelper
 
   # Работа с разделами
   def partitions_work agent, agent_data
-    $logger.info "Началась работа с разделами у агента #{agent.name}"
     # добавим разделы, если их нет. Изменим общий размер, если изменился
     partitions = @partitions.where host_with_port_id: agent.id
     if partitions.empty?
@@ -136,7 +133,6 @@ module AgentHelper
 
   # работа со статусами
   def statuses_work agent, agent_data
-    $logger.info "Началась работа со статусами у агента #{agent.name}"
     if @issues[:services][agent.id].nil?
       @issues[:services][agent.id] = { }
       agent_data["Services"].each do |service|

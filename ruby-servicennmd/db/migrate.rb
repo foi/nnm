@@ -10,6 +10,7 @@ class CreateDatabase < ActiveRecord::Migration
       t.string :name, null: false, limit: 50
       t.string :address, null: false
       t.integer :group_id, null: false
+      t.boolean :notify, default: true
     end
 
     create_table :subscribers do |t|
@@ -41,6 +42,7 @@ class CreateDatabase < ActiveRecord::Migration
       t.string :name, null: false
       t.integer :type_id, null: false
       t.string :route
+      t.boolean :notify, default: true
     end
 
     create_table :system_memory do |t|

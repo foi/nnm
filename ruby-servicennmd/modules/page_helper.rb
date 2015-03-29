@@ -11,7 +11,6 @@ module PageHelper
         url = form_url _
         size = check_size url
         if is_any_changes? @issues[:page], _, size
-          p "Есть изменения в размере страницы #{_.name} - #{Time.now}"
           raw_notify_string = @configuration.notify_page_template.dup
           notify_string = format_notify_string raw_notify_string, {
             "{page}" => _.name,
@@ -32,7 +31,6 @@ module PageHelper
 
   def check_size url
     size = 0
-    puts "Начало открытия страницы #{url}"
     re_try do 
       timeout(@configuration.page_timeout) do 
         res = open(url)
@@ -52,7 +50,7 @@ module PageHelper
       url += ":" + raw.port.to_s
     else 
       if raw.route
-      url += raw.route
+        url += raw.route
       else
         url += "/"
       end
