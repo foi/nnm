@@ -28,7 +28,7 @@ module AgentHelper
             # наполнениe справочника со статусами
             end
          rescue Exception => e
-           $logger.warn "Произошла ошибка во время обработки информации от агента: #{agent.name} - #{e}"
+           $logger.warn "Произошла ошибка во время обработки информации от агента: #{agent.name} - #{e.message}"
         end
       end
     end

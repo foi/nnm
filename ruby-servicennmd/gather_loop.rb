@@ -9,9 +9,13 @@ class GatherLoop
   extend NotifyHelper
   extend ResponseTimeHelper
 
+  # Чтобы не было проблем с проверкой https страниц с неподписаным сертификатом
+  OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
   @stop = false
 
   def self.start
+
     # хэш с тем, произошли  ли изменения
     @issues = { 
       services: { },
@@ -54,12 +58,12 @@ class GatherLoop
       end
       # измерение времени отклика от ресурсов по url
       threads << Thread.new do
-        measure_response_time_collection @urls_for_benchmark
+        measure_response_time_urls @urls_for_benchmark
       end
       threads.map(&:join)
-      p @trouble_counters
-      p @issues
-      p @mail_queue.length
+      $logger.info @trouble_counters
+      $logger.info @issues
+      $logger.info @mail_queue.length
     end
 
   end

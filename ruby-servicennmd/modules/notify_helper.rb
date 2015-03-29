@@ -26,6 +26,7 @@ module NotifyHelper
         begin
           while (subject = @mail_queue.pop(true) rescue nil) do
             sleep rand(0)
+            $logger.info subject
             Pony.mail({subject: subject });  
           end
           sleep 10

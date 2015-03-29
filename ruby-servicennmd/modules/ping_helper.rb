@@ -12,7 +12,7 @@ module PingHelper
     threads = []
     hosts.each do |host|
       threads << Thread.new do 
-        latency = ping host.address, host.id
+        latency = ping host.address, host.id, host.notify
         with_connection do 
           PingEntry.create!(host_id: host.id, latency: latency, period_id: @period_id)
         end
@@ -21,12 +21,12 @@ module PingHelper
     threads.map(&:join)
   end
 
-  def ping address, id
+  def ping address, id, notify
     result = 0
     re_try do
       result = unaccurate_ping address 
     end
-    register_trouble :ping, result, id
+    register_trouble(:ping, result, id) if notify
     result 
   end
 

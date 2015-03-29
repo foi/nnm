@@ -18,8 +18,10 @@ module PageHelper
             "{size}" => ActiveSupport::NumberHelper.number_to_human_size(size),
             "{time}" => formatted_current_time 
             }
-          p notify_string
-          @mail_queue << notify_string
+          # уведомлять только в случае, если надо
+          if _.notify
+            @mail_queue << notify_string
+          end
           with_connection do 
             PageEntry.create! host_with_port_id: _.id, size: size, period_id: @period_id
           end
@@ -38,24 +40,6 @@ module PageHelper
       end
     end
     size
-  end
-
-  # формирование URL - если тип проверка старницы, то порт 443 будет заменен на https, а 80 на http
-  # в случае если это полученеи информации от агента то протокол будет всегда http, а порт то указан
-  def form_url raw
-    url = ""
-    raw.port == 443 ? url += "https://" : url += "http://"
-    url += @hosts.where(id: raw.host_id).first.address
-    if raw.type_id == $SHARED_CONSTANTS[:TYPE_AGENT_ID]
-      url += ":" + raw.port.to_s
-    else 
-      if raw.route
-        url += raw.route
-      else
-        url += "/"
-      end
-    end
-    URI.parse url
   end
 
 end

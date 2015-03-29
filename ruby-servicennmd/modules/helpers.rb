@@ -113,4 +113,23 @@ module Helpers
       ActiveRecord::Base.connection_pool.release_connection
     end
   end
+
+   # формирование URL - если тип проверка старницы, то порт 443 будет заменен на https, а 80 на http
+  # в случае если это полученеи информации от агента то протокол будет всегда http, а порт то указан
+  def form_url raw
+    url = ""
+    raw.port == 443 ? url += "https://" : url += "http://"
+    url += @hosts.where(id: raw.host_id).first.address
+    if raw.type_id == $SHARED_CONSTANTS[:TYPE_AGENT_ID]
+      url += ":" + raw.port.to_s
+    else 
+      if raw.route
+        url += raw.route
+      else
+        url += "/"
+      end
+    end
+    URI.parse url
+  end
+  
 end
