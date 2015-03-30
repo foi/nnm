@@ -110,3 +110,9 @@ class RAM < ActiveRecord::Base
   self.table_name = "system_memory"
 end
 
+class ResponseEntry < ActiveRecord::Base
+  self.table_name = "response_time_statistics"
+  validates :period_id, presence: true
+  validates :host_with_port_id, presence: true
+  validates :time, presence: true
+end

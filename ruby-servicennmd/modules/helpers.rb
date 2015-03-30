@@ -120,7 +120,7 @@ module Helpers
     url = ""
     raw.port == 443 ? url += "https://" : url += "http://"
     url += @hosts.where(id: raw.host_id).first.address
-    if raw.type_id == $SHARED_CONSTANTS[:TYPE_AGENT_ID]
+    if raw.type_id.eql?($SHARED_CONSTANTS[:TYPE_AGENT_ID]) || raw.type_id.eql?($SHARED_CONSTANTS[:TYPE_RESPONSE_ID]) 
       url += ":" + raw.port.to_s
     else 
       if raw.route
