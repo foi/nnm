@@ -30,6 +30,12 @@
           <input type="radio" name="page_timeout" id="page_timeout" ng-model="config.page_timeout" value="{{i}}">{{i}}
         </label> 
     </li>
+    <li class="list-group-item" style="overflow:hidden">
+      <h5><b>Таймаут для отлика сетевых ресурсов (сек.)</b></h5>
+        <label class="radio-inline" ng-repeat="i in [1,2,3,4]">
+          <input type="radio" name="response_time_timeout" id="response_time_timeout" ng-model="config.response_time_timeout" value="{{i}}">{{i}}
+        </label> 
+    </li>
   </ul>
   <div style="clear: left"></div>
   <!-- SMTP -->
@@ -81,13 +87,19 @@
     </li>
   </ul>
   <div style="clear: left"></div>
-  <!-- Web-интерфейс -->
+  <!-- Прочие настройки -->
   <ul class="list-group col-md-5">
-    <h4>Настройки веб-интерфейса</h4>
+    <h4>Прочее</h4>
     <li class="list-group-item" style="overflow:hidden">
       <div class="input-group col-md-12" style="float:left;margin-right: 4px;">
         <div class="input-group-addon">Отображать статистику за N минут на странице HOT</div>
         <input type="number" min=20 max=60 class="form-control " name="hot_minutes" id="hot_minutes" ng-model="config.hot_minutes" required>
+      </div>
+    </li>
+    <li class="list-group-item" style="overflow:hidden">
+      <div class="input-group col-md-12" style="float:left;margin-right: 4px;">
+        <div class="input-group-addon">N раз проверять отклик от сетевого ресурса</div>
+        <input type="number" min=1 max=5 class="form-control " name="response_time_avg_from" id="response_time_avg_from" ng-model="config.response_time_avg_from" required>
       </div>
     </li>
   </ul>

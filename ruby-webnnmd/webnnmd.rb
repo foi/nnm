@@ -14,6 +14,11 @@ class WebNNMd < Sinatra::Base
   # отключить показ ошибок
   set :show_exceptions => false
 
+  configure do
+    @config = Configuration.first 
+  end
+
+
   helpers do
     def ppp object
       puts object.inspect
@@ -298,6 +303,12 @@ class WebNNMd < Sinatra::Base
       result = "true"
     end
     result
+  end
+
+  # получить информацию об отклике от сетевых ресурсов за Х минут
+  get "/api/get_response_statistics" do
+    periods = Period.last @config.hot_minutes
+    
   end
 
   # каждый запрос закрывает соединение с БД
