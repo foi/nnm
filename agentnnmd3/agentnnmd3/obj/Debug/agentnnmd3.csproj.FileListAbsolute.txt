@@ -5,3 +5,10 @@ F:\projects\nnm\agentnnmd3\agentnnmd3\bin\Debug\Newtonsoft.Json.xml
 F:\projects\nnm\agentnnmd3\agentnnmd3\obj\Debug\agentnnmd3.csprojResolveAssemblyReference.cache
 F:\projects\nnm\agentnnmd3\agentnnmd3\obj\Debug\agentnnmd3.exe
 F:\projects\nnm\agentnnmd3\agentnnmd3\obj\Debug\agentnnmd3.pdb
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd3\agentnnmd3\obj\Debug\agentnnmd3.exe
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd3\agentnnmd3\obj\Debug\agentnnmd3.csprojResolveAssemblyReference.cache
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd3\agentnnmd3\bin\Debug\agentnnmd3.exe
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd3\agentnnmd3\bin\Debug\agentnnmd3.pdb
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd3\agentnnmd3\bin\Debug\Newtonsoft.Json.dll
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd3\agentnnmd3\bin\Debug\Newtonsoft.Json.xml
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd3\agentnnmd3\obj\Debug\agentnnmd3.pdb

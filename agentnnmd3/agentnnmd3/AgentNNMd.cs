@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Management;
 using System.ServiceProcess;
 using System.Collections.Generic;
 using System.Text;
@@ -80,13 +81,15 @@ namespace agentnnmd3
             var GetDrivesInfo = new Thread(getDrivesInfo) { IsBackground = true };
             var GetServicesStatuses = new Thread(getServicesStatuses) { IsBackground = true };
             var GetNetworkStat = new Thread(getNetworkStat) { IsBackground = true };
+            var GetPageFileUsage = new Thread(GetPageFileStat) {IsBackground = true};
             var Threads = new List<Thread>
             {
                 GetCpuStatThread,
                 GetHostNameThread,
                 GetDrivesInfo,
                 GetServicesStatuses,
-                GetNetworkStat
+                GetNetworkStat,
+                GetPageFileUsage
             };
             Threads.ForEach(t => t.Start());
             Threads.ForEach(t => t.Join());
@@ -174,6 +177,19 @@ namespace agentnnmd3
                 }
                 catch { }
             });
+        }
+        // получаем статистику использования файла подкачки
+        private static void GetPageFileStat()
+        {
+            agentData.Swap = new Swap();
+            using (var query = new ManagementObjectSearcher("SELECT CurrentUsage, AllocatedBaseSize FROM Win32_PageFileUsage"))
+            {
+                foreach (ManagementBaseObject obj in query.Get())
+                {
+                    agentData.Swap.CurrentSize = (uint)obj.GetPropertyValue("CurrentUsage");
+                    agentData.Swap.TotalSize = (uint)obj.GetPropertyValue("AllocatedBaseSize");
+                }
+            }
         }
     }
 }

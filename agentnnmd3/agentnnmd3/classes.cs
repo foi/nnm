@@ -29,6 +29,7 @@ namespace agentnnmd3
         public string Hostname { get; set; }
         public int CpuLoad { get; set; }
         public Ram Ram { get; set; }
+        public Swap Swap { get; set; }
         public List<Disk> Disks { get; set; }
         public List<Interface> Interfaces { get; set; }
         public List<Service> Services { get; set; }
@@ -38,6 +39,13 @@ namespace agentnnmd3
         public string Name { get; set; }
         public bool Working { get; set; }
     }
+
+    public class Swap
+    {
+        public uint TotalSize { get; set; }
+        public uint CurrentSize { get; set; }
+    }
+
     // Структура конфига
     public class Config
     {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Net;
 using System.Net.Mail;
 using System.Net.NetworkInformation;
@@ -25,8 +26,8 @@ namespace agentnnmd
         private static HttpListenerContext _context;
         private static string _response;
         private static Thread _bgThread;
-        private const int MEGABYTE = 1024*1024;
-        private const int GYGABYTE = 1024*1024*1024;
+        private const int MEGABYTE = 1024 * 1024;
+        private const int GYGABYTE = 1024 * 1024 * 1024;
         private static ConcurrentQueue<string> _messagesQueue = new ConcurrentQueue<string>();
         private static Dictionary<string, bool> _hostsAvailabilityCounter = new Dictionary<string, bool>();
         private static Dictionary<string, int> _webPagesSizes = new Dictionary<string, int>();
@@ -75,7 +76,7 @@ namespace agentnnmd
             // Объект, который содержит всю информацию о системе
             GetCpuLoadStat();
             // загрузка процессора и количество оперативной памяти
-            Parallel.Invoke(() => GetMemStat(), () => getHostName(), () => getNetworkStat(), () => getDrivesInfo(), () => getServicesStatuses());
+            Parallel.Invoke(() => GetMemStat(), () => getHostName(), () => getNetworkStat(), () => getDrivesInfo(), () => getServicesStatuses(), () => GetPageFileStat());
             var json = JsonConvert.SerializeObject(agentData);
             return json;
         }
@@ -150,6 +151,19 @@ namespace agentnnmd
                 if (di.DriveType.ToString() == "Fixed")
                 {
                     agentData.Disks.Add(new Disk { Name = di.Name, TotalSpace = ((int)((di.TotalSize) / GYGABYTE)), UsedSpace = (int)((di.TotalSize - di.TotalFreeSpace) / GYGABYTE) });
+                }
+            }
+        }
+        // получаем информацию о файле подкачки - http://stackoverflow.com/questions/3002314/win32-pagefileusage-wmi-call-returning-0-for-currentusage
+        private static void GetPageFileStat()
+        {
+            agentData.Swap = new Swap();
+            using (var query = new ManagementObjectSearcher("SELECT CurrentUsage, AllocatedBaseSize FROM Win32_PageFileUsage"))
+            {
+                foreach (ManagementBaseObject obj in query.Get())
+                {
+                    agentData.Swap.CurrentSize = (uint)obj.GetPropertyValue("CurrentUsage");
+                    agentData.Swap.TotalSize = (uint)obj.GetPropertyValue("AllocatedBaseSize");
                 }
             }
         }
