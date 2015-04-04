@@ -1,9 +1,9 @@
 # encoding: utf-8
-module PageHelper
+module ResourceHelper
 
   private
 
-  def check_page_collection pages
+  def check_resource_collection pages
     threads = [ ]
     $logger.info "Началась проверка размеров страниц."
     pages.each do |_|

@@ -50,13 +50,18 @@ class PortEntry < ActiveRecord::Base
   validates :period_id, presence: true
 end
 
-class PageEntry < ActiveRecord::Base
-  self.table_name = "page_statistics"
+class ResourceEntry < ActiveRecord::Base
+  self.table_name = "resource_statistics"
   belongs_to :host_with_port
+  validates :size, null: false
+  validates :response_time, null: false
 end
 
 class CPURAMEntry < ActiveRecord::Base
   self.table_name = "cpu_ram_statistics"
+  validates :usage_cpu, presence: true
+  validates :usage_ram, presence: true
+  validates :usage_swap, presence: true
 end
 
 class Interface < ActiveRecord::Base
@@ -79,12 +84,10 @@ end
 
 class PingEntry < ActiveRecord::Base
   self.table_name = "ping_statistics"
-  # validates :latency, presense: true
-  # validates :period_id, presence: true
-  # valudates :host_id, presence: true
+  validates :latency, presense: true
+  validates :period_id, presence: true
+  valudates :host_id, presence: true
 end
-
-
 
 class ServiceEntry < ActiveRecord::Base
   self.table_name = "services_statistics"
@@ -108,11 +111,4 @@ end
 
 class RAM < ActiveRecord::Base
   self.table_name = "system_memory"
-end
-
-class ResponseEntry < ActiveRecord::Base
-  self.table_name = "response_time_statistics"
-  validates :period_id, presence: true
-  validates :host_with_port_id, presence: true
-  validates :time, presence: true
 end

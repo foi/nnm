@@ -40,13 +40,13 @@ module AgentHelper
   def memory_work agent, agent_data
     memory = @memory.where(host_with_port_id: agent.id).first
     if memory.nil?
-      with_connection { RAM.create! host_with_port_id: agent.id, total: agent_data["Ram"]["TotalRam"] }
+      with_connection { RAM.create! host_with_port_id: agent.id, total_ram: agent_data["Ram"]["TotalRam"], total_swap: agent_data["Swap"]["TotalSize"] }
     elsif memory != agent_data["Ram"]["TotalRam"]
       with_connection { memory.update! total: agent_data["Ram"]["TotalRam"] }
     end
      # вставим данные оперативной памяти и загрузки цпу
     with_connection do
-      CPURAMEntry.create! cpu_load: agent_data["CpuLoad"], used_ram: agent_data["Ram"]["UsedRam"], host_with_port_id: agent.id, period_id: @period_id
+      CPURAMEntry.create! usage_cpu: agent_data["CpuLoad"], used_ram: agent_data["Ram"]["UsedRam"], usad host_with_port_id: agent.id, period_id: @period_id
     end
   end
 

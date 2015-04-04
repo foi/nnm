@@ -47,7 +47,8 @@ class CreateDatabase < ActiveRecord::Migration
 
     create_table :system_memory do |t|
       t.integer :host_with_port_id, null: false
-      t.integer :total, null: false
+      t.integer :total_ram, null: false
+      t.integer :total_swap, null: false
     end
 
     create_table :partitions_statistics do |t|
@@ -58,8 +59,9 @@ class CreateDatabase < ActiveRecord::Migration
     end
 
     create_table :cpu_ram_statistics do |t|
-      t.integer :cpu_load, null: false
+      t.integer :used_cpu, null: false
       t.integer :used_ram, null: false
+      t.integer :used_swap, null: false
       t.integer :host_with_port_id, null: false
       t.integer :period_id
     end
@@ -97,16 +99,11 @@ class CreateDatabase < ActiveRecord::Migration
       t.boolean :status, null: false
     end
 
-    create_table :page_statistics do |t|
+    create_table :resource_statistics do |t|
       t.integer :host_with_port_id, null: false
-      t.integer :size, null: false
+      t.integer :size, null: false, default: 0
       t.integer :period_id, null: false
-    end
-
-    create_table :response_time_statistics do |t|
-      t.integer :host_with_port_id, null: false
-      t.integer :time, null: false
-      t.integer :period_id, null: false
+      t.integer :response_time, null: false, default: 0
     end
 
     create_table :configuration do |t|
@@ -142,7 +139,7 @@ class CreateDatabase < ActiveRecord::Migration
       Group.create! name: e
     end
 
-    ["Web", "Проверка порта", "Agent", "Время отклика ресурса"].each do |e|
+    ["Размер и время отклика ресурса", "Проверка порта", "Agent"].each do |e|
       Type.create! name: e
     end
 
@@ -158,7 +155,6 @@ class CreateDatabase < ActiveRecord::Migration
       ping_timeout: 1,
       port_timeout: 1,
       agent_timeout: 10,
-      response_time_timeout: 3,
       sleep: true,
       sleep_min: 0.001,
       sleep_max: 1,

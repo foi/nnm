@@ -4,10 +4,9 @@ class GatherLoop
   extend Helpers
   extend PingHelper
   extend PortHelper
-  extend PageHelper
+  extend ResourceHelper
   extend AgentHelper
   extend NotifyHelper
-  extend ResponseTimeHelper
 
   # Чтобы не было проблем с проверкой https страниц с неподписаным сертификатом
   OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
@@ -50,15 +49,12 @@ class GatherLoop
       threads << Thread.new do
         check_port_collection @ports
       end
+      # измерение времени отклика от ресурсов по url и их размер
       threads << Thread.new do 
-        check_page_collection @pages
+        check_resource_collection @pages
       end
       threads << Thread.new do
         check_agent_collection @agents
-      end
-      # измерение времени отклика от ресурсов по url
-      threads << Thread.new do
-        measure_response_time_urls @urls_for_benchmark
       end
       threads.map(&:join)
       $logger.info @trouble_counters
@@ -83,7 +79,6 @@ class GatherLoop
     @agents = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_AGENT_ID])   
     @ports = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PORT_ID])
     @pages = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PAGE_ID]) 
-    @urls_for_benchmark = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_RESPONSE_ID])
     @interfaces = Interface.all  
     @memory = RAM.all
     @services = Service.all
