@@ -1,12 +1,3 @@
-GIT
-  remote: git://github.com/sinatra/sinatra.git
-  revision: 29c51d12fdd91ee254e51d4ce099535fcb6ea1a9
-  specs:
-    sinatra (1.4.6)
-      rack (~> 1.4)
-      rack-protection (~> 1.4)
-      tilt (>= 1.3, < 3)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -34,6 +25,10 @@ GEM
     rack (1.6.0)
     rack-protection (1.5.3)
       rack
+    sinatra (1.4.6)
+      rack (~> 1.4)
+      rack-protection (~> 1.4)
+      tilt (>= 1.3, < 3)
     thread_safe (0.3.5)
     tilt (2.0.1)
     tzinfo (1.2.2)
@@ -47,5 +42,5 @@ DEPENDENCIES
   json
   mysql2
   puma
-  sinatra!
+  sinatra
   thread_safe

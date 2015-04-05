@@ -28,7 +28,7 @@ module AgentHelper
             # наполнениe справочника со статусами
             end
          rescue Exception => e
-           $logger.warn "Произошла ошибка во время обработки информации от агента: #{agent.name} - #{e.message}"
+           $logger.warn "Произошла ошибка во время обработки информации от агента: #{agent.name} - #{e.message} - #{e.backtrace}"
         end
       end
     end
@@ -39,14 +39,20 @@ module AgentHelper
   #### Память
   def memory_work agent, agent_data
     memory = @memory.where(host_with_port_id: agent.id).first
+    # Если данных о памяти и подкачке для данного агента вообще нет
+    # Если изменился размер оперативной памяти
+    # Если изменился размер своп-файла
+    $logger.info agent_data
     if memory.nil?
       with_connection { RAM.create! host_with_port_id: agent.id, total_ram: agent_data["Ram"]["TotalRam"], total_swap: agent_data["Swap"]["TotalSize"] }
-    elsif memory != agent_data["Ram"]["TotalRam"]
-      with_connection { memory.update! total: agent_data["Ram"]["TotalRam"] }
+    elsif memory["total_ram"] != agent_data["Ram"]["TotalRam"]
+      with_connection { memory.update! total_ram: agent_data["Ram"]["TotalRam"] }
+    elsif memory["total_swap"] != agent_data["Swap"]["TotalSize"]
+      with_connection { memory.update! total_swap: agent_data["Swap"]["TotalSize"] }
     end
-     # вставим данные оперативной памяти и загрузки цпу
+    # И в любом случае вставим данные оперативной памяти и свопа, загрузки цпу
     with_connection do
-      CPURAMEntry.create! usage_cpu: agent_data["CpuLoad"], used_ram: agent_data["Ram"]["UsedRam"], usad host_with_port_id: agent.id, period_id: @period_id
+      CPURAMEntry.create! used_cpu: agent_data["CpuLoad"], used_ram: agent_data["Ram"]["UsedRam"], used_swap: agent_data["Swap"]["CurrentSize"], host_with_port_id: agent.id, period_id: @period_id
     end
   end
 

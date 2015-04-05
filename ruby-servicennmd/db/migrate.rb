@@ -113,11 +113,10 @@ class CreateDatabase < ActiveRecord::Migration
       t.string :smtp_email, null: false
       t.string :smtp_password, null: false
       t.boolean :smtp_notify, null: false
-      t.integer :page_timeout, null: false
+      t.integer :resource_timeout, null: false
       t.integer :ping_timeout, null: false
       t.integer :port_timeout, null: false
       t.integer :agent_timeout, null: false
-      t.integer :response_time_timeout, null: false
       t.boolean :sleep, null: false
       t.float :sleep_min, null: false
       t.float :sleep_max, null: false
@@ -128,7 +127,7 @@ class CreateDatabase < ActiveRecord::Migration
       t.string :notify_agent_template, null: false
       t.string :notify_port_template, null: false
       t.string :notify_host_template, null: false
-      t.string :notify_page_template, null: false
+      t.string :notify_resource_template, null: false
       t.string :notify_host_alive_template, null: false
       t.string :default_admin_name, null: false
       t.string :default_admin_password, null: false 
@@ -151,7 +150,7 @@ class CreateDatabase < ActiveRecord::Migration
       smtp_email: "example@example.net", 
       smtp_password: "password", 
       smtp_notify: false, 
-      page_timeout: 2,
+      resource_timeout: 2,
       ping_timeout: 1,
       port_timeout: 1,
       agent_timeout: 10,
@@ -165,7 +164,7 @@ class CreateDatabase < ActiveRecord::Migration
       notify_agent_template: "[АГЕНТ] У {agent} сервис {service} изменил статус на {status}. Время события: {time}",
       notify_port_template: "[ПОРТ] {port_name} на {hostname} изменил статус на - {status}. Время события: {time}",
       notify_host_template: "[ПИНГ] {hostname} {status} в течение {fail_time}. Время события: {time}",
-      notify_page_template: "[WEB] {page} на {hostname} изменила размер на {size}. Время события: {time}",
+      notify_resource_template: "[RESOURCE] {resource} на {hostname} изменила размер на {size}. Время события: {time}",
       notify_host_alive_template: "[ПИНГ] {hostname} снова доступен. Время события: {time}",
       default_admin_name: "admin",
       default_admin_password: "admin"
@@ -180,7 +179,7 @@ class CreateDatabase < ActiveRecord::Migration
     drop_table :subscribers
     drop_table :periods
     drop_table :configuration
-    drop_table :page_statistics
+    drop_table :resource_statistics
     drop_table :services_statistics
     drop_table :ping_statistics
     drop_table :port_statistics
@@ -192,6 +191,5 @@ class CreateDatabase < ActiveRecord::Migration
     drop_table :types
     drop_table :services
     drop_table :cpu_ram_statistics
-    drop_table :response_time_statistics
   end
 end

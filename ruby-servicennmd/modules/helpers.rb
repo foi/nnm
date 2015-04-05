@@ -82,15 +82,15 @@ module Helpers
   # писаться должно только в том случае, если прошлый
   # раз было отличное значение
   def is_any_changes? issues, e, new_value
-    hmm = false
+    default = false
     if issues[e.id].nil?
       issues[e.id] = new_value
-      hmm = true
+      default = true
     elsif issues[e.id] != new_value
       issues[e.id] = new_value
-      hmm = true
+      default = true
     end
-    hmm
+    default
   end
 
   # метод, который пытается снова,

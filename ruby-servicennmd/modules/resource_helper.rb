@@ -1,45 +1,85 @@
 # encoding: utf-8
 module ResourceHelper
-
-  private
-
-  def check_resource_collection pages
+  # Измерить время отклика у массива  хостов
+  def check_resource_collection urls
+    $logger.info "Измерение времени отклика сетевых ресурсов"
     threads = [ ]
-    $logger.info "Началась проверка размеров страниц."
-    pages.each do |_|
+    @response_statistics = { }
+    @sizes = { }
+    urls.each do |url|
       threads << Thread.new do
-        url = form_url _
-        size = check_size url
-        if is_any_changes? @issues[:page], _, size
-          raw_notify_string = @configuration.notify_page_template.dup
-          notify_string = format_notify_string raw_notify_string, {
-            "{page}" => _.name,
-            "{hostname}" => @hosts.where(id: _.host_id).first.name,
-            "{size}" => ActiveSupport::NumberHelper.number_to_human_size(size),
-            "{time}" => formatted_current_time 
-            }
-          # уведомлять только в случае, если надо
-          if _.notify
-            @mail_queue << notify_string
-          end
-          with_connection do 
-            PageEntry.create! host_with_port_id: _.id, size: size, period_id: @period_id
-          end
-        end
-      end
-    end 
-    threads.map(&:join)
-  end
-
-  def check_size url
-    size = 0
-    re_try do 
-      timeout(@configuration.page_timeout) do 
-        res = open(url)
-        size = res.size
+        @response_statistics[url.id] = []
+        @sizes[url.id] = 0
+        measure_response_time url
       end
     end
-    size
+    threads.map &:join
+    # очистим от нулей
+    @response_statistics.map {|k, v| v.delete(0) }
+    # введем статистику с базу
+    @response_statistics.each do |k, v|
+      time = 0
+      if v.size.eql? 0
+        time = 0 
+      else
+        time = (v.reduce(:+).to_f / v.size).round
+      end
+
+      $logger.info "#{k} - #{time} #{@sizes[k]}"
+      with_connection { ResourceEntry.create! period_id: @period_id, response_time: time, host_with_port_id: k, size: @sizes[k]  }
+
+    #   if is_any_changes? @issues[:page], k, @sizes[k]
+    #     page = @pages.where(id: k).first
+    #     $logger.info page
+    #     raw_notify_string = @configuration.notify_resource_template.dup
+    #     notify_string = format_notify_string raw_notify_string, {
+    #       "{resource}" => page.name,
+    #       "{hostname}" => @hosts.where(id: page.host_id).first.name,
+    #       "{size}" => ActiveSupport::NumberHelper.number_to_human_size(@sizes[k]),
+    #       "{time}" => formatted_current_time 
+    #       }
+    #       p notify_string
+    #     # уведомлять только в случае, если надо
+    #     if page.notify
+    #       @mail_queue << notify_string
+    #     end
+    #     # with_connection do 
+    #     #   PageEntry.create! host_with_port_id: _.id, size: size, period_id: @period_id
+    #     # end
+    #   end
+    end
+
+  end
+  # Измерить время отклика от веб-ресурса
+  def measure_response_time url
+    normalized_url = form_url url
+    $logger.info normalized_url
+    # Сколько раз измерять для вычисления среднего значения
+    @configuration["response_time_avg_from"].times do 
+      @response_statistics[url.id] << get_page(normalized_url, url.id)
+      $logger.info @response_statistics
+    end
+  end
+
+  def get_page url, key
+    time = 0
+    begin
+      sleep(rand(@configuration.sleep_min..@configuration.sleep_max)) if @configuration.sleep
+      start = Time.now.to_f * 1000
+      timeout(@configuration.resource_timeout) do 
+        _ = open(url).read
+        @sizes[key] = if _.size.eql? 0
+                        0
+                      else
+                        _.size
+                      end
+      end
+      stop = Time.now.to_f * 1000
+      time = (stop - start).abs.round 
+    rescue
+      nil
+    end
+    time
   end
 
 end

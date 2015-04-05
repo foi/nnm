@@ -25,15 +25,9 @@
         </label> 
     </li>
     <li class="list-group-item" style="overflow:hidden">
-      <h5><b>Таймаут для проверки размера страницы (сек.)</b></h5>
+      <h5><b>Таймаут для проверки размера и отклика ресурса (сек.)</b></h5>
         <label class="radio-inline" ng-repeat="i in [1,2,3,4]">
-          <input type="radio" name="page_timeout" id="page_timeout" ng-model="config.page_timeout" value="{{i}}">{{i}}
-        </label> 
-    </li>
-    <li class="list-group-item" style="overflow:hidden">
-      <h5><b>Таймаут для отлика сетевых ресурсов (сек.)</b></h5>
-        <label class="radio-inline" ng-repeat="i in [1,2,3,4]">
-          <input type="radio" name="response_time_timeout" id="response_time_timeout" ng-model="config.response_time_timeout" value="{{i}}">{{i}}
+          <input type="radio" name="resource_timeout" id="resource_timeout" ng-model="config.resource_timeout" value="{{i}}">{{i}}
         </label> 
     </li>
   </ul>
@@ -132,8 +126,8 @@
     </li>
     <li class="list-group-item" style="overflow:hidden">
       <div class="input-group col-md-12" style="float:left;margin-right: 4px;">
-        <div class="input-group-addon">Шаблон для изменения размера страницы</div>
-        <input type="text" class="form-control " name="notify_page_template" id="notify_page_template" ng-model="config.notify_page_template" required>
+        <div class="input-group-addon">Шаблон для изменения размера ресурса</div>
+        <input type="text" class="form-control " name="notify_resource_template" id="notify_resource_template" ng-model="config.notify_resource_template" required>
       </div>
     </li>
     <li class="list-group-item" style="overflow:hidden">

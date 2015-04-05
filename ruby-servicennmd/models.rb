@@ -84,9 +84,9 @@ end
 
 class PingEntry < ActiveRecord::Base
   self.table_name = "ping_statistics"
-  validates :latency, presense: true
-  validates :period_id, presence: true
-  valudates :host_id, presence: true
+  # validates :latency, presense: true
+  # validates :period_id, presence: true
+  # validates :host_id, presence: true
 end
 
 class ServiceEntry < ActiveRecord::Base

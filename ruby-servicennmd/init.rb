@@ -17,11 +17,11 @@ $SHARED_CONSTANTS = {
 
 config = JSON.load File.open("config/database.json")
 
-%w{logger models modules/helpers modules/ping_helper modules/port_helper modules/page_helper modules/agent_helper modules/notify_helper modules/response_time_helper gather_loop}.each do |file|
+%w{logger models modules/helpers modules/ping_helper modules/port_helper modules/agent_helper modules/notify_helper modules/resource_helper gather_loop}.each do |file|
   require file
 end
 
-$logger = Logger.new 'log/nnm-service.log', 'daily'
+$logger = Logger.new 'nnm-service.log', 'daily'
 
 begin
   ActiveRecord::Base.establish_connection config
@@ -33,7 +33,7 @@ end
 begin
   GatherLoop.start
 rescue Exception => e
-  $logger.fatal "Сервис NNM упал: #{e.message}"
+  $logger.fatal "Сервис NNM упал: #{e.message} - #{e.backtrace}"
   GatherLoop.stop
   sleep 60
   retry
