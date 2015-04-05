@@ -42,7 +42,6 @@ module AgentHelper
     # Если данных о памяти и подкачке для данного агента вообще нет
     # Если изменился размер оперативной памяти
     # Если изменился размер своп-файла
-    $logger.info agent_data
     if memory.nil?
       with_connection { RAM.create! host_with_port_id: agent.id, total_ram: agent_data["Ram"]["TotalRam"], total_swap: agent_data["Swap"]["TotalSize"] }
     elsif memory["total_ram"] != agent_data["Ram"]["TotalRam"]

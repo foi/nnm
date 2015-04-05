@@ -138,6 +138,9 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
     },
     size: {
       height: 300
+    },
+    legend: {
+      position: 'bottom'
     }
   };
   $scope.agent_cpu_chart_default = angular.copy($scope.ping_chart_data);
@@ -184,7 +187,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
     $scope.agent_cpu_chart.data.columns = $scope.agents_data[i]["cpu_load"];
     // данные для графика с размером оперативной памяти
     $scope.agent_mem_chart = angular.copy($scope.agent_cpu_chart_default);
-    $scope.agent_mem_chart["axis"]["y"]["max"] = $scope.agents_data[i]["memory_max"];
+    $scope.agent_mem_chart["axis"]["y"]["max"] = $scope.agents_data[i]["memory_max"] > $scope.agents_data[i]["swap_max"] ? $scope.agents_data[i]["memory_max"] : $scope.agents_data[i]["swap_max"];
     // Линии для максимума памяти и свопа
     $scope.agent_mem_chart["grid"]["y"]["lines"].push({value: $scope.agents_data[i]["memory_max"], text: "максимум ОЗУ " + $scope.agents_data[i]["memory_max"] + " МБ"});
     $scope.agent_mem_chart["grid"]["y"]["lines"].push({value: $scope.agents_data[i]["swap_max"], text: "максимум SWAP " + $scope.agents_data[i]["swap_max"] + " МБ"});

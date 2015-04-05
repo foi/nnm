@@ -83,11 +83,12 @@ module Helpers
   # раз было отличное значение
   def is_any_changes? issues, e, new_value
     default = false
-    if issues[e.id].nil?
-      issues[e.id] = new_value
+    id = e.respond_to?(:id) ? e.id : e
+    if issues[id].nil?
+      issues[id] = new_value
       default = true
-    elsif issues[e.id] != new_value
-      issues[e.id] = new_value
+    elsif issues[id] != new_value
+      issues[id] = new_value
       default = true
     end
     default

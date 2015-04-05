@@ -23,6 +23,7 @@ module NotifyHelper
       sleep $SHARED_CONSTANTS[:INTERVAL] - 10
       $logger.info "Поток уведомлений инициализирован."
       loop do
+        break if @stop
         begin
           while (subject = @mail_queue.pop(true) rescue nil) do
             sleep rand(0)

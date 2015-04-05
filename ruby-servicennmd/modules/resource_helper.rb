@@ -18,42 +18,34 @@ module ResourceHelper
     @response_statistics.map {|k, v| v.delete(0) }
     # введем статистику с базу
     @response_statistics.each do |k, v|
-      time = 0
-      if v.size.eql? 0
-        time = 0 
-      else
-        time = (v.reduce(:+).to_f / v.size).round
-      end
+      time = if v.size.eql? 0
+               0 
+             else
+               (v.reduce(:+).to_f / v.size).round
+             end
 
-      $logger.info "#{k} - #{time} #{@sizes[k]}"
       with_connection { ResourceEntry.create! period_id: @period_id, response_time: time, host_with_port_id: k, size: @sizes[k]  }
 
-    #   if is_any_changes? @issues[:page], k, @sizes[k]
-    #     page = @pages.where(id: k).first
-    #     $logger.info page
-    #     raw_notify_string = @configuration.notify_resource_template.dup
-    #     notify_string = format_notify_string raw_notify_string, {
-    #       "{resource}" => page.name,
-    #       "{hostname}" => @hosts.where(id: page.host_id).first.name,
-    #       "{size}" => ActiveSupport::NumberHelper.number_to_human_size(@sizes[k]),
-    #       "{time}" => formatted_current_time 
-    #       }
-    #       p notify_string
-    #     # уведомлять только в случае, если надо
-    #     if page.notify
-    #       @mail_queue << notify_string
-    #     end
-    #     # with_connection do 
-    #     #   PageEntry.create! host_with_port_id: _.id, size: size, period_id: @period_id
-    #     # end
-    #   end
+      if is_any_changes? @issues[:resource], k, @sizes[k]
+        page = @resources.where(id: k).first
+        raw_notify_string = @configuration.notify_resource_template.dup
+        notify_string = format_notify_string raw_notify_string, {
+          "{resource}" => page.name,
+          "{hostname}" => @hosts.where(id: page.host_id).first.name,
+          "{size}" => ActiveSupport::NumberHelper.number_to_human_size(@sizes[k]),
+          "{time}" => formatted_current_time 
+        }
+        # уведомлять только в случае, если надо
+        if page.notify
+          @mail_queue << notify_string
+        end
+      end
     end
 
   end
   # Измерить время отклика от веб-ресурса
   def measure_response_time url
     normalized_url = form_url url
-    $logger.info normalized_url
     # Сколько раз измерять для вычисления среднего значения
     @configuration["response_time_avg_from"].times do 
       @response_statistics[url.id] << get_page(normalized_url, url.id)

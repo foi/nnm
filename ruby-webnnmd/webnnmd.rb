@@ -127,6 +127,14 @@ class WebNNMd < Sinatra::Base
     end
   end
 
+  # получить статистику времени отклика
+  get "/api/response_time/:ids" do
+    @ids_string = params[:hosts].split(/&/)
+    responses_stat = HostWithPort.find @ids_string
+    periods = Period.last 30 
+    period_ids = periods.pluck :id
+  end
+
   # статистика пинга если заданы диапазоны
   post "/api/ping/:host" do 
     host_id = params[:host]

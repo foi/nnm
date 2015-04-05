@@ -19,7 +19,7 @@ class GatherLoop
     @issues = { 
       services: { },
       port: { },
-      page: { },
+      resource: { },
       partitions: { }
     }
 
@@ -51,7 +51,7 @@ class GatherLoop
       end
       # измерение времени отклика от ресурсов по url и их размер
       threads << Thread.new do 
-        check_resource_collection @pages
+        check_resource_collection @resources
       end
       threads << Thread.new do
         check_agent_collection @agents
@@ -78,7 +78,7 @@ class GatherLoop
     @hosts = Host.all
     @agents = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_AGENT_ID])   
     @ports = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PORT_ID])
-    @pages = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PAGE_ID]) 
+    @resources = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PAGE_ID]) 
     @interfaces = Interface.all  
     @memory = RAM.all
     @services = Service.all
