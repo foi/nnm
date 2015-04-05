@@ -209,9 +209,10 @@ class WebNNMd < Sinatra::Base
         tmp_mem << e.used_ram
         tmp_swap << e.used_swap
       end
-      tmp_cpu[0] = "Загрузка ЦП % / AVG - #{ get_average_from tmp_cpu }%"
-      tmp_mem[0] = "Занято ОЗУ / AVG - #{ get_average_from tmp_mem } МБ"
-      tmp_swap[0] = "Swap / AVG - #{ get_average_from tmp_swap } МБ"
+      # информативные подписи
+      tmp_cpu[0] = "Загрузка ЦП % [AVG #{ get_average_from tmp_cpu } %]"
+      tmp_mem[0] = "Занято ОЗУ [AVG #{ get_average_from tmp_mem } МБ]"
+      tmp_swap[0] = "Swap [AVG #{ get_average_from tmp_swap } МБ]"
 
       # разделы
       partitions = HostWithPort.where(id: k).first.partitions
