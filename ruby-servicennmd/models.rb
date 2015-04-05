@@ -59,9 +59,9 @@ end
 
 class CPURAMEntry < ActiveRecord::Base
   self.table_name = "cpu_ram_statistics"
-  validates :usage_cpu, presence: true
-  validates :usage_ram, presence: true
-  validates :usage_swap, presence: true
+  validates :used_cpu, presence: true
+  validates :used_ram, presence: true
+  validates :used_swap, presence: true
 end
 
 class Interface < ActiveRecord::Base

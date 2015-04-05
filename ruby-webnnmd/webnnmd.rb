@@ -24,6 +24,11 @@ class WebNNMd < Sinatra::Base
       puts object.inspect
     end
 
+    # вычислить среднее число из массива int
+    def get_average_from array
+      array[1..array.size].compact.reduce(:+) / array[1..array.size].compact.size
+    end
+
     # получить список полей, что уникальны, которые нельзя модифицировать
     def get_unique_fields model_name
       validations = model_name.validators
@@ -148,7 +153,7 @@ class WebNNMd < Sinatra::Base
       diff = periods_ids - _
       if !diff.empty? 
         diff.each do |period_id|
-          cpu_ram_data << CPURAMEntry.new(period_id: period_id, cpu_load: nil, used_ram: nil, host_with_port_id: id)
+          cpu_ram_data << CPURAMEntry.new(period_id: period_id, used_cpu: nil, used_ram: nil, used_swap: nil, host_with_port_id: id)
           missed_periods[id] ||= []
           missed_periods[id] << period_id
         end
@@ -180,8 +185,8 @@ class WebNNMd < Sinatra::Base
         upload = interface_stat.map &:upload
         avg_download = (download.compact.sum / download.count) 
         avg_upload = (upload.compact.sum / upload.count) 
-        interfaces_acc << [ "#{interface.name} [DL] [AVG #{avg_download} кб/c]"] + download 
-        interfaces_acc << ["#{interface.name} [UL] [AVG #{avg_upload} кб/с]"] + upload 
+        interfaces_acc << ["[DL] #{interface.name} [AVG #{avg_download} кб/c]"] + download 
+        interfaces_acc << ["[UL] #{interface.name} [AVG #{avg_upload} кб/с]"] + upload 
       end
       interfaces_data[id] = interfaces_acc 
       interfaces_data[id] << normalized_periods 
@@ -191,15 +196,23 @@ class WebNNMd < Sinatra::Base
       answer[k] ||= {}
       answer[k]["cpu_load"] ||= []
       answer[k]["used_ram"] ||= []
+      answer[k]["used_swap"] ||= []
       answer[k]["partitions"] ||= [] # заодно и разделы
-      answer[k]["memory_max"] = RAM.where(host_with_port_id: k).first.total
+      answer[k]["memory_max"] = RAM.where(host_with_port_id: k).first.total_ram
+      answer[k]["swap_max"] = RAM.where(host_with_port_id: k).first.total_swap
       answer[k]["interfaces_data"] ||= []
-      tmp_cpu = ["Загрузка ЦП %"]
-      tmp_mem = ["Занято ОЗУ"]
+      tmp_cpu = [""]
+      tmp_mem = [""]
+      tmp_swap = [""]
       v.each do |e|
-        tmp_cpu << e.cpu_load
+        tmp_cpu << e.used_cpu
         tmp_mem << e.used_ram
+        tmp_swap << e.used_swap
       end
+      tmp_cpu[0] = "Загрузка ЦП % / AVG - #{ get_average_from tmp_cpu }%"
+      tmp_mem[0] = "Занято ОЗУ / AVG - #{ get_average_from tmp_mem } МБ"
+      tmp_swap[0] = "Swap / AVG - #{ get_average_from tmp_swap } МБ"
+
       # разделы
       partitions = HostWithPort.where(id: k).first.partitions
       partitions.each do |partition|
@@ -214,6 +227,8 @@ class WebNNMd < Sinatra::Base
       answer[k]["used_ram"] << tmp_mem
       answer[k]["cpu_load"] << normalized_periods
       answer[k]["used_ram"] << normalized_periods
+      answer[k]["used_swap"] << tmp_swap
+      answer[k]["used_swap"] << normalized_periods
       answer[k]["interfaces_data"] = interfaces_data[k.to_s]
     end
     answer.to_json
