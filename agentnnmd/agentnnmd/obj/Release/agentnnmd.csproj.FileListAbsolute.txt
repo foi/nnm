@@ -1,0 +1,8 @@
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\bin\Release\agentnnmd.exe
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\bin\Release\agentnnmd.pdb
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\bin\Release\Newtonsoft.Json.dll
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\bin\Release\Newtonsoft.Json.xml
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\obj\Release\agentnnmd.Properties.Resources.resources
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\obj\Release\agentnnmd.csproj.GenerateResource.Cache
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\obj\Release\agentnnmd.exe
+C:\Users\foi\Documents\GitHub\nnm\agentnnmd\agentnnmd\obj\Release\agentnnmd.pdb
