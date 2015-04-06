@@ -439,7 +439,11 @@ nnm.directive('cpuChart', [function () {
       }
       else {
         if (oldSeries) {
-          chart.load({columns: newSeries, duration: 100, unload: ["Загрузка ЦП %"]});
+          var unload_cpu_names = []; 
+          angular.forEach(oldSeries.data.columns, function (value) {
+            unload_cpu_names.push(value[0]);
+          });
+          chart.load({columns: newSeries, duration: 100, unload: unload_cpu_names});
         }
         else {
           chart.load({columns: newSeries, duration: 100});
@@ -465,12 +469,18 @@ nnm.directive('memChart', [function () {
         }
         else {
           if (old) {
+            var unload_memory_names = []; 
+            angular.forEach(old.data.columns, function (value) {
+              unload_memory_names.push(value[0]);
+            });
             chart.axis.max({y: newD.axis.y.max});
-            chart.load({columns: newD.data.columns, duration: 100, unload: ["Занято ОЗУ"]});
+            
+            chart.load({columns: newD.data.columns, duration: 100, unload: unload_memory_names});
           } else {
             chart.axis.max({y: newD.axis.y.max});
             chart.load({columns: newD.data.columns, duration: 100});
           };
+          chart.ygrids(newD.grid.y.lines);
         }
       });
     }
