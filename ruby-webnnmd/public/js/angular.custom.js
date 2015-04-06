@@ -154,7 +154,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
       });
       $http.get('/api/ping/' + hosts.join('&')).success(function (ping_data) {
         $scope.ping_chart_data.data.columns = ping_data;
-        console.log(ping_data);
+        //console.log(ping_data);
       });
     }, function (err) {
       console.log(err);
@@ -164,7 +164,7 @@ nnm.controller('HotCtrl', ['$scope', '$http','$rootScope', 'Host', 'Agents', fun
   $scope.load_agents = function () {
     Agents.getAgentsIds().then(function (data) {
       $scope.agents = data;
-      console.log(data);
+      //console.log(data);
       var agent_ids = [];
       angular.forEach($scope.agents, function (v, k) {
         agent_ids.push(v.id);
@@ -433,7 +433,7 @@ nnm.directive('cpuChart', [function () {
   link: function (scope, element, attrs) {
     scope.config.bindto = "#" + attrs.id;
     var chart;
-    scope.$watch('config.data.columns', function(newSeries, oldSeries) {
+    scope.$watch('config', function(newSeries, oldSeries) {
       if (chart == undefined) {
         chart = c3.generate(scope.config);
       }
@@ -443,10 +443,11 @@ nnm.directive('cpuChart', [function () {
           angular.forEach(oldSeries.data.columns, function (value) {
             unload_cpu_names.push(value[0]);
           });
-          chart.load({columns: newSeries, duration: 100, unload: unload_cpu_names});
+          console.log(unload_cpu_names);
+          chart.load({columns: newSeries.data.columns, duration: 100, unload: unload_cpu_names});
         }
         else {
-          chart.load({columns: newSeries, duration: 100});
+          chart.load({columns: newSeries.data.columns, duration: 100});
         }
       }
     });
