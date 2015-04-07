@@ -48,7 +48,7 @@ module Helpers
         }
       @mail_queue << notify_string
     elsif @trouble_counters[type][id].zero? && !last_value.zero?
-      raw_notify_string = type == :ping ? @configuration.notify_host_alive_template : @configuration.notify_port_template.dup
+      raw_notify_string = type == :ping ? @configuration.notify_host_alive_template.dup : @configuration.notify_port_template.dup
       notify_string = format_notify_string raw_notify_string, { 
         "{hostname}" => type == :ping ? @hosts.where(id: id).first.name : "",
         "{status}" => "доступен",
