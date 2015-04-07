@@ -443,7 +443,7 @@ nnm.directive('cpuChart', [function () {
           angular.forEach(oldSeries.data.columns, function (value) {
             unload_cpu_names.push(value[0]);
           });
-          console.log(unload_cpu_names);
+          //console.log(unload_cpu_names);
           chart.load({columns: newSeries.data.columns, duration: 100, unload: unload_cpu_names});
         }
         else {
