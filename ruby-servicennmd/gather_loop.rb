@@ -72,17 +72,19 @@ class GatherLoop
   private 
 
   def self.init_dictionaries
-    @subscribers = Subscriber.all.pluck :email
-    period = Period.create! period: Time.now
-    @period_id = period.id
-    @hosts = Host.all
-    @agents = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_AGENT_ID])   
-    @ports = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PORT_ID])
-    @resources = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PAGE_ID]) 
-    @interfaces = Interface.all  
-    @memory = RAM.all
-    @services = Service.all
-    @partitions = Partition.all
+    with_connection do
+      @subscribers = Subscriber.all.pluck :email
+      period = Period.create! period: Time.now
+      @period_id = period.id
+      @hosts = Host.all
+      @agents = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_AGENT_ID])   
+      @ports = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PORT_ID])
+      @resources = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PAGE_ID]) 
+      @interfaces = Interface.all  
+      @memory = RAM.all
+      @services = Service.all
+      @partitions = Partition.all
+    end
   end
 
 end

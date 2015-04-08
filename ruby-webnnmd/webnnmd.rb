@@ -26,7 +26,8 @@ class WebNNMd < Sinatra::Base
 
     # вычислить среднее число из массива int
     def get_average_from array
-      if array.first.nil?
+      ppp array
+      if array[1].nil?
         "Нет данных"
       else
         array[1..array.size].compact.reduce(:+) / array[1..array.size].compact.size
