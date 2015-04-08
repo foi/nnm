@@ -26,7 +26,11 @@ class WebNNMd < Sinatra::Base
 
     # вычислить среднее число из массива int
     def get_average_from array
-      array[1..array.size].compact.reduce(:+) / array[1..array.size].compact.size
+      if array.first.nil?
+        "Нет данных"
+      else
+        array[1..array.size].compact.reduce(:+) / array[1..array.size].compact.size
+      end
     end
 
     # получить список полей, что уникальны, которые нельзя модифицировать
