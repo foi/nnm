@@ -5,6 +5,7 @@ gem 'mysql2', platform: :ruby
 gem 'jdbc-mysql', platform: :jruby
 gem 'activerecord-jdbc-adapter', platform: :jruby
 gem "activerecord", :require => "active_record"
+gem "net-ping"
 gem "activesupport"
 gem "concurrent-ruby"
 gem "json_pure"
