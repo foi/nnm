@@ -32,10 +32,9 @@ module PingHelper
 
   def unaccurate_ping address
     timeout(@configuration.ping_timeout) do
-      _ = Net::Ping::External.new address, nil, @configuration.ping_timeout
-      _.ping
-      raise PingError if _.duration.nil?
-      in_ms _.duration
+      _ = system_ping(address, @configuration.ping_timeout)
+      raise PingError if _.eql? 0
+      _
     end
   end
 

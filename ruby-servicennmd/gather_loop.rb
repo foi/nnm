@@ -7,6 +7,7 @@ class GatherLoop
   extend ResourceHelper
   extend AgentHelper
   extend NotifyHelper
+  extend SystemPingHelper
 
   # Чтобы не было проблем с проверкой https страниц с неподписаным сертификатом
   OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE

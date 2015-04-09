@@ -23,6 +23,7 @@ GEM
     concurrent-ruby (0.8.0-java)
     i18n (0.7.0)
     jdbc-mysql (5.1.33)
+    json (1.8.2)
     json (1.8.2-java)
     json_pure (1.8.2)
     mail (2.6.3)
@@ -30,7 +31,6 @@ GEM
     mime-types (2.4.3)
     minitest (5.5.1)
     mysql2 (0.3.18)
-    net-ping (1.7.7)
     pony (1.11)
       mail (>= 2.0)
     ref (1.0.5)
@@ -51,6 +51,5 @@ DEPENDENCIES
   jdbc-mysql
   json_pure
   mysql2
-  net-ping
   pony
   thread_safe
