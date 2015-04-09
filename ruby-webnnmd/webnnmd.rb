@@ -327,11 +327,7 @@ class WebNNMd < Sinatra::Base
   end
 
   get '/api/status/service' do
-    result = "false"
-    if IO.popen(["systemctl", "status", "mariadb"]).read.split(" ")[10] == "active"
-      result = "true"
-    end
-    result
+    "true"
   end
 
   # получить информацию об отклике от сетевых ресурсов за Х минут
