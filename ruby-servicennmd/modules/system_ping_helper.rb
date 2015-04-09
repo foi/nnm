@@ -2,8 +2,9 @@ module SystemPingHelper
 
   # ping возвратит количество мс
   def system_ping host, timeout
-    #result = `ping -c 1 -W #{timeout} #{host} 2>&1`
-    result = %x[ping -c 1 -W #{timeout} #{host} 2>&1]
+    raw = IO.popen "ping -c 1 -W #{timeout} #{host} 2>&1"
+    result = raw.read
+    Process.wait raw.pid
     if result.size < 30
       0
     else
