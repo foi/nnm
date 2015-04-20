@@ -23,7 +23,7 @@ end
 
 
 
-$logger = Logger.new 'logs/nnm-service.log', 3, 1024000
+$logger = Logger.new 'logs/nnm-service.log', 3, 10240000
 
 begin
   ActiveRecord::Base.establish_connection config
