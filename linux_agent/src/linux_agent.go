@@ -26,9 +26,13 @@ type NetInterface struct {
 	DownloadSpeed int64
 }
 
-type NetInterfaces []NetInterface
+//type NetInterfaces []NetInterface
 
 func main() {
+	ttt := time.April
+	ttt = ttt
+	sss := strings.ToLower("sss")
+	sss = sss
 	mem := new(Ram)
 	swap := new(Swap)
 	//interfaces := new(NetInterfaces)
@@ -38,9 +42,15 @@ func main() {
 	}
 	// считываем информацию об интерфейсах
 	raw_interfaces_stat, err := ioutil.ReadFile("/proc/net/dev")
+	time.Sleep(1 * time.Second)
+	raw_interfaces_stat_after_one_second, err := ioutil.ReadFile("/proc/net/dev")
 
 	parsed_string_ram := parseByteArrayIntoArrayOfString(raw_mem_info)
-	parsed_string_network := parseByteArrayIntoArrayOfString(raw_interfaces_stat)
+	parsed_string_network := parseByteArrayIntoString(raw_interfaces_stat)
+	parsed_string_network_after_one_second := parseByteArrayIntoString(raw_interfaces_stat_after_one_second)
+	normalized_network_string := strings.Split(parsed_string_network, "\n")
+
+	normalized_network_string_after_one_sec := strings.Split(parsed_string_network_after_one_second, "\n")
 
 	getMemStat(parsed_string_ram, mem)   // выбираем ОЗУ
 	getSwapStat(parsed_string_ram, swap) // выбираем своп
@@ -51,29 +61,28 @@ func main() {
 		swap.TotalSize,
 		swap.CurrentSize,
 		len(parsed_string_network))
+	var interfacesData []NetInterface
+	interfacesData = getInterfacesData(interfacesData, normalized_network_string, normalized_network_string_after_one_sec)
+	fmt.Println(interfacesData)
+}
 
-	for i := 20; i <= (len(parsed_string_network) - 1); i++ {
-		if i == 20 || i == 37 || i == 54 || i == 71 || i == 88 || i == 105 {
-			first_down := fromStringToInt64(parsed_string_network[i+1])
-			first_up := fromStringToInt64(parsed_string_network[i+9])
-			time.Sleep(1 * time.Second)
-			downloadSpeed := (fromStringToInt64(parsed_string_network[i+1]) - first_down) * 8
-			fmt.Println(downloadSpeed)
-			uploadSpeed := (fromStringToInt64(parsed_string_network[i+9]) - first_up) * 8
-			netInt := NetInterface{Name: parsed_string_network[i], Guid: "", DownloadSpeed: downloadSpeed, UploadSpeed: uploadSpeed}
-			fmt.Println(netInt.UploadSpeed)
+// заполним информацию - статистику сетевых интерфейсов
+func getInterfacesData(interfacesData []NetInterface, normalized_network_string []string, normalized_network_string_after_one_sec []string) []NetInterface {
+	for i := 2; i < len(normalized_network_string)-1; i++ {
+		str := normalized_network_string[i]
+		str_after_one_second := normalized_network_string_after_one_sec[i]
+		arr := strings.Fields(str)
+		arr_after_one_second := strings.Fields(str_after_one_second)
+		if arr[0] != "lo:" {
+			name := arr[0][:len(arr[0])-len(":")]
+			interfaceData := NetInterface{Name: name,
+				Guid:          getMACfromNetAdapterName(name),
+				DownloadSpeed: fromStringToInt64(arr_after_one_second[1]) - fromStringToInt64(arr[1]),
+				UploadSpeed:   fromStringToInt64(arr_after_one_second[9]) - fromStringToInt64(arr[9])}
+			interfacesData = append(interfacesData, interfaceData)
 		}
 	}
-	for index, element := range parsed_string_network {
-		//fmt.Printf("%v - %v;", index, element)
-		if index >= 20 {
-			if index == 20 || index == 37 || index == 54 || index == 71 || index == 88 {
-				//netInt := new(NetInterface){element, }
-				fmt.Println(element)
-			}
-
-		}
-	}
+	return interfacesData
 }
 
 // получим информацию об ОЗУ
@@ -105,17 +114,23 @@ func parseByteArrayIntoArrayOfString(byte_str []byte) []string {
 	return array_of_strings
 }
 
+// Массив байт в строку
+func parseByteArrayIntoString(byte_str []byte) string {
+	normal_string := string(byte_str)
+	return normal_string
+}
+
 // getMACfromNetAdapterName
 // cat /sys/class/net/eth?/address
 func getMACfromNetAdapterName(name string) string {
-	return "hello"
+	interface_name := string(name)
+	raw_mac, _ := ioutil.ReadFile("/sys/class/net/" + interface_name + "/address")
+	mac := parseByteArrayIntoString(raw_mac)
+	return mac
 }
 
 //из строки в int64
 func fromStringToInt64(str string) int64 {
-	result, err := strconv.ParseInt(str, 0, 64)
-	if err != nil {
-		fmt.Println(err)
-	}
+	result, _ := strconv.ParseInt(str, 10, 64)
 	return result
 }
