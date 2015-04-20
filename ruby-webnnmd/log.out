@@ -1,7 +1,0 @@
-=== puma startup: 2015-04-06 14:05:41 +0700 ===
-connect to db ok
-* Listening on tcp://0.0.0.0:80
-=== puma startup: 2015-04-06 14:06:43 +0700 ===
-- Gracefully stopping, waiting for requests to finish
-=== puma shutdown: 2015-04-06 14:06:43 +0700 ===
-- Goodbye!

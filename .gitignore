@@ -2,7 +2,6 @@
 *.class
 *.o
 *.so
-*.log
 .DS_Store*
 ehthumbs.db
 Icon?
@@ -34,5 +33,3 @@ Thumbs.db
 *.svclog
 *.scc
 **/packages/*
-*.log
-*.json
