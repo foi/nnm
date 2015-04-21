@@ -1,4 +1,4 @@
-// test1 project main.go
+// linux_agent.go
 package main
 
 import (
@@ -8,12 +8,26 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
 )
 
+// config
+type Config struct {
+	Port     int
+	Services []string
+}
+
+// global variable config
+var config Config
+
+// init system
+var initSystem string
+
+// all response data
 type AgentData struct {
 	Hostname   string
 	CpuLoad    int64
@@ -21,6 +35,7 @@ type AgentData struct {
 	Swap       Swap
 	Interfaces []NetInterface
 	Disks      []Disk
+	Services   []Service
 }
 
 type Ram struct {
@@ -46,78 +61,28 @@ type Disk struct {
 	UsedSpace  int64
 }
 
-//type NetInterfaces []NetInterface
+type Service struct {
+	Name    string
+	Working bool
+}
 
 func main() {
-	ttt := time.April
-	ttt = ttt
-	sss := strings.ToLower("sss")
-	sss = sss
+	getInitSystemType()
+	// get config
+	config_raw, _ := ioutil.ReadFile("./config.json")
+	err_ := json.Unmarshal(config_raw, &config)
+	if err_ != nil {
+		fmt.Println(err_)
+	}
+	// start web-server
 	http.HandleFunc("/", SendData)
-	err := http.ListenAndServe(":9998", nil)
+	err := http.ListenAndServe(":"+strconv.Itoa(config.Port), nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-	mem := new(Ram)
-	swap := new(Swap)
-	//interfaces := new(NetInterfaces)
-	//raw_mem_info, err := ioutil.ReadFile("/proc/meminfo")
-	if err != nil {
-		fmt.Println(err)
-	}
-	// получаем имя хоста
-	//hostname := getHostname()
-	//fmt.Println(hostname)
-	Disks := getPartitionsInfo()
-	fmt.Println(Disks)
-	// считываем информацию об интерфейсах
-	//	raw_interfaces_stat, err := ioutil.ReadFile("/proc/net/dev")
-	//	time.Sleep(1 * time.Second)
-	//	raw_interfaces_stat_after_one_second, err := ioutil.ReadFile("/proc/net/dev")
-
-	//parsed_string_ram := parseByteArrayIntoArrayOfString(raw_mem_info)
-	//	parsed_string_network := parseByteArrayIntoString(raw_interfaces_stat)
-	//	parsed_string_network_after_one_second := parseByteArrayIntoString(raw_interfaces_stat_after_one_second)
-	//	normalized_network_string := strings.Split(parsed_string_network, "\n")
-
-	//	normalized_network_string_after_one_sec := strings.Split(parsed_string_network_after_one_second, "\n")
-
-	//getMemStat(parsed_string_ram, mem)   // выбираем ОЗУ
-	//getSwapStat(parsed_string_ram, swap) // выбираем своп
-
-	//CpuLoad := getCpuUsage()
-	//fmt.Println(CpuLoad)
-	//var interfacesData []NetInterface
-	//interfacesData = getInterfacesData(interfacesData, normalized_network_string, normalized_network_string_after_one_sec)
-	//fmt.Println(interfacesData)
-	fmt.Printf("Total RAM %v \n Used Ram %v \n Total Swap %v \n Used Swap %v \n Network: %v",
-		mem.TotalRam,
-		mem.UsedRam,
-		swap.TotalSize,
-		swap.CurrentSize,
-		1)
-
 }
 
 // заполним информацию - статистику сетевых интерфейсов
-//func getInterfacesData(interfacesData []NetInterface, normalized_network_string []string, normalized_network_string_after_one_sec []string) []NetInterface {
-
-//	for i := 2; i < len(normalized_network_string)-1; i++ {
-//		str := normalized_network_string[i]
-//		str_after_one_second := normalized_network_string_after_one_sec[i]
-//		arr := strings.Fields(str)
-//		arr_after_one_second := strings.Fields(str_after_one_second)
-//		if arr[0] != "lo:" {
-//			name := arr[0][:len(arr[0])-len(":")]
-//			interfaceData := NetInterface{Name: name,
-//				Guid:          getMACfromNetAdapterName(name),
-//				DownloadSpeed: fromByteToKilobit(fromStringToInt64(arr_after_one_second[1]) - fromStringToInt64(arr[1])),
-//				UploadSpeed:   fromByteToKilobit(fromStringToInt64(arr_after_one_second[9]) - fromStringToInt64(arr[9]))}
-//			interfacesData = append(interfacesData, interfaceData)
-//		}
-//	}
-//	return interfacesData
-//}
 func getInterfacesData() []NetInterface {
 	var interfacesData []NetInterface
 	raw_interfaces_stat, _ := ioutil.ReadFile("/proc/net/dev")
@@ -145,15 +110,6 @@ func getInterfacesData() []NetInterface {
 }
 
 // получим информацию об ОЗУ
-//func getMemStat(parsed []string, mem *Ram) {
-//	total_ram_in_kb, err := strconv.ParseInt(parsed[1], 0, 64)
-//	total_available_ram_in_kb, err := strconv.ParseInt(parsed[7], 0, 64)
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//	mem.TotalRam = (total_ram_in_kb / 1024)
-//	mem.UsedRam = mem.TotalRam - total_available_ram_in_kb/1024
-//}
 func getMemStat(parsed []string) Ram {
 	mem := Ram{}
 	total_ram_in_kb := fromStringToInt64(parsed[1])
@@ -164,15 +120,6 @@ func getMemStat(parsed []string) Ram {
 }
 
 // получим информацию о своп
-//func getSwapStat(parsed []string, swap *Swap) {
-//	total_swap_in_kb, err := strconv.ParseInt(parsed[43], 0, 64)
-//	total_free_swap_in_kb, err := strconv.ParseInt(parsed[46], 0, 64)
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//	swap.TotalSize = total_swap_in_kb / 1024
-//	swap.CurrentSize = swap.TotalSize - (total_free_swap_in_kb / 1024)
-//}
 func getSwapStat(parsed []string) Swap {
 	swap := Swap{}
 	total_swap_in_kb := fromStringToInt64(parsed[43])
@@ -224,14 +171,6 @@ func fromByteToKilobit(s int64) int64 {
 func fromKBtoGB(KB int64) int64 {
 	result := (KB / 1024) / 1024
 	return result
-}
-
-// получить hostname
-func getHostname() string {
-	hostname_byte, _ := ioutil.ReadFile("/proc/sys/kernel/hostname")
-	hostname_string := parseByteArrayIntoString(hostname_byte)
-	hostname := strings.TrimSpace(hostname_string)
-	return hostname
 }
 
 // пространство используемое и занятое на разделах
@@ -294,20 +233,49 @@ func getCPUSample() (idle, total uint64) {
 	return
 }
 
-// получить данные о своп и РАМ
-func getSwapAndRamData() {
+// check status of processes
+func getInitSystemType() {
+	// check init system
+	output, _err := os.Readlink("/sbin/init")
+	if _err != nil {
+		fmt.Println(_err)
+	}
+	if strings.Contains(output, "upstart") {
+		initSystem = "upstart"
+	} else if strings.Contains(output, "systemd") {
+		initSystem = "systemd"
+	} else {
+		initSystem = "sysv"
+	}
+}
 
+// check service statuses
+func checkServiceStatuses() { //[]Service {
+	//var services []Service
+	for _, serviceName := range config.Services {
+		if initSystem == "upstart" {
+			raw_service_st, err := exec.Command("service", serviceName, "status").Output()
+			if err != nil {
+				fmt.Println("ERROR:", err)
+			} else {
+				parsed_service_st := parseByteArrayIntoString(raw_service_st)
+				fmt.Println(parsed_service_st)
+			}
+
+		} else if initSystem == "systemd" {
+
+		}
+	}
 }
 
 // Все что нужно для веб-сервера
 func SendData(w http.ResponseWriter, req *http.Request) {
 	agentData := &AgentData{}
-
 	raw_mem_info, _ := ioutil.ReadFile("/proc/meminfo")
 	parsed_mem_and_swap := parseByteArrayIntoArrayOfString(raw_mem_info)
 	mem := getMemStat(parsed_mem_and_swap)
 	swap := getSwapStat(parsed_mem_and_swap)
-	agentData.Hostname = getHostname()
+	agentData.Hostname, _ = os.Hostname()
 	agentData.CpuLoad = getCpuUsage()
 	agentData.Ram.TotalRam = mem.TotalRam
 	agentData.Ram.UsedRam = mem.UsedRam
@@ -315,6 +283,7 @@ func SendData(w http.ResponseWriter, req *http.Request) {
 	agentData.Swap.CurrentSize = swap.CurrentSize
 	agentData.Interfaces = getInterfacesData()
 	agentData.Disks = getPartitionsInfo()
+	checkServiceStatuses()
 	response, _ := json.Marshal(agentData)
 	io.WriteString(w, string(response))
 }
