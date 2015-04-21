@@ -67,6 +67,9 @@ func main() {
 	getMemStat(parsed_string_ram, mem)   // выбираем ОЗУ
 	getSwapStat(parsed_string_ram, swap) // выбираем своп
 
+	CpuLoad := getCpuUsage()
+	fmt.Println(CpuLoad)
+
 	fmt.Printf("Total RAM %v \n Used Ram %v \n Total Swap %v \n Used Swap %v ",
 		mem.TotalRam,
 		mem.UsedRam,
@@ -149,6 +152,9 @@ func fromStringToInt64(str string) int64 {
 // из байт в килобит
 func fromByteToKilobit(s int64) int64 {
 	result := (s / 1024) * 8
+	if result == 0 {
+		result = 1
+	}
 	return result
 }
 
@@ -181,4 +187,45 @@ func getPartitionsInfo() []Disk {
 		}
 	}
 	return Disks
+}
+
+// Загрузка ЦПУ
+func getCpuUsage() int64 {
+	idle0, total0 := getCPUSample()
+	time.Sleep(1 * time.Second)
+	idle1, total1 := getCPUSample()
+
+	idleTicks := float64(idle1 - idle0)
+	totalTicks := float64(total1 - total0)
+	cpuUsage := 100 * (totalTicks - idleTicks) / totalTicks
+	return int64(cpuUsage)
+
+	//fmt.Printf("CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
+}
+
+// узнаем загрузку CPU - семпл - http://stackoverflow.com/questions/11356330/getting-cpu-usage-with-golang
+func getCPUSample() (idle, total uint64) {
+	contents, err := ioutil.ReadFile("/proc/stat")
+	if err != nil {
+		return
+	}
+	lines := strings.Split(string(contents), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if fields[0] == "cpu" {
+			numFields := len(fields)
+			for i := 1; i < numFields; i++ {
+				val, err := strconv.ParseUint(fields[i], 10, 64)
+				if err != nil {
+					fmt.Println("Error: ", i, fields[i], err)
+				}
+				total += val // tally up all the numbers to get total ticks
+				if i == 4 {  // idle is the 5th field in the cpu line
+					idle = val
+				}
+			}
+			return
+		}
+	}
+	return
 }
