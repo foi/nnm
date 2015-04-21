@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +27,12 @@ type NetInterface struct {
 	DownloadSpeed int64
 }
 
+type Disk struct {
+	Name       string
+	TotalSpace int64
+	UsedSpace  int64
+}
+
 //type NetInterfaces []NetInterface
 
 func main() {
@@ -40,6 +47,11 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	// получаем имя хоста
+	hostname := getHostname()
+	fmt.Println(hostname)
+	Disks := getPartitionsInfo()
+	fmt.Println(Disks)
 	// считываем информацию об интерфейсах
 	raw_interfaces_stat, err := ioutil.ReadFile("/proc/net/dev")
 	time.Sleep(1 * time.Second)
@@ -55,12 +67,11 @@ func main() {
 	getMemStat(parsed_string_ram, mem)   // выбираем ОЗУ
 	getSwapStat(parsed_string_ram, swap) // выбираем своп
 
-	fmt.Printf("Total RAM %v \n Used Ram %v \n Total Swap %v \n Used Swap %v \n Govno %v ",
+	fmt.Printf("Total RAM %v \n Used Ram %v \n Total Swap %v \n Used Swap %v ",
 		mem.TotalRam,
 		mem.UsedRam,
 		swap.TotalSize,
-		swap.CurrentSize,
-		len(parsed_string_network))
+		swap.CurrentSize)
 	var interfacesData []NetInterface
 	interfacesData = getInterfacesData(interfacesData, normalized_network_string, normalized_network_string_after_one_sec)
 	fmt.Println(interfacesData)
@@ -77,8 +88,8 @@ func getInterfacesData(interfacesData []NetInterface, normalized_network_string 
 			name := arr[0][:len(arr[0])-len(":")]
 			interfaceData := NetInterface{Name: name,
 				Guid:          getMACfromNetAdapterName(name),
-				DownloadSpeed: fromStringToInt64(arr_after_one_second[1]) - fromStringToInt64(arr[1]),
-				UploadSpeed:   fromStringToInt64(arr_after_one_second[9]) - fromStringToInt64(arr[9])}
+				DownloadSpeed: fromByteToKilobit(fromStringToInt64(arr_after_one_second[1]) - fromStringToInt64(arr[1])),
+				UploadSpeed:   fromByteToKilobit(fromStringToInt64(arr_after_one_second[9]) - fromStringToInt64(arr[9]))}
 			interfacesData = append(interfacesData, interfaceData)
 		}
 	}
@@ -133,4 +144,41 @@ func getMACfromNetAdapterName(name string) string {
 func fromStringToInt64(str string) int64 {
 	result, _ := strconv.ParseInt(str, 10, 64)
 	return result
+}
+
+// из байт в килобит
+func fromByteToKilobit(s int64) int64 {
+	result := (s / 1024) * 8
+	return result
+}
+
+// from KB to GB
+func fromKBtoGB(KB int64) int64 {
+	result := (KB / 1024) / 1024
+	return result
+}
+
+// получить hostname
+func getHostname() string {
+	hostname, _ := ioutil.ReadFile("/proc/sys/kernel/hostname")
+	return parseByteArrayIntoString(hostname)
+}
+
+// пространство используемое и занятое на разделах
+func getPartitionsInfo() []Disk {
+	var Disks []Disk
+	df_b, _ := exec.Command("df").Output()
+	df_string := parseByteArrayIntoString(df_b)
+	df_parsed := strings.Split(df_string, "\n")
+	df_data := df_parsed[1:(len(df_parsed) - 1)]
+	for i := 0; i < len(df_data)-1; i++ {
+		df_fields := strings.Fields(df_data[i])
+		if fromStringToInt64(df_fields[1]) > 1024000 {
+			disk := Disk{Name: df_fields[5],
+				TotalSpace: fromKBtoGB(fromStringToInt64(df_fields[1])),
+				UsedSpace:  fromKBtoGB(fromStringToInt64(df_fields[2]))}
+			Disks = append(Disks, disk)
+		}
+	}
+	return Disks
 }
