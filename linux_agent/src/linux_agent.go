@@ -201,6 +201,7 @@ func getMACfromNetAdapterName(name string) string {
 	interface_name := string(name)
 	raw_mac, _ := ioutil.ReadFile("/sys/class/net/" + interface_name + "/address")
 	mac := parseByteArrayIntoString(raw_mac)
+	mac = strings.TrimSpace(mac)
 	return mac
 }
 
@@ -227,8 +228,10 @@ func fromKBtoGB(KB int64) int64 {
 
 // получить hostname
 func getHostname() string {
-	hostname, _ := ioutil.ReadFile("/proc/sys/kernel/hostname")
-	return parseByteArrayIntoString(hostname)
+	hostname_byte, _ := ioutil.ReadFile("/proc/sys/kernel/hostname")
+	hostname_string := parseByteArrayIntoString(hostname_byte)
+	hostname := strings.TrimSpace(hostname_string)
+	return hostname
 }
 
 // пространство используемое и занятое на разделах
