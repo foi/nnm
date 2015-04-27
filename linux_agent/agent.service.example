@@ -1,0 +1,12 @@
+[Unit]
+Description=AgentNNM
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/home/foi
+ExecStart=/bin/bash -c '/home/foi/agent'
+
+[Install]
+WantedBy=multi-user.target
+
