@@ -1,4 +1,4 @@
 {
 	"Port": 9998,
-	"Services": ["mysql", "ssh", "derm"]
+	"Services": ["mysql", "ssh", "cups"]
 }

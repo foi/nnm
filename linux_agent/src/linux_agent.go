@@ -27,6 +27,9 @@ var config Config
 // init system
 var initSystem string
 
+// agent data
+var agentData AgentData
+
 // all response data
 type AgentData struct {
 	Hostname   string
@@ -250,9 +253,11 @@ func getInitSystemType() {
 }
 
 // check service statuses
-func checkServiceStatuses() { //[]Service {
-	//var services []Service
+func checkServiceStatuses() {
+	agentData.Services = nil
 	for _, serviceName := range config.Services {
+		//var service Service
+		fmt.Println(serviceName)
 		if initSystem == "upstart" {
 			raw_service_st, err := exec.Command("service", serviceName, "status").Output()
 			if err != nil {
@@ -261,16 +266,31 @@ func checkServiceStatuses() { //[]Service {
 				parsed_service_st := parseByteArrayIntoString(raw_service_st)
 				fmt.Println(parsed_service_st)
 			}
-
 		} else if initSystem == "systemd" {
-
+			raw_service_st, err := exec.Command("systemctl", "status", serviceName).Output()
+			parsed_service_st := parseByteArrayIntoString(raw_service_st)
+			normalized := splitIntoArrayByNewline(parsed_service_st)
+			if err != nil {
+				fmt.Println("ERROR:", err, parseByteArrayIntoString(raw_service_st))
+				if strings.Contains(normalized[2], "inactive") {
+					agentData.Services = append(agentData.Services, Service{Name: serviceName, Working: false})
+				}
+			} else {
+				if strings.Contains(normalized[2], "running") {
+					agentData.Services = append(agentData.Services, Service{Name: serviceName, Working: true})
+				}
+			}
 		}
 	}
 }
 
+// разбить на массив по \n
+func splitIntoArrayByNewline(str string) []string {
+	return strings.Split(str, "\n")
+}
+
 // Все что нужно для веб-сервера
 func SendData(w http.ResponseWriter, req *http.Request) {
-	agentData := &AgentData{}
 	raw_mem_info, _ := ioutil.ReadFile("/proc/meminfo")
 	parsed_mem_and_swap := parseByteArrayIntoArrayOfString(raw_mem_info)
 	mem := getMemStat(parsed_mem_and_swap)
