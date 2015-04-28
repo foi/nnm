@@ -256,8 +256,6 @@ func getInitSystemType() {
 func checkServiceStatuses() {
 	agentData.Services = nil
 	for _, serviceName := range config.Services {
-		//var service Service
-		fmt.Println(serviceName)
 		if initSystem == "upstart" {
 			raw_service_st, err := exec.Command("service", serviceName, "status").Output()
 			if err != nil {
