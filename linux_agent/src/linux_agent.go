@@ -165,7 +165,7 @@ func fromStringToInt64(str string) int64 {
 func fromByteToKilobit(s int64) int64 {
 	result := (s / 1024) * 8
 	if result == 0 {
-		result = 1
+		result = 0
 	}
 	return result
 }
