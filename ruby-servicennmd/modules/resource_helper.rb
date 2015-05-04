@@ -14,12 +14,15 @@ module ResourceHelper
       end
     end
     threads.map &:join
+    #$logger.info @response_statistics
     # очистим от нулей
     @response_statistics.map {|k, v| v.delete(0) }
+
+
     # введем статистику с базу
     @response_statistics.each do |k, v|
       time = if v.size.eql? 0
-               0 
+               0
              else
                (v.reduce(:+).to_f / v.size).round
              end
@@ -33,7 +36,7 @@ module ResourceHelper
           "{resource}" => page.name,
           "{hostname}" => @hosts.where(id: page.host_id).first.name,
           "{size}" => ActiveSupport::NumberHelper.number_to_human_size(@sizes[k]),
-          "{time}" => formatted_current_time 
+          "{time}" => formatted_current_time
         }
         # уведомлять только в случае, если надо
         if page.notify
@@ -47,7 +50,7 @@ module ResourceHelper
   def measure_response_time url
     normalized_url = form_url url
     # Сколько раз измерять для вычисления среднего значения
-    @configuration["response_time_avg_from"].times do 
+    @configuration["response_time_avg_from"].times do
       @response_statistics[url.id] << get_page(normalized_url, url.id)
       $logger.info @response_statistics
     end
@@ -58,8 +61,10 @@ module ResourceHelper
     begin
       sleep(rand(@configuration.sleep_min..@configuration.sleep_max)) if @configuration.sleep
       start = Time.now.to_f * 1000
-      timeout(@configuration.resource_timeout) do 
+      timeout(@configuration.resource_timeout) do
+        #$logger.info url
         _ = open(url).read
+        #$logger.info _
         @sizes[key] = if _.size.eql? 0
                         0
                       else
@@ -67,7 +72,7 @@ module ResourceHelper
                       end
       end
       stop = Time.now.to_f * 1000
-      time = (stop - start).abs.round 
+      time = (stop - start).abs.round
     rescue
       nil
     end

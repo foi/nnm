@@ -7,6 +7,9 @@ require 'bundler/setup'
 
 Bundler.require(:default)
 
+require "open3"
+require 'open-uri'
+
 # КОНСТАНТЫ
 $SHARED_CONSTANTS = {
   INTERVAL: 60,
