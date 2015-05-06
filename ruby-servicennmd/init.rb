@@ -11,7 +11,7 @@ require "open3"
 require 'open-uri'
 
 # КОНСТАНТЫ
-$SHARED_CONSTANTS = {
+KEYS = {
   INTERVAL: 60,
   TYPE_AGENT_ID: 3,
   TYPE_PAGE_ID: 1,
@@ -20,7 +20,7 @@ $SHARED_CONSTANTS = {
 
 config = JSON.load File.open("config/database.json")
 
-%w{logger models modules/helpers modules/ping_helper modules/port_helper modules/agent_helper modules/notify_helper modules/resource_helper modules/system_ping_helper modules/memory_suka gather_loop }.each do |file|
+%w{logger models modules/helpers modules/ping_helper modules/port_helper modules/agent_helper modules/notify_helper modules/resource_helper modules/system_ping_helper gather_loop }.each do |file|
   require file
 end
 

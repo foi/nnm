@@ -8,9 +8,15 @@ class GatherLoop
   extend AgentHelper
   extend NotifyHelper
   extend SystemPingHelper
-  extend MemorySuka
   # Чтобы не было проблем с проверкой https страниц с неподписаным сертификатом
   OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
+  KEYS = {
+    INTERVAL: 60,
+    TYPE_AGENT_ID: 3,
+    TYPE_PAGE_ID: 1,
+    TYPE_PORT_ID: 2
+  }
 
   @stop = false
 
@@ -79,9 +85,9 @@ class GatherLoop
       period = Period.create! period: Time.now
       @period_id = period.id
       @hosts = Host.all
-      @agents = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_AGENT_ID])
-      @ports = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PORT_ID])
-      @resources = HostWithPort.where(type_id: $SHARED_CONSTANTS[:TYPE_PAGE_ID])
+      @agents = HostWithPort.where(type_id: KEYS[:TYPE_AGENT_ID])
+      @ports = HostWithPort.where(type_id: KEYS[:TYPE_PORT_ID])
+      @resources = HostWithPort.where(type_id: KEYS[:TYPE_PAGE_ID])
       @interfaces = Interface.all
       @memory = RAM.all
       @services = Service.all

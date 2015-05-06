@@ -20,7 +20,7 @@ module NotifyHelper
   # поток, который проверяет, если ли пробелмы, в случае их наличия отправляет сообщение на email
   def check_troubles_and_notify
     Thread.new do
-      sleep $SHARED_CONSTANTS[:INTERVAL] - 10
+      sleep KEYS[:INTERVAL] - 10
       $logger.info "Поток уведомлений инициализирован."
       loop do
         break if @stop
