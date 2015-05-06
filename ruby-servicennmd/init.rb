@@ -11,12 +11,12 @@ require "open3"
 require 'open-uri'
 
 # КОНСТАНТЫ
-KEYS = {
-  INTERVAL: 60,
-  TYPE_AGENT_ID: 3,
-  TYPE_PAGE_ID: 1,
-  TYPE_PORT_ID: 2
-}
+# KEYS = {
+#   INTERVAL: 60,
+#   TYPE_AGENT_ID: 3,
+#   TYPE_PAGE_ID: 1,
+#   TYPE_PORT_ID: 2
+# }
 
 config = JSON.load File.open("config/database.json")
 

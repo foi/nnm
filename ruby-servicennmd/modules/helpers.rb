@@ -71,7 +71,7 @@ module Helpers
       init_time = Time.now
       yield
       end_time = Time.now
-      sleep_sec = KEYS[:INTERVAL] - (end_time - init_time)
+      sleep_sec = @KEYS[:INTERVAL] - (end_time - init_time)
       $logger.info "*" * 30 + " sleep - #{sleep_sec} sec. " + "*" * 30
       break if @stop
       sleep sleep_sec
@@ -121,7 +121,7 @@ module Helpers
     url = ""
     raw.port == 443 ? url += "https://" : url += "http://"
     url += @hosts.where(id: raw.host_id).first.address
-    if raw.type_id.eql?(KEYS[:TYPE_AGENT_ID]) || raw.type_id.eql?(KEYS[:TYPE_RESPONSE_ID]) 
+    if raw.type_id.eql?(@KEYS[:TYPE_AGENT_ID]) || raw.type_id.eql?(@KEYS[:TYPE_RESPONSE_ID]) 
       url += ":" + raw.port.to_s
     else 
       if raw.route
