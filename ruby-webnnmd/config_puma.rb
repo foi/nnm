@@ -1,8 +1,8 @@
 #!/usr/bin/env puma
 
-directory '/samba/public/nnm/ruby-webnnmd/'
+directory '/home/foi/nnm/ruby-webnnmd/'
 daemonize true
-pidfile '/samba/public/nnm/ruby-webnnmd/puma.pid'
-stdout_redirect '/samba/public/nnm/ruby-webnnmd/log.out', '/samba/public/nnm/ruby-webnnmd/log.error', true
+pidfile '/home/foi/nnm/ruby-webnnmd/puma.pid'
+stdout_redirect '/home/foi/nnm/ruby-webnnmd/log.out', '/home/foi/nnm/ruby-webnnmd/log.error', true
 environment 'production'
 bind 'tcp://0.0.0.0:80'

@@ -1,0 +1,15 @@
+[Unit]
+Description=WEBNNMD
+After=network.target
+
+[Service]
+Type=forking
+User=root
+WorkingDirectory=/home/foi/nnm/ruby-webnnmd/
+PIDFile=/home/foi/nnm/ruby-webnnmd/puma.pid
+ExecStart=/bin/bash -c '/home/foi/.rbenv/shims/puma -C /home/foi/nnm/ruby-webnnmd/config_puma.rb'
+TimeoutSec=60
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

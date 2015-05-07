@@ -1,0 +1,24 @@
+=== puma startup: 2015-05-07 07:54:30 +0700 ===
+connect to db ok
+* Listening on tcp://0.0.0.0:80
+- Gracefully stopping, waiting for requests to finish
+=== puma shutdown: 2015-05-07 07:54:59 +0700 ===
+- Goodbye!
+=== puma startup: 2015-05-07 07:56:07 +0700 ===
+connect to db ok
+* Listening on tcp://0.0.0.0:80
+["", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 1, 0, 0, 0, 11, nil, nil, 3, 1, 0, 0, 0]
+["", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 2767, 2759, 2756, 2727, 2732, nil, nil, 2769, 2740, 2762, 2761, 2761]
+["", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 313, 313, 313, 334, 334, nil, nil, 313, 334, 340, 340, 340]
+- Gracefully stopping, waiting for requests to finish
+=== puma shutdown: 2015-05-07 07:57:16 +0700 ===
+- Goodbye!
+=== puma startup: 2015-05-07 07:59:15 +0700 ===
+connect to db ok
+* Listening on tcp://0.0.0.0:80
+- Gracefully stopping, waiting for requests to finish
+=== puma shutdown: 2015-05-07 08:00:13 +0700 ===
+- Goodbye!
+=== puma startup: 2015-05-07 08:00:14 +0700 ===
+connect to db ok
+* Listening on tcp://0.0.0.0:80
