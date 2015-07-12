@@ -44,6 +44,12 @@ Noname Network Monitor
 * Настроить параметры для подключения к БД в файле ``` ruby-servicennmd/config/database.json ```
 * перейти в ruby-servicennmd и выполнить ``` rake ```
 
+## Запуск
+* ruby ruby-servicennmd/start_servicennmd.rb - запустит сервис в фоне
+* cd ruby-webnnmd, puma -d -e production -p 80
+* Ну а агент через системд скрипт (если на линуксе), а на винде с помощью nssm служба делается
+
+
 ## Смысл
 
 Мониторинг доступности пингом, получение информации от агентов о загрузке ЦП, памяти, и т.д., проверка размера веб-страниц.
