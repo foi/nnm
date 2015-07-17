@@ -196,8 +196,8 @@ class WebNNMd < Sinatra::Base
         interface_stat = interface_stat.sort_by { |e| e.period_id }
         download = interface_stat.map &:download
         upload = interface_stat.map &:upload
-        avg_download = (download.compact.sum / download.count) 
-        avg_upload = (upload.compact.sum / upload.count) 
+        avg_download = (download.compact.sum / (download.count | 1)) 
+        avg_upload = (upload.compact.sum / (upload.count | 1)) 
         interfaces_acc << ["[DL] #{interface.name} [AVG #{avg_download} кб/c]"] + download 
         interfaces_acc << ["[UL] #{interface.name} [AVG #{avg_upload} кб/с]"] + upload 
       end
