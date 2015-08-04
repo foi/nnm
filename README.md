@@ -17,6 +17,8 @@ Noname Network Monitor
 
 [v0.4.1 - скачать](https://www.dropbox.com/s/l7z3a0k9j8s9l9j/nnm_0.4.1.tar.gz?dl=1)
 
+[v0.4.2 - скачать](https://www.dropbox.com/s/ckzhwgiduczk1ge/nnm_0.4.2.tar.gz?dl=1)
+
 * не решена проблема оформления ruby-servicennmd как сервиса. Ребят, фиг его знает, системд глючит или я. Не получается.
 
 ===========
