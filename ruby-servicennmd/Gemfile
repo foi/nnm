@@ -1,9 +1,0 @@
-source "http://rubygems.org"
-
-gem "thread_safe"
-gem 'mysql2', platform: :ruby
-gem "activerecord", :require => "active_record"
-gem "activesupport"
-gem "concurrent-ruby"
-gem "json_pure"
-gem "pony"
