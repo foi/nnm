@@ -19,7 +19,7 @@ Noname Network Monitor
 
 [v0.4.2 - скачать](https://www.dropbox.com/s/ckzhwgiduczk1ge/nnm_0.4.2.tar.gz?dl=1)
 
-* не решена проблема оформления ruby-servicennmd как сервиса. Ребят, фиг его знает, системд глючит или я. Не получается.
+* не решена проблема оформления ruby-servicennmd как сервиса. Ребят, фиг его знает, системд глючит или я. Не получается. [Решение проблемы!](http://stackoverflow.com/questions/26247926/how-to-solve-usr-bin-env-ruby-executable-hooks-no-such-file-or-directory)
 
 ===========
 # Интро
