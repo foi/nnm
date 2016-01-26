@@ -31,7 +31,7 @@ module PingHelper
   end
 
   def unaccurate_ping address
-    timeout(@configuration.ping_timeout) do
+    Timeout::timeout(@configuration.ping_timeout) do
       _ = system_ping(address, @configuration.ping_timeout)
       raise PingError if _.eql? 0
       _
