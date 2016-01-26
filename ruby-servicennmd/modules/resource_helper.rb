@@ -61,7 +61,7 @@ module ResourceHelper
     begin
       sleep(rand(@configuration.sleep_min..@configuration.sleep_max)) if @configuration.sleep
       start = Time.now.to_f * 1000
-      timeout(@configuration.resource_timeout) do
+      Timeout::timeout(@configuration.resource_timeout) do
         #$logger.info url
         _ = open(url).read
         #$logger.info _
