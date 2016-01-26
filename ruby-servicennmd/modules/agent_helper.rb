@@ -13,7 +13,7 @@ module AgentHelper
     agents.each do |agent|
       threads << Thread.new do
         begin
-          timeout(@configuration.agent_timeout) do 
+          Timeout::timeout(@configuration.agent_timeout) do 
             url = form_url agent
             content = open(url).read
             agent_data = JSON.parse content
