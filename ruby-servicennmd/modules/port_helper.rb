@@ -23,7 +23,7 @@ module PortHelper
   def check_port host, port, id, notify
     result = false
     re_try do
-      timeout(@configuration.port_timeout) do 
+      Timeout::timeout(@configuration.port_timeout) do 
         TCPSocket.new(host, port).close
         result = true
       end
