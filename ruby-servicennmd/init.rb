@@ -9,6 +9,7 @@ Bundler.require(:default)
 
 require "open3"
 require 'open-uri'
+require "json"
 
 # КОНСТАНТЫ
 # KEYS = {
